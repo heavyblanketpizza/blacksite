@@ -2,6 +2,10 @@
 # Publish only our additions in overlay/ and edits in patches/.
 /holmesgpt/
 
+# Keep supporting Markdown notes local; only the root README is published.
+*.[mM][dD]
+!/README.md
+
 # Local credentials and machine-specific configuration.
 .env
 .env.*

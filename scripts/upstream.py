@@ -66,7 +66,8 @@ def manifest(root):
     data["commit"] = data["commit"].lower()
     data["patch"] = relative_path(data.get("patch"))
     all_paths = []
-    for key in ("modified_files", "added_files"):
+    data.setdefault("local_only_files", [])
+    for key in ("modified_files", "added_files", "local_only_files"):
         if not isinstance(data.get(key), list):
             raise WorkflowError(f"upstream.json requires a {key} list")
         data[key] = sorted(relative_path(path) for path in data[key])
@@ -76,7 +77,7 @@ def manifest(root):
     return data
 
 
-def overlay_files(root, expected, require_all):
+def overlay_files(root, expected, require_all, local_only=()):
     overlay = safe_path(root, "overlay")
     actual = set()
     if overlay.exists():
@@ -92,7 +93,7 @@ def overlay_files(root, expected, require_all):
                 if not path.is_file():
                     raise WorkflowError(f"Expected a regular file: {path}")
                 actual.add(path.relative_to(overlay).as_posix())
-    extra = actual - set(expected)
+    extra = actual - set(expected) - set(local_only)
     missing = set(expected) - actual if require_all else set()
     if extra or missing:
         problems = []
@@ -126,7 +127,7 @@ def verify_manifest_paths(checkout, data):
     if invalid:
         raise WorkflowError("Manifest paths have the wrong added/modified classification: "
                             + ", ".join(sorted(invalid)))
-    for name in data["modified_files"]:
+    for name in data["modified_files"] + data["local_only_files"]:
         safe_path(checkout, name)
 
 
@@ -169,7 +170,8 @@ def validate_patch(root, patch, allowed):
 
 
 def prepare(root, checkout, data):
-    overlay = overlay_files(root, data["added_files"], require_all=True)
+    overlay = overlay_files(root, data["added_files"], require_all=True,
+                            local_only=data["local_only_files"])
     patch = safe_path(root, data["patch"])
     validate_patch(root, patch, data["modified_files"])
     if not checkout.exists():
@@ -210,7 +212,7 @@ def prepare(root, checkout, data):
 def export(root, checkout, data, check):
     verify_checkout(checkout, data["commit"])
     verify_manifest_paths(checkout, data)
-    allowed = set(data["modified_files"] + data["added_files"])
+    allowed = set(data["modified_files"] + data["added_files"] + data["local_only_files"])
     changed = git(checkout, "diff", "--no-renames", "--name-only", "-z", data["commit"], "--").stdout
     untracked = git(checkout, "ls-files", "--others", "--exclude-standard", "-z").stdout
     unknown = {name.decode("utf-8", "surrogateescape") for name in
@@ -219,7 +221,8 @@ def export(root, checkout, data, check):
         raise WorkflowError("Unlisted checkout changes; review and explicitly add approved paths to "
                             "upstream.json before exporting:\n  " + "\n  ".join(sorted(unknown)))
 
-    overlay = overlay_files(root, data["added_files"], require_all=False)
+    overlay = overlay_files(root, data["added_files"], require_all=False,
+                            local_only=data["local_only_files"])
     sources = []
     for name in data["added_files"]:
         source = safe_path(checkout, name)

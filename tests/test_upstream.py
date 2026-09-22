@@ -32,6 +32,7 @@ class WorkflowTests(unittest.TestCase):
         self.origin.mkdir()
         git(self.origin, "init")
         (self.origin / "base.txt").write_text("first\noriginal\nlast\n")
+        (self.origin / "README.md").write_text("Upstream guide\n")
         (self.origin / ".gitignore").write_text(".env\n")
         git(self.origin, "add", ".")
         git(self.origin, "commit", "-m", "Pinned upstream")
@@ -117,6 +118,48 @@ class WorkflowTests(unittest.TestCase):
         target = self.fresh_checkout()
         self.assertFalse((target / ".env").exists())
         self.assert_run(0, "export", "--check", "--checkout", str(target))
+
+    def test_local_only_docs_preserved_without_publication_or_requirement(self):
+        self.data["local_only_files"] = ["README.md", "docs/local.md"]
+        self.save_manifest()
+        (self.checkout / "README.md").write_text("Local guide edits\n")
+        local = self.checkout / "docs/local.md"
+        local.parent.mkdir()
+        local.write_text("Local notes\n")
+        retained = self.root / "overlay/docs/local.md"
+        retained.parent.mkdir()
+        retained.write_text("Previously exported notes\n")
+
+        self.assert_run(0, "export")
+        self.assert_run(0, "export", "--check")
+        self.assert_run(0, "prepare")
+        self.assertEqual("Local guide edits\n", (self.checkout / "README.md").read_text())
+        self.assertEqual("Local notes\n", local.read_text())
+        self.assertEqual("Previously exported notes\n", retained.read_text())
+        self.assertNotIn("README.md", (self.root / self.data["patch"]).read_text())
+
+        retained.unlink()  # A public clone has no local-only overlay files.
+        target = self.fresh_checkout()
+        self.assertEqual("Upstream guide\n", (target / "README.md").read_text())
+        self.assertFalse((target / "docs/local.md").exists())
+        self.assert_run(0, "export", "--check", "--checkout", str(target))
+
+    def test_local_only_manifest_paths_must_be_safe_and_disjoint(self):
+        for paths, message in [
+            (["base.txt"], "overlapping paths"),
+            (["../private.md"], "Unsafe manifest path"),
+            ("docs/local.md", "local_only_files list"),
+        ]:
+            with self.subTest(paths=paths):
+                self.data["local_only_files"] = paths
+                self.save_manifest()
+                self.assertIn(message, self.assert_run(1, "export"))
+
+    def test_local_only_symlinks_refused(self):
+        self.data["local_only_files"] = ["local.md"]
+        self.save_manifest()
+        (self.checkout / "local.md").symlink_to(self.checkout / "README.md")
+        self.assertIn("Symlinks", self.assert_run(1, "export"))
 
     def test_unlisted_overlay_and_symlinks_refused(self):
         extra = self.root / "overlay/private.txt"

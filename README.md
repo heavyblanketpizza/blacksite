@@ -2,17 +2,23 @@
 
 Playing with [HolmesGPT](https://github.com/HolmesGPT/holmesgpt), agent harnesses and hardening, MCPs, and whatever else helps answer one question:
 
+![Blacksite — an isometric pixel-art homestead with solar power, a garden, and a local AI coding desk](assets/blacksite-homestead.png)
+
 **How useful could a local coding agent be after the internet dies in an apocalypse and I retreat to my off-grid homestead?**
 
 The apocalypse gives the experiments a concrete constraint: the agent has to work with the compute, power, code, tools, and knowledge already on hand. Can it fix a small program, diagnose a local service, write a useful script, or find the right passage in a saved manual when downloading the missing piece is no longer an option?
 
 Blacksite is a personal experiment. HolmesGPT is the starting point; local inference, tool access through the Model Context Protocol (MCP), memory, retrieval, and the surrounding agent harness are things to try and measure. The model, hardware, and eventual architecture are open questions.
 
-## Remember why we're here
+## Things to try
 
-- [Project brief](docs/PROJECT.md): the premise, scope, working assumptions, and decisions to preserve.
-- [Experiments](docs/EXPERIMENTS.md): questions to test and a format for recording what actually happened.
-- [Offline readiness](docs/OFFLINE.md): what needs to survive an internet cutoff and a cold restart.
+- Compare working alone, local model chat, and an agent on the same small coding tasks.
+- Try local MCP tools for reading code, making reviewable changes, and running checks.
+- Give the agent a local bookshelf of saved documentation and see whether it can find reliable answers.
+- Disconnect the internet, restart the stack, and find out which dependencies we forgot to bring.
+- Measure useful work completed, human intervention, memory, latency, and energy where available.
+
+The first offline scenario allows a working LAN. Model weights, packages, container images, source code, and reference material need to be prepared before the cutoff. Working from a warm cache, restarting offline, and recovering from saved artifacts are separate experiments.
 
 ## What exists today
 
@@ -27,10 +33,12 @@ This repository stores our additions and changes. The canonical HolmesGPT code, 
 | Path | Contents |
 | --- | --- |
 | `overlay/` | Project files added to HolmesGPT, using their original relative paths |
-| `patches/holmesgpt.patch` | Our edits to existing upstream code, tests, and documentation |
+| `patches/holmesgpt.patch` | Our edits to existing upstream code and tests |
 | `upstream.json` | Exact upstream commit and explicit list of files to export |
 | `scripts/upstream.py` | Rebuild or export the project changes |
 | `holmesgpt/` | Local working checkout; excluded from this public repository |
+
+Only this README is published as Markdown. Supporting notes and local documentation edits stay outside the published files.
 
 ## Set up a checkout
 
@@ -45,7 +53,7 @@ cd holmesgpt
 
 The upstream base is [`96715d65480cefc26a03ee5ac8408aa793204e53`](https://github.com/HolmesGPT/holmesgpt/commit/96715d65480cefc26a03ee5ac8408aa793204e53). Preparation applies the patch and copies the overlay files into the checkout. Repeating it with the same project files is a no-op; conflicting local edits cause an error instead of being overwritten.
 
-Follow the [vLLM guide](overlay/docs/ai-providers/vllm.md) from inside `holmesgpt/`. Its relative links to other HolmesGPT documentation resolve in the prepared checkout. For the included Linux/NVIDIA deployment:
+From inside `holmesgpt/`, start the included Linux/NVIDIA deployment:
 
 ```bash
 cp examples/vllm/.env.example vllm.env
@@ -55,6 +63,16 @@ docker compose --env-file vllm.env \
 ```
 
 This CUDA deployment needs a compatible Linux NVIDIA host. A Mac can run Holmes as a client of a remote inference server. Offline use also requires downloading the container images, Python dependencies, model weights, and any data/tooling you need in advance.
+
+After the model server finishes loading, verify a tool-calling round trip:
+
+```bash
+docker compose --env-file vllm.env \
+  -f docker-compose.yaml -f docker-compose.vllm.yaml exec -T holmes \
+  python - --base-url http://vllm:8000/v1 --model holmes-local < scripts/check_vllm.py
+```
+
+The reference model settings live in [the example environment file](overlay/examples/vllm/.env.example) and [the model list](overlay/examples/vllm/model_list.yaml). Keep the server's total context limit and the model list's `max_context_size` aligned, with `max_tokens` below that limit.
 
 ## Keep project changes in Git
 
@@ -68,7 +86,7 @@ git commit -m "Describe the project change"
 git push
 ```
 
-Only paths listed in `upstream.json` are exported. For a new file, add its path relative to `holmesgpt/` to `added_files`; for a new edit to an existing upstream file, add its path to `modified_files`. Review each path before exporting. Unlisted changes are reported so they cannot silently disappear from the public project or be published accidentally. Local `.env` files and credentials belong outside the export list; the committed `.env.example` contains reference placeholders only.
+Only paths listed for publication in `upstream.json` are exported. For a new code or configuration file, add its path relative to `holmesgpt/` to `added_files`; for a new edit to an existing upstream file, add its path to `modified_files`. `local_only_files` records documentation changes that may remain in the working checkout but are never exported or required by a fresh checkout. Keep supporting Markdown in that local-only category. Review each path before exporting. Unlisted changes are reported so they cannot silently disappear from the public project or be published accidentally. Local `.env` files and credentials belong outside the export list; the committed `.env.example` contains reference placeholders only.
 
 ```bash
 # Verify that everything intended for publication matches the working checkout.
@@ -98,7 +116,7 @@ poetry run pytest tests/core/test_vllm_backend.py \
   tests/core/test_llm_completion_max_tokens.py tests/test_check_vllm.py --no-cov
 ```
 
-These tests mock inference HTTP calls. The [smoke check](overlay/scripts/check_vllm.py) in the vLLM guide separately verifies a running model server.
+These tests mock inference HTTP calls. The [smoke check](overlay/scripts/check_vllm.py) shown above separately verifies a running model server.
 
 ## Attribution
 

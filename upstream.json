@@ -3,22 +3,24 @@
   "commit": "96715d65480cefc26a03ee5ac8408aa793204e53",
   "patch": "patches/holmesgpt.patch",
   "modified_files": [
-    "docs/ai-providers/.nav.yml",
-    "docs/ai-providers/index.md",
-    "docs/ai-providers/openai-compatible.md",
-    "docs/installation/docker-compose-installation.md",
-    "docs/reference/context-management.md",
     "holmes/core/llm.py",
     "tests/core/test_llm_completion_max_tokens.py"
   ],
   "added_files": [
     "docker-compose.vllm.yaml",
-    "docs/ai-providers/vllm.md",
     "examples/vllm/.env.example",
     "examples/vllm/holmes.yaml",
     "examples/vllm/model_list.yaml",
     "scripts/check_vllm.py",
     "tests/core/test_vllm_backend.py",
     "tests/test_check_vllm.py"
+  ],
+  "local_only_files": [
+    "docs/ai-providers/.nav.yml",
+    "docs/ai-providers/index.md",
+    "docs/ai-providers/openai-compatible.md",
+    "docs/ai-providers/vllm.md",
+    "docs/installation/docker-compose-installation.md",
+    "docs/reference/context-management.md"
   ]
 }
