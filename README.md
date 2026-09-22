@@ -48,6 +48,8 @@ git diff
 
 Add new runtime files to `added_files` and edited upstream files to `modified_files`. Paths are relative to the runtime checkout. `local_only_files` are excluded from export. Commit in Blacksite; keep the runtime checkout at the pinned commit.
 
+Rebuild the banner: `uv run scripts/pixelate_image.py`.
+
 ## Tests
 
 Repository workflow tests, from the Blacksite root:
