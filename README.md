@@ -1,6 +1,26 @@
 # Blacksite
 
-Experiments with running [HolmesGPT](https://github.com/HolmesGPT/holmesgpt) against local inference, starting with vLLM. The current work includes a Docker Compose deployment, example model configuration, a tool-calling smoke check, and a fix that makes Holmes reserve the configured output-token budget for smaller context windows.
+Playing with [HolmesGPT](https://github.com/HolmesGPT/holmesgpt), agent harnesses and hardening, MCPs, and whatever else helps answer one question:
+
+**How useful could a local coding agent be after the internet dies in an apocalypse and I retreat to my off-grid homestead?**
+
+The apocalypse gives the experiments a concrete constraint: the agent has to work with the compute, power, code, tools, and knowledge already on hand. Can it fix a small program, diagnose a local service, write a useful script, or find the right passage in a saved manual when downloading the missing piece is no longer an option?
+
+Blacksite is a personal experiment. HolmesGPT is the starting point; local inference, tool access through the Model Context Protocol (MCP), memory, retrieval, and the surrounding agent harness are things to try and measure. The model, hardware, and eventual architecture are open questions.
+
+## Remember why we're here
+
+- [Project brief](docs/PROJECT.md): the premise, scope, working assumptions, and decisions to preserve.
+- [Experiments](docs/EXPERIMENTS.md): questions to test and a format for recording what actually happened.
+- [Offline readiness](docs/OFFLINE.md): what needs to survive an internet cutoff and a cold restart.
+
+## What exists today
+
+The current work provides a vLLM Docker Compose deployment, example model configuration, a tool-calling smoke check, and a fix that makes Holmes reserve the configured output-token budget for smaller context windows. The project also includes a reproducible way to apply those additions to a pinned HolmesGPT checkout.
+
+The repository-setup baseline on 2026-09-22 recorded 49 passing tests with mocked inference calls, 11 repository workflow tests, and successful reconstruction from upstream. Live GPU inference, useful coding performance, project-specific MCP servers, and operation through an actual internet cutoff remain to be demonstrated. A working HTTP endpoint or a passing mock test is only one part of the experiment.
+
+## Repository layout
 
 This repository stores our additions and changes. The canonical HolmesGPT code, dependencies, generated files, credentials, and Git history stay in the ignored `holmesgpt/` checkout.
 

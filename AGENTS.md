@@ -1,5 +1,16 @@
 # Blacksite development
 
+Blacksite explores how useful a local coding agent could be after the internet
+disappears and the user retreats to an off-grid homestead. HolmesGPT is the
+starting point for experiments with agent harnesses, hardening, MCP tools,
+local knowledge, and limited resources. Read `docs/PROJECT.md` for the purpose
+and `docs/EXPERIMENTS.md` for the questions we are trying to answer.
+
+Keep implemented features, proposed experiments, and observed results distinct.
+Mocked tool calls do not establish live inference or offline readiness. Record
+meaningful experiment outcomes and decisions in the project docs, including
+failures and unresolved questions, so the next session can pick up the work.
+
 This outer repository publishes only Blacksite's changes to HolmesGPT.
 `holmesgpt/` is an ignored, independent upstream checkout, not a submodule.
 
