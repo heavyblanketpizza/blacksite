@@ -2,7 +2,7 @@
 
 Playing with [HolmesGPT](https://github.com/HolmesGPT/holmesgpt), agent harnesses and hardening, MCPs, and whatever else helps answer one question:
 
-![Blacksite — an isometric pixel-art homestead with solar power, a garden, and a local AI coding desk](assets/blacksite-homestead.png)
+![Blacksite — a woman with short black hair and grey sweats coding in an Aeron chair at a solar-powered homestead](assets/blacksite-homestead.png)
 
 **How useful could a local coding agent be after the internet dies in an apocalypse and I retreat to my off-grid homestead?**
 
