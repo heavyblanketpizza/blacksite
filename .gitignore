@@ -1,6 +1,9 @@
-# Canonical HolmesGPT source and its Git history stay local.
-# Publish only our additions in overlay/ and edits in patches/.
+# Do not reintroduce the removed nested checkout into this repository.
+# Runtime checkouts belong outside Blacksite; publish overlay/ and patches/ only.
 /holmesgpt/
+
+# Local recovery copies; never publish these.
+/.local-backups/
 
 # Keep supporting Markdown notes local; only the root README is published.
 *.[mM][dD]

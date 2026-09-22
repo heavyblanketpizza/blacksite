@@ -39,7 +39,7 @@ class WorkflowTests(unittest.TestCase):
         self.pin = git(self.origin, "rev-parse", "HEAD")
         self.root = self.base / "project"
         self.root.mkdir()
-        self.checkout = self.root / "holmesgpt"
+        self.checkout = self.base / "checkout"
         git(self.root, "clone", str(self.origin), str(self.checkout))
         (self.checkout / "base.txt").write_text("first\nproject change\nlast\n")
         self.added = self.checkout / "tools" / "run.sh"
@@ -55,10 +55,16 @@ class WorkflowTests(unittest.TestCase):
     def save_manifest(self):
         (self.root / "upstream.json").write_text(json.dumps(self.data))
 
-    def assert_run(self, expected, *arguments):
+    def assert_run(self, expected, *arguments, include_checkout=True):
         output = io.StringIO()
+        arguments = list(arguments)
+        if include_checkout and "--checkout" not in arguments:
+            arguments.extend(["--checkout", str(self.checkout)])
         with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
-            result = upstream.main(list(arguments), root=self.root)
+            try:
+                result = upstream.main(arguments, root=self.root)
+            except SystemExit as error:
+                result = error.code
         self.assertEqual(expected, result, output.getvalue())
         return output.getvalue()
 
@@ -77,6 +83,52 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("Already prepared", self.assert_run(0, "prepare", "--checkout", str(target)))
         self.assert_run(0, "export", "--check", "--checkout", str(target))
         self.assertEqual("", git(target, "diff", "--cached", "--name-only"))
+
+    def test_checkout_path_must_be_explicit(self):
+        for action in ("prepare", "export"):
+            with self.subTest(action=action):
+                self.assertIn("--checkout", self.assert_run(2, action, include_checkout=False))
+        self.assertFalse((self.root / "holmesgpt").exists())
+
+    def test_checkout_cannot_be_inside_project(self):
+        link = self.base / "project-link"
+        link.symlink_to(self.root, target_is_directory=True)
+        for action in ("prepare", "export"):
+            for target in (self.root, self.root / "holmesgpt", link / "nested"):
+                with self.subTest(action=action, target=target):
+                    self.assertIn("outside the Blacksite repository", self.assert_run(
+                        1, action, "--checkout", str(target)))
+        self.assertFalse((self.root / ".git").exists())
+        self.assertFalse((self.root / "holmesgpt").exists())
+        self.assertFalse((self.root / "nested").exists())
+
+    def test_prepared_checkout_has_no_push_destination(self):
+        target = self.fresh_checkout()
+        self.assertEqual("", git(target, "remote"))
+        self.assertEqual("nothing", git(target, "config", "--local", "push.default"))
+        self.assertNotEqual(0, upstream.git(target, "push", check=False).returncode)
+
+    def test_prepare_removes_matching_upstream_origin(self):
+        self.assertEqual(str(self.origin), git(self.checkout, "remote", "get-url", "origin"))
+        self.assert_run(0, "prepare")
+        self.assertEqual("", git(self.checkout, "remote"))
+        self.assertEqual("nothing", git(self.checkout, "config", "--local", "push.default"))
+        self.assertNotEqual(0, upstream.git(self.checkout, "push", check=False).returncode)
+
+    def test_prepare_preserves_unexpected_remotes_and_checkout(self):
+        target = self.base / "unexpected"
+        git(self.root, "clone", str(self.origin), str(target))
+        for arguments in (("remote", "set-url", "origin", "https://example.invalid/other.git"),
+                          ("remote", "add", "other", str(self.origin))):
+            with self.subTest(arguments=arguments):
+                git(target, *arguments)
+                before = (target / ".git/config").read_bytes()
+                self.assertIn("unexpected Git remotes", self.assert_run(
+                    1, "prepare", "--checkout", str(target)))
+                self.assertEqual(before, (target / ".git/config").read_bytes())
+                self.assertEqual("first\noriginal\nlast\n", (target / "base.txt").read_text())
+                self.assertFalse((target / "tools/run.sh").exists())
+                git(target, "remote", "set-url", "origin", str(self.origin))
 
     def test_prepare_preserves_unrelated_local_changes(self):
         (self.checkout / ".gitignore").write_text(".env\nlocal-only\n")

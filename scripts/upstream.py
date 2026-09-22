@@ -169,6 +169,20 @@ def validate_patch(root, patch, allowed):
         raise WorkflowError("Patch contains unlisted paths: " + ", ".join(sorted(unknown)))
 
 
+def disable_pushes(checkout, repository):
+    remotes = git(checkout, "remote").stdout.decode().splitlines()
+    if remotes:
+        origin_urls = git(checkout, "config", "--get-all", "remote.origin.url",
+                          check=False).stdout.decode().splitlines()
+        if remotes != ["origin"] or origin_urls != [repository]:
+            raise WorkflowError(
+                "Checkout has unexpected Git remotes. Use a new external --checkout path "
+                "or review and remove those remotes yourself. No changes made."
+            )
+        git(checkout, "remote", "remove", "origin")
+    git(checkout, "config", "--local", "push.default", "nothing")
+
+
 def prepare(root, checkout, data):
     overlay = overlay_files(root, data["added_files"], require_all=True,
                             local_only=data["local_only_files"])
@@ -177,8 +191,8 @@ def prepare(root, checkout, data):
     if not checkout.exists():
         checkout.parent.mkdir(parents=True, exist_ok=True)
         git(root, "init", "--", str(checkout))
-        git(checkout, "remote", "add", "origin", data["repository"])
-        git(checkout, "fetch", "--depth=1", "origin", data["commit"])
+        git(checkout, "config", "--local", "push.default", "nothing")
+        git(checkout, "fetch", "--depth=1", data["repository"], data["commit"])
         git(checkout, "checkout", "--detach", data["commit"])
     verify_checkout(checkout, data["commit"])
     verify_manifest_paths(checkout, data)
@@ -201,6 +215,7 @@ def prepare(root, checkout, data):
                 raise WorkflowError("Patch neither applies cleanly nor is already applied. "
                                     "Local changes were preserved.\n" + result.stderr.decode(errors="replace").strip())
             apply_patch = True
+    disable_pushes(checkout, data["repository"])
     if apply_patch:
         git(checkout, "apply", "--whitespace=nowarn", str(patch))
     for source, destination in copies:
@@ -261,8 +276,8 @@ def main(argv=None, root=None):
     commands = parser.add_subparsers(dest="action", required=True)
     for action in ("prepare", "export"):
         command = commands.add_parser(action)
-        command.add_argument("--checkout", type=Path, default=root / "holmesgpt",
-                             help="HolmesGPT Git root (default: ./holmesgpt)")
+        command.add_argument("--checkout", type=Path, required=True,
+                             help="Explicit HolmesGPT Git root outside the Blacksite repository")
         if action == "export":
             command.add_argument("--check", action="store_true", help="Fail if published files differ")
     arguments = parser.parse_args(argv)
@@ -271,6 +286,12 @@ def main(argv=None, root=None):
         checkout = arguments.checkout.absolute()
         if checkout.is_symlink():
             raise WorkflowError(f"Checkout cannot be a symlink: {checkout}")
+        checkout = checkout.resolve()
+        if checkout == root or root in checkout.parents:
+            raise WorkflowError(
+                f"Checkout must be outside the Blacksite repository: {checkout}. "
+                "Choose an external --checkout path."
+            )
         if arguments.action == "prepare":
             prepare(root, checkout, data)
         else:
