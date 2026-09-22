@@ -1,0 +1,83 @@
+# Linux + NVIDIA GPU overlay. See docs/ai-providers/vllm.md.
+# docker compose -f docker-compose.yaml -f docker-compose.vllm.yaml up --build -d
+services:
+  holmes:
+    build: .
+    image: holmes-vllm:local
+    environment:
+      MODEL: vllm
+      MODEL_LIST_FILE_LOCATION: /etc/holmes/config/model_list.yaml
+      VLLM_API_BASE: http://vllm:8000/v1
+      VLLM_API_KEY: ${VLLM_API_KEY:-local-vllm}
+    volumes:
+      - ${VLLM_HOLMES_CONFIG_FILE:-./examples/vllm/holmes.yaml}:/root/.holmes/config.yaml:ro
+      - ./examples/vllm/model_list.yaml:/etc/holmes/config/model_list.yaml:ro
+    depends_on:
+      vllm:
+        condition: service_healthy
+    # Kubernetes access is optional; keep the base Compose localhost rewrite.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ -f /tmp/.kube/config ]; then
+          mkdir -p /root/.kube
+          cp /tmp/.kube/config /root/.kube/config
+          sed -i 's|server: https://127\.0\.0\.1|server: https://host.docker.internal|g; s|server: https://localhost|server: https://host.docker.internal|g' /root/.kube/config
+        fi
+        exec python -u server.py
+
+  vllm:
+    image: ${VLLM_IMAGE:-vllm/vllm-openai:v0.30.0-cu129}
+    ports:
+      - "127.0.0.1:${VLLM_PORT:-8000}:8000"
+    environment:
+      VLLM_API_KEY: ${VLLM_API_KEY:-local-vllm}
+      HF_TOKEN: ${HF_TOKEN:-}
+    volumes:
+      - vllm-huggingface-cache:/root/.cache/huggingface
+    shm_size: "4gb"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${VLLM_TENSOR_PARALLEL_SIZE:-1}
+              capabilities: [gpu]
+    command:
+      - ${VLLM_MODEL:-Qwen/Qwen3-8B}
+      - --served-model-name
+      - holmes-local
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --enable-auto-tool-choice
+      - --tool-call-parser
+      - ${VLLM_TOOL_CALL_PARSER:-hermes}
+      - --default-chat-template-kwargs
+      - '{"enable_thinking":false}'
+      - --enable-prefix-caching
+      # Keep this in sync with custom_args.max_context_size in model_list.yaml.
+      - --max-model-len
+      - "32768"
+      - --tensor-parallel-size
+      - ${VLLM_TENSOR_PARALLEL_SIZE:-1}
+      - --gpu-memory-utilization
+      - ${VLLM_GPU_MEMORY_UTILIZATION:-0.9}
+      - --max-num-seqs
+      - ${VLLM_MAX_NUM_SEQS:-4}
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 6
+      # Allow time for the initial model download and engine compilation.
+      start_period: 20m
+
+volumes:
+  vllm-huggingface-cache:

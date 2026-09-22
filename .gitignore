@@ -1,0 +1,52 @@
+# Canonical HolmesGPT source and its Git history stay local.
+# Publish only our additions in overlay/ and edits in patches/.
+/holmesgpt/
+
+# Local credentials and machine-specific configuration.
+.env
+.env.*
+*.env
+!.env.example
+*.pem
+*.key
+/config.yaml
+/config_toolsets.yaml
+/model_list.yaml
+/checks.yaml
+/.aws/
+/.kube/
+/.holmes/
+
+# Dependencies, caches, builds, and model weights.
+.venv/
+venv/
+env/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage*
+htmlcov/
+coverage.xml
+build/
+dist/
+*.egg-info/
+/models/
+*.safetensors
+*.gguf
+
+# Local tools and generated output.
+.DS_Store
+.DS_STORE
+.idea/
+.vscode/
+.codex/
+.agents/
+.claude/
+*.log
+/tmp/
+/evals_report.*
+/eval_results.json

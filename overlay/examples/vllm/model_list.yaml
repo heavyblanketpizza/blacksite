@@ -1,0 +1,12 @@
+vllm:
+  # Use the OpenAI-compatible API, not LiteLLM's in-process vLLM provider.
+  model: openai/holmes-local
+  api_base: "{{ env.VLLM_API_BASE }}"
+  api_key: "{{ env.VLLM_API_KEY }}"
+  temperature: 0.7
+  top_p: 0.8
+  max_tokens: 4096
+  custom_args:
+    # Total input + output limit. Keep in sync with vLLM --max-model-len.
+    # Numeric values must stay YAML numbers: env substitution produces strings.
+    max_context_size: 32768

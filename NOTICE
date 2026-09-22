@@ -1,0 +1,13 @@
+Blacksite
+
+This repository contains additions and patches for HolmesGPT:
+https://github.com/HolmesGPT/holmesgpt
+
+HolmesGPT is distributed under the Apache License, Version 2.0.
+The upstream license text is retained in LICENSE.
+
+Blacksite modifications include local vLLM deployment configuration,
+tool-calling checks and tests, documentation, and an output-token budget fix.
+The modified upstream files are identified in patches/holmesgpt.patch and
+upstream.json. All other upstream source remains in the separately obtained
+HolmesGPT checkout.

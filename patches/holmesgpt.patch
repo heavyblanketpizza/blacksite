@@ -1,0 +1,170 @@
+diff --git a/docs/ai-providers/.nav.yml b/docs/ai-providers/.nav.yml
+index 5dfb1665ada1f9a19eb52f8a19cbe9d2202345a1..fe1210647dfcf424e04ca315837a2adda2bbb208 100644
+--- a/docs/ai-providers/.nav.yml
++++ b/docs/ai-providers/.nav.yml
+@@ -14,4 +14,5 @@ nav:
+ - OpenAI-Compatible: openai-compatible.md
+ - Other: other.md
+ - Robusta AI: robusta-ai.md
++- vLLM: vllm.md
+ - Using Multiple Providers: using-multiple-providers.md
+diff --git a/docs/ai-providers/index.md b/docs/ai-providers/index.md
+index 986dff368ff442e4eff0f21382edf7add6ba47f1..4162190ec331ae54a7dcd532ff2d945673b3a874 100644
+--- a/docs/ai-providers/index.md
++++ b/docs/ai-providers/index.md
+@@ -16,6 +16,7 @@ HolmesGPT supports multiple AI providers, giving you flexibility in choosing the
+ -   [:material-api:{ .lg .middle } **OpenAI-Compatible** (LiteLLM Proxy, etc.)](openai-compatible.md)
+ -   [:material-earth:{ .lg .middle } **OpenRouter**](openrouter.md)
+ -   [:material-robot:{ .lg .middle } **Robusta AI**](robusta-ai.md)
++-   [:material-server:{ .lg .middle } **vLLM**](vllm.md)
+ -   [:material-layers-triple:{ .lg .middle } **Using Multiple Providers**](using-multiple-providers.md)
+ 
+ </div>
+diff --git a/docs/ai-providers/openai-compatible.md b/docs/ai-providers/openai-compatible.md
+index 8710731e14f02e7fbacd029977e49faa56bca190..121b162f9af2043f246553e7628fb1e1adb4d40a 100644
+--- a/docs/ai-providers/openai-compatible.md
++++ b/docs/ai-providers/openai-compatible.md
+@@ -2,6 +2,8 @@
+ 
+ HolmesGPT works with **any OpenAI-compatible API endpoint**. This includes [**LiteLLM Proxy**](https://docs.litellm.ai/docs/simple_proxy){:target="_blank"}, other API gateways and proxy servers, and local inference servers — as long as they expose an OpenAI-compatible interface with function calling support.
+ 
++For vLLM, see the [vLLM setup guide](vllm.md) for a GPU Docker Compose deployment, tool-call parser settings, and explicit context/output budgets.
++
+ !!! tip "Using LiteLLM Proxy (or another proxy)?"
+     This is the right page. Configure your proxy's URL as `OPENAI_API_BASE`, the proxy token as `OPENAI_API_KEY`, and set `model: openai/<name-your-proxy-exposes>` in `modelList`. See the example below.
+ 
+diff --git a/docs/installation/docker-compose-installation.md b/docs/installation/docker-compose-installation.md
+index c4753348116023622e491e9d7b886722494b0abe..94ea56d5443ad9981d1da4d5540cd7c255ca3357 100644
+--- a/docs/installation/docker-compose-installation.md
++++ b/docs/installation/docker-compose-installation.md
+@@ -34,6 +34,8 @@ To deploy the HTTP server on Kubernetes, see the [Helm Chart](kubernetes-install
+ 
+ The API is available at `http://localhost:5050`.
+ 
++To run a local inference server alongside Holmes on a Linux NVIDIA GPU host, use the [vLLM Compose overlay](../ai-providers/vllm.md#run-with-docker-compose). It builds Holmes from this checkout and waits for the model server to become healthy.
++
+ ## Configuration
+ 
+ Edit `docker-compose.yaml` to configure your setup:
+diff --git a/docs/reference/context-management.md b/docs/reference/context-management.md
+index 0e9b9b4f4f1ed9955de515a8e497c516438430b6..f4722769708ac9ba04d7f56ed7e796a638a450de 100644
+--- a/docs/reference/context-management.md
++++ b/docs/reference/context-management.md
+@@ -76,6 +76,6 @@ Every LLM request includes an explicit output-token limit. It is the same value
+ 
+ The value is resolved in this order:
+ 
+-1. A non-null `max_tokens` or `max_completion_tokens` in the model's args (model list / `custom_args`) takes precedence (a `null` value is stripped, so it does not block the computed default below).
++1. A non-null `max_completion_tokens`, then `max_tokens`, in the model-list entry takes precedence for both the request and the reserved output budget. These fields belong alongside `model`, not inside `custom_args`. A `null` value is treated as unset.
+ 2. `OVERRIDE_MAX_OUTPUT_TOKEN` environment variable.
+ 3. Computed: `max(64000, 12% of the context window)` — so a 200k-context (or unknown) model reserves 64k and a 1M-context model reserves 120k — further capped by the model's `max_output_tokens` from litellm's cost map when the model is known.
+diff --git a/holmes/core/llm.py b/holmes/core/llm.py
+index 314e6cd5b6b33d8774f8ff7b8245911c86c1d165..1fd4ea05c72836c545f76be577f7fb34d686992c 100644
+--- a/holmes/core/llm.py
++++ b/holmes/core/llm.py
+@@ -790,6 +790,15 @@ class DefaultLLM(LLM):
+             raise Exception(f"Unexpected type returned by the LLM {type(result)}")
+ 
+     def get_maximum_output_token(self) -> int:
++        # Match completion's explicit limit so input limiting and compaction
++        # reserve the output budget the request actually uses. A configured
++        # max_completion_tokens takes precedence over max_tokens; null values
++        # are treated as unset, as they are when constructing the request.
++        for param in ("max_completion_tokens", "max_tokens"):
++            configured_limit = self.args.get(param)
++            if configured_limit is not None:
++                return configured_limit
++
+         # Reserve output budget = max(64k, 12% of the context window). The 64k
+         # floor keeps small and unknown models usable (the 200k fallback window
+         # gives 12% = 24k, so they stay at 64k), while large windows scale up:
+diff --git a/tests/core/test_llm_completion_max_tokens.py b/tests/core/test_llm_completion_max_tokens.py
+index c3b6d81a123fd537d91d7562d438471389d6557e..3977b1b89cfcf3b23d336324aeed202883e6af79 100644
+--- a/tests/core/test_llm_completion_max_tokens.py
++++ b/tests/core/test_llm_completion_max_tokens.py
+@@ -3,7 +3,11 @@ from unittest.mock import patch
+ import pytest
+ from litellm.types.utils import Choices, Message, ModelResponse, Usage
+ 
+-from holmes.core.llm import DefaultLLM
++from holmes.core.llm import ContextWindowUsage, DefaultLLM
++from holmes.core.truncation.input_context_window_limiter import (
++    CompactionInsufficientError,
++    compact_if_necessary,
++)
+ 
+ 
+ def _mock_model_response() -> ModelResponse:
+@@ -106,6 +110,7 @@ class TestCompletionMaxTokensHandling:
+         llm.completion(messages=[{"role": "user", "content": "hi"}])
+         kwargs = mock_completion.call_args.kwargs
+         assert kwargs["max_tokens"] == 8000
++        assert llm.get_maximum_output_token() == 8000
+ 
+     def test_config_null_max_tokens_is_replaced(self, mock_completion):
+         """Row 3: modelList `max_tokens: null` must not leak as None nor block injection."""
+@@ -122,6 +127,7 @@ class TestCompletionMaxTokensHandling:
+         kwargs = mock_completion.call_args.kwargs
+         assert kwargs["max_completion_tokens"] == 8000
+         assert "max_tokens" not in kwargs
++        assert llm.get_maximum_output_token() == 8000
+ 
+     def test_config_null_max_completion_tokens_is_stripped(self, mock_completion):
+         """Row 5: modelList `max_completion_tokens: null` is stripped and the
+@@ -149,3 +155,56 @@ class TestCompletionMaxTokensHandling:
+         kwargs = mock_completion.call_args.kwargs
+         assert kwargs["max_tokens"] == llm.get_maximum_output_token()
+         assert kwargs["max_tokens"] <= 16384
++
++
++@pytest.mark.parametrize(
++    "args, expected",
++    [
++        ({"max_tokens": 4096}, 4096),
++        ({"max_completion_tokens": 4096}, 4096),
++        ({"max_tokens": 8192, "max_completion_tokens": 4096}, 4096),
++        ({"max_tokens": 4096, "max_completion_tokens": None}, 4096),
++        ({"max_tokens": None, "max_completion_tokens": 4096}, 4096),
++        ({"max_tokens": None, "max_completion_tokens": None}, 12345),
++        ({}, 12345),
++    ],
++)
++def test_output_budget_matches_configured_limit_before_completion(args, expected):
++    """Per-model limits beat the env default even before the first request."""
++    llm = _make_llm(args, model="openai/local-vllm", max_context_size=32768)
++    with patch("holmes.core.llm.OVERRIDE_MAX_OUTPUT_TOKEN", 12345):
++        assert llm.get_maximum_output_token() == expected
++
++
++@pytest.mark.parametrize("token_param", ["max_tokens", "max_completion_tokens"])
++def test_small_context_reserves_configured_output_limit(token_param):
++    """A 32k server can use its input budget instead of reserving the 64k fallback."""
++    llm = _make_llm(
++        {token_param: 4096}, model="openai/local-vllm", max_context_size=32768
++    )
++    messages = [{"role": "user", "content": "investigate"}]
++    usage = ContextWindowUsage(
++        total_tokens=28672,
++        tools_tokens=0,
++        system_tokens=0,
++        user_tokens=28672,
++        tools_to_call_tokens=0,
++        assistant_tokens=0,
++        other_tokens=0,
++    )
++    with (
++        patch.object(llm, "count_tokens", return_value=usage),
++        patch(
++            "holmes.core.truncation.input_context_window_limiter.ENABLE_CONVERSATION_HISTORY_COMPACTION",
++            False,
++        ),
++    ):
++        result = compact_if_necessary(llm, messages, tools=None)
++        assert result.messages == messages
++        assert result.maximum_output_token == 4096
++        assert not result.conversation_history_compacted
++
++        usage.total_tokens += 1
++        usage.user_tokens += 1
++        with pytest.raises(CompactionInsufficientError):
++            compact_if_necessary(llm, messages, tools=None)
