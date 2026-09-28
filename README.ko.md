@@ -12,7 +12,7 @@
 
 ## 데모
 
-https://github.com/user-attachments/assets/5cdedde4-ccf4-4289-a6a2-121e20cc82ed
+https://github.com/user-attachments/assets/07dc0837-7fa2-468e-a823-b9375bc70171
 
 59초 데모: 로그인, 근거 검색, 실시간 조사, 인용이 달린 가이드, 서명 검증, 다운로드, 공유, 감사 기록 검증. Qwen 3.8 27B를 llama.cpp에서 로컬 GGUF 가중치와 64k 컨텍스트로 실행하며, 로그와 계정은 합성 자료입니다. 영상은 2배속, 7분간의 조사 구간은 15.5배속이며 화면에 배속을 표시합니다.
 
