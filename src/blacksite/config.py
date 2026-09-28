@@ -37,7 +37,7 @@ class ModelSettings:
     # OpenAI-compatible API; blacksite.backends handles their differences.
     provider: Literal["vllm", "llamacpp", "ollama"] = "vllm"
     base_url: str = "http://localhost:8000/v1"
-    name: str = "holmes-local"
+    name: str = "blacksite"
     api_key_env: str = "VLLM_API_KEY"
     timeout: float = 600.0
     # Context length `blacksite serve model` gives llama.cpp and vLLM (Ollama: demo/Modelfile).

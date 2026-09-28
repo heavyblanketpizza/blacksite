@@ -4,9 +4,10 @@
 # ///
 """Rebuild the README banner: uv run scripts/pixelate_image.py.
 
-One global 320x180 grid and 128-color palette are applied to the source.
-Nearest-neighbor sampling preserves hard edges; dithering is disabled.
-The 6x enlargement produces a 1920x1080 PNG with uniform 6x6 pixel blocks.
+One global 480x270 grid and 128-color palette are applied to the source.
+Box averaging removes fine sampling noise; dithering is disabled.
+Nearest-neighbor enlargement produces a 1920x1080 PNG with crisp 4x4 blocks.
+The fixed settings and pinned Pillow version make rebuilds repeatable.
 """
 
 import argparse
@@ -35,9 +36,9 @@ def main():
         "--output", type=Path,
         default=ROOT / "assets/blacksite-homestead.png",
     )
-    parser.add_argument("--width", type=positive_integer, default=320)
-    parser.add_argument("--height", type=positive_integer, default=180)
-    parser.add_argument("--scale", type=positive_integer, default=6)
+    parser.add_argument("--width", type=positive_integer, default=480)
+    parser.add_argument("--height", type=positive_integer, default=270)
+    parser.add_argument("--scale", type=positive_integer, default=4)
     parser.add_argument("--colors", type=int, choices=range(2, 257), default=128,
                         metavar="2..256")
     args = parser.parse_args()
@@ -47,11 +48,11 @@ def main():
         parser.error("source and output must be different files")
 
     with Image.open(args.source) as source:
-        # The same grid and palette cover the entire image, including the developer.
+        # Average source detail into a single grid before reducing the palette.
         pixels = ImageOps.fit(
             source.convert("RGB"),
             (args.width, args.height),
-            method=Image.Resampling.NEAREST,
+            method=Image.Resampling.BOX,
             centering=(0.5, 0.5),
         )
         pixels = pixels.quantize(

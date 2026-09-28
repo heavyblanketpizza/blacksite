@@ -9,7 +9,7 @@
 # OpenAI-compatible endpoint used by the agent and `blacksite learn reflect`.
 provider = "vllm"          # vllm (GPU server), llamacpp (llama-server), or ollama
 base_url = "http://localhost:8000/v1"
-name = "holmes-local"
+name = "blacksite"
 api_key_env = "VLLM_API_KEY"
 timeout = 600.0
 context = 65536            # tokens; used by `blacksite serve model` for llama.cpp and vLLM

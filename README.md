@@ -104,8 +104,8 @@ Keep `var/keys/` private and backed up. It holds the key that proves the ledger 
 uv run pytest
 ```
 
-Tests mock the model and need no GPU. Code lives in [src/blacksite](src/blacksite/); sample configs and runbooks in [demo](demo/). The [HolmesGPT baseline](upstream.json) is maintained separately through [overlay/](overlay/), [patches/](patches/), and [scripts/upstream.py](scripts/upstream.py).
+Tests mock the model and need no GPU. Code lives in [src/blacksite](src/blacksite/); sample configs and runbooks in [demo](demo/).
 
 ## License
 
-Apache 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE) for upstream attribution.
+Apache 2.0. See [LICENSE](LICENSE).

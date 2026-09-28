@@ -1,7 +1,3 @@
-# Do not reintroduce the removed nested checkout into this repository.
-# Runtime checkouts belong outside Blacksite; publish overlay/ and patches/ only.
-/holmesgpt/
-
 # Local recovery copies; never publish these.
 /.local-backups/
 
@@ -19,16 +15,10 @@
 .env
 .env.*
 *.env
-!.env.example
 *.pem
 *.key
-/config.yaml
-/config_toolsets.yaml
-/model_list.yaml
-/checks.yaml
 /.aws/
 /.kube/
-/.holmes/
 
 # Dependencies, caches, builds, and model weights.
 .venv/
@@ -71,8 +61,6 @@ evidence.*.duckdb.wal
 .claude/
 *.log
 /tmp/
-/evals_report.*
-/eval_results.json
 
 # Test fixtures are sample evidence and runbooks, not local notes or logs.
 # Preserve these files despite the patterns above.

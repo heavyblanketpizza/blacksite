@@ -104,8 +104,8 @@ uv run blacksite --config demo/blacksite.toml check
 uv run pytest
 ```
 
-테스트는 모델을 모의 처리하므로 GPU가 필요 없습니다. 코드는 [src/blacksite](src/blacksite/), 예제 설정과 운영 문서는 [demo](demo/)에 있습니다. 비교용 [HolmesGPT 구성](upstream.json)은 [overlay/](overlay/), [patches/](patches/), [scripts/upstream.py](scripts/upstream.py)로 별도 관리합니다.
+테스트는 모델을 모의 처리하므로 GPU가 필요 없습니다. 코드는 [src/blacksite](src/blacksite/), 예제 설정과 운영 문서는 [demo](demo/)에 있습니다.
 
 ## 라이선스
 
-Apache 2.0. 원본 프로젝트의 저작권 고지는 [LICENSE](LICENSE)와 [NOTICE](NOTICE)를 참고하세요.
+Apache 2.0. [LICENSE](LICENSE)를 참고하세요.
