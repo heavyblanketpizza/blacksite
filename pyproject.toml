@@ -1,0 +1,43 @@
+[project]
+name = "blacksite"
+version = "0.1.0"
+description = "Offline evidence, knowledge, and learning tools for a local incident-diagnosis agent"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = [
+    "cryptography>=44,<51",
+    "duckdb>=1.5,<2",
+    "httpx>=0.28,<1",
+    "mcp>=2.2,<3",
+    "pydantic>=2.11,<3",
+]
+
+[project.optional-dependencies]
+# Dense retrieval for rag.retriever = "hybrid".
+hybrid = ["numpy>=2.2,<3"]
+# The investigation agent and the local web demo.
+agent = [
+    "pydantic-ai-slim[openai,mcp]>=2.51,<3",
+    "uvicorn>=0.54,<1",
+    "starlette>=1.7,<2",
+    "python-multipart>=0.0.32",
+    "segno>=1.6,<2",
+]
+
+[project.scripts]
+blacksite = "blacksite.cli:main"
+
+[dependency-groups]
+dev = [
+    "blacksite[agent,hybrid]",
+    "pytest>=8.4",
+]
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"

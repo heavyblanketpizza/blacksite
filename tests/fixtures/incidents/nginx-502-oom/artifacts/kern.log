@@ -1,0 +1,13 @@
+Sep 27 01:12:44 web01 kernel: [180972.118220] EXT4-fs (sda1): re-mounted. Opts: errors=remount-ro. Quota mode: none.
+Sep 27 02:14:05 web01 kernel: [183201.004112] app invoked oom-killer: gfp_mask=0x140cca(GFP_HIGHUSER_MOVABLE|__GFP_COMP), order=0, oom_score_adj=0
+Sep 27 02:14:05 web01 kernel: [183201.004655] Memory cgroup out of memory: Killed process 4242 (app) total-vm:4194304kB, anon-rss:3145728kB, file-rss:0kB, shmem-rss:0kB, UID:1001 pgtables:6400kB oom_score_adj:0
+Sep 27 02:14:05 web01 kernel: [183201.009870] oom_reaper: reaped process 4242 (app), now anon-rss:0kB, file-rss:0kB, shmem-rss:0kB
+Sep 27 02:19:40 web01 kernel: [183531.004112] app invoked oom-killer: gfp_mask=0x140cca(GFP_HIGHUSER_MOVABLE|__GFP_COMP), order=0, oom_score_adj=0
+Sep 27 02:19:40 web01 kernel: [183531.004655] Memory cgroup out of memory: Killed process 4339 (app) total-vm:4194304kB, anon-rss:3146752kB, file-rss:0kB, shmem-rss:0kB, UID:1001 pgtables:6400kB oom_score_adj:0
+Sep 27 02:19:40 web01 kernel: [183531.009870] oom_reaper: reaped process 4339 (app), now anon-rss:0kB, file-rss:0kB, shmem-rss:0kB
+Sep 27 02:25:12 web01 kernel: [183861.004112] app invoked oom-killer: gfp_mask=0x140cca(GFP_HIGHUSER_MOVABLE|__GFP_COMP), order=0, oom_score_adj=0
+Sep 27 02:25:12 web01 kernel: [183861.004655] Memory cgroup out of memory: Killed process 4436 (app) total-vm:4194304kB, anon-rss:3147776kB, file-rss:0kB, shmem-rss:0kB, UID:1001 pgtables:6400kB oom_score_adj:0
+Sep 27 02:25:12 web01 kernel: [183861.009870] oom_reaper: reaped process 4436 (app), now anon-rss:0kB, file-rss:0kB, shmem-rss:0kB
+Sep 27 02:30:51 web01 kernel: [184191.004112] app invoked oom-killer: gfp_mask=0x140cca(GFP_HIGHUSER_MOVABLE|__GFP_COMP), order=0, oom_score_adj=0
+Sep 27 02:30:51 web01 kernel: [184191.004655] Memory cgroup out of memory: Killed process 4533 (app) total-vm:4194304kB, anon-rss:3148800kB, file-rss:0kB, shmem-rss:0kB, UID:1001 pgtables:6400kB oom_score_adj:0
+Sep 27 02:30:51 web01 kernel: [184191.009870] oom_reaper: reaped process 4533 (app), now anon-rss:0kB, file-rss:0kB, shmem-rss:0kB

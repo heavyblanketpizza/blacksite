@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Blacksite</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%231a2028'/><path d='M4 11h8M4 8h5M4 5h8' stroke='%23fbeed6' stroke-width='1.6'/></svg>">
+  <meta name="blacksite-i18n" content="/static/i18n.json">
+  <script src="/static/boot.js"></script>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><b>Blacksite</b><span class="hide-narrow" data-i18n="brand.tagline">Offline incident analyst</span></div>
+    <nav class="nav" aria-label="Sections" data-i18n-aria="nav.label">
+      <a href="#/" data-view="dashboard" data-i18n="nav.dashboard">Dashboard</a>
+      <a href="#/incidents" data-view="incidents" data-i18n="nav.incidents">Incidents</a>
+      <a href="#/admin" data-view="admin" data-i18n="nav.admin" data-role="admin" hidden>Admin</a>
+    </nav>
+    <div class="spacer"></div>
+    <button class="pill pill-button" id="model-pill" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="model-menu" data-i18n-title="models.open"><span class="dot"></span><span class="pill-label" data-i18n="status.checking">Checking model…</span><span class="caret" aria-hidden="true"></span></button>
+    <span class="pill" id="usb-pill" hidden><span class="dot"></span><span></span></span>
+    <span class="pill hide-narrow" data-i18n="top.noCloud" data-i18n-title="top.noCloudTitle">No cloud calls</span>
+    <div class="seg compact" id="theme-toggle" role="group" data-i18n-aria="theme.label"></div>
+    <div class="seg compact" id="lang-toggle" role="group" data-i18n-aria="top.language">
+      <button type="button" data-lang="en" lang="en">EN</button>
+      <button type="button" data-lang="ko" lang="ko">한국어</button>
+    </div>
+    <button class="btn ghost" id="learning-open" type="button" data-role="admin" hidden><span data-i18n="top.learning">Learning</span> <span class="badge warn" id="pending-count" hidden></span></button>
+    <button class="btn ghost" id="evidence-toggle" type="button" data-i18n="top.evidence" data-i18n-title="top.evidenceTitle">Evidence</button>
+    <button class="user-button" id="user-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="user-menu">
+      <span class="avatar" id="user-avatar" aria-hidden="true"></span>
+      <span class="who"><span id="user-name"></span> <span class="role-badge" id="user-role"></span><small id="user-session"></small></span>
+    </button>
+  </header>
+
+  <div class="view dashboard-view" id="view-dashboard" hidden></div>
+  <div class="view admin-view" id="view-admin" hidden></div>
+  <div class="view account-view" id="view-account" hidden></div>
+
+  <div class="body" id="view-incidents" hidden>
+    <nav class="sidebar" aria-label="Incidents">
+      <section>
+        <div class="label"><span data-i18n="side.incidents">Incidents</span> <button class="btn small" id="new-incident" type="button" data-i18n="side.new">+ New</button></div>
+        <div class="incident-list" id="incident-list"></div>
+      </section>
+      <section>
+        <div class="label"><span data-i18n="side.uses">What the agent may use</span> <span class="baseline" id="baseline-tag" data-i18n="side.baseline" hidden>Baseline</span></div>
+        <div id="switches"></div>
+      </section>
+    </nav>
+
+    <main class="main" id="main">
+      <div class="page" id="page"></div>
+      <div class="composer" id="composer" hidden>
+        <div class="box">
+          <textarea id="message" rows="1" data-i18n-placeholder="composer.placeholder"></textarea>
+          <textarea id="paste" class="paste" data-i18n-placeholder="composer.paste" hidden></textarea>
+          <div class="row">
+            <button class="btn ghost small" id="paste-toggle" type="button" data-i18n="composer.pasteToggle">+ Paste command output</button>
+            <span class="hint" id="composer-hint"></span>
+            <span class="spacer"></span>
+            <button class="btn primary" id="send" type="button" data-i18n="composer.investigate">Investigate</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="evidence" id="evidence" aria-label="Evidence">
+      <div class="tabs">
+        <button class="on" data-tab="overview" type="button" data-i18n="tab.overview">Overview</button>
+        <button data-tab="search" type="button" data-i18n="tab.search">Search</button>
+        <button data-tab="lines" type="button" data-i18n="tab.lines">Lines</button>
+        <span class="spacer"></span>
+        <button class="close" id="evidence-close" type="button" data-i18n-title="ev.close" data-i18n-aria="ev.close">&times;</button>
+      </div>
+      <div class="panel-body" id="evidence-body"></div>
+    </aside>
+  </div>
+</div>
+
+<div class="overlay" id="new-modal" hidden>
+  <form class="modal" id="new-form">
+    <h2 data-i18n="new.title">New incident</h2>
+    <label class="field"><span data-i18n="new.what">What is wrong?</span><input name="title" required data-i18n-placeholder="new.whatPlaceholder"></label>
+    <label class="field"><span><span data-i18n="new.know">What do you know?</span> <span class="faint" data-i18n="new.optional">(optional)</span></span>
+      <textarea name="description" rows="3" data-i18n-placeholder="new.knowPlaceholder"></textarea></label>
+    <label class="field"><span><span data-i18n="new.year">Year of the logs</span> <span class="faint" data-i18n="new.yearHint">(for syslog lines without a year)</span></span>
+      <input name="year" inputmode="numeric" placeholder="2026"></label>
+    <div class="drop" id="drop"><span data-i18n="new.drop">Drop log, config, or command-output files here, or click to choose.</span>
+      <input type="file" id="file-input" multiple hidden><ul id="file-names"></ul></div>
+    <div class="modal-actions">
+      <button class="btn" type="button" id="new-cancel" data-i18n="new.cancel">Cancel</button>
+      <button class="btn primary" type="submit" id="new-submit" data-i18n="new.create">Create and index</button>
+    </div>
+  </form>
+</div>
+
+<div class="popover" id="model-menu" role="dialog" data-i18n-aria="models.title" hidden></div>
+<div class="popover user-menu" id="user-menu" role="menu" hidden></div>
+
+<div class="drawer" id="learning" hidden>
+  <div class="drawer-head"><h2 data-i18n="learn.title">What Blacksite has learned</h2><button class="btn ghost" id="learning-close" type="button" data-i18n="learn.close">Close</button></div>
+  <div class="drawer-body" id="learning-body"></div>
+</div>
+
+<script src="/static/app.js"></script>
+<script src="/static/dashboard.js"></script>
+<script src="/static/admin.js"></script>
+</body>
+</html>

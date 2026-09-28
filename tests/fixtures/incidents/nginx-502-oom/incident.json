@@ -1,0 +1,6 @@
+{
+  "id": "nginx-502-oom",
+  "title": "API returns 502 since about 02:14",
+  "description": "Customers get 502 Bad Gateway from api.example.com since around 02:14 UTC. Version 2.14.0 of the order API was deployed at 01:50. nginx proxies to the app on 127.0.0.1:8080.",
+  "year": 2026
+}

@@ -1,0 +1,34 @@
+# Laptop demo: Qwen3.8-27B (4-bit) through Ollama. Paths resolve against this directory.
+# Production uses the same settings with provider = "vllm" and the GPU server's URL.
+
+[model]
+provider = "ollama"
+base_url = "http://localhost:11434/v1"
+name = "blacksite-qwen3.8"        # see demo/Modelfile: qwen3.8:27b-q4_K_M with a 64k context
+api_key_env = "OLLAMA_API_KEY"
+timeout = 900.0
+
+[agent]
+thinking = "low"
+max_tool_calls = 12
+
+[rag]
+docs_dir = "knowledge"
+index_path = "../var/demo/knowledge.sqlite"
+
+[learning]
+store_path = "../var/demo/learning.sqlite"
+
+# Accounts and the audit ledger for the web app; see README "Access and audit".
+[auth]
+totp_enabled = false
+store_path = "../var/demo/access.sqlite"
+keys_dir = "../var/demo/keys"
+
+[audit]
+store_path = "../var/demo/audit.sqlite"
+
+# USB mode: plug in a drive with a "blacksite" folder; see README.
+[usb]
+enabled = true
+sandbox_dir = "../var/demo/sandbox"

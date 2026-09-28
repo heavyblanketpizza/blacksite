@@ -1,0 +1,83 @@
+# Do not reintroduce the removed nested checkout into this repository.
+# Runtime checkouts belong outside Blacksite; publish overlay/ and patches/ only.
+/holmesgpt/
+
+# Local recovery copies; never publish these.
+/.local-backups/
+
+# Keep supporting Markdown notes local; publish the English and Korean READMEs.
+*.[mM][dD]
+!/README.md
+!/README.ko.md
+
+# Keep the local GUI guide's PDF and screenshots with its ignored Markdown document.
+/docs/GUI-GUIDE.ko.pdf
+/docs/images/gui-guide-ko/
+
+# Local credentials and machine-specific configuration.
+/blacksite.toml
+.env
+.env.*
+*.env
+!.env.example
+*.pem
+*.key
+/config.yaml
+/config_toolsets.yaml
+/model_list.yaml
+/checks.yaml
+/.aws/
+/.kube/
+/.holmes/
+
+# Dependencies, caches, builds, and model weights.
+.venv/
+venv/
+env/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage*
+htmlcov/
+coverage.xml
+build/
+dist/
+*.egg-info/
+/models/
+*.safetensors
+*.gguf
+
+# Blacksite runtime data: learning store, knowledge index, incident indexes.
+/var/
+# Keep Ollama recordings local; publish the llama.cpp demos only.
+/docs/video/blacksite-demo-en-2x.mp4
+/docs/video/blacksite-terminal-demo-2min.mp4
+/docs/video/*ollama*.mp4
+evidence.*.duckdb
+evidence.*.duckdb.wal
+.evidence.*.tmp
+
+# Local tools and generated output.
+.DS_Store
+.DS_STORE
+.idea/
+.vscode/
+.codex/
+.agents/
+.claude/
+*.log
+/tmp/
+/evals_report.*
+/eval_results.json
+
+# Test fixtures are sample evidence and runbooks, not local notes or logs.
+# Preserve these files despite the patterns above.
+!/tests/fixtures/**
+!/demo/knowledge/**
+
+# JPEG images.
+*.[jJ][pP][gG]

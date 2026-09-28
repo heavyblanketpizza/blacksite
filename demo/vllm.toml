@@ -1,0 +1,35 @@
+# Blacksite on vLLM: NVIDIA GPUs on Linux, or vllm-metal on Apple Silicon. Start the server with:
+#   uv run blacksite --config demo/vllm.toml serve model
+# (defaults: Qwen/Qwen3.8-27B-FP8 on NVIDIA, mlx-community/Qwen3.8-27B-4bit on a Mac). Paths resolve against this directory.
+
+[model]
+provider = "vllm"
+base_url = "http://127.0.0.1:8000/v1"
+name = "blacksite-qwen3.8"
+api_key_env = "VLLM_API_KEY"
+timeout = 900.0
+context = 65536
+
+[agent]
+thinking = "low"
+max_tool_calls = 12
+
+[rag]
+docs_dir = "knowledge"
+index_path = "../var/demo/knowledge.sqlite"
+
+[learning]
+store_path = "../var/demo/learning.sqlite"
+
+# Accounts and the audit ledger for the web app; see README "Access and audit".
+[auth]
+totp_enabled = false
+store_path = "../var/demo/access.sqlite"
+keys_dir = "../var/demo/keys"
+
+[audit]
+store_path = "../var/demo/audit.sqlite"
+
+[usb]
+enabled = true
+sandbox_dir = "../var/demo/sandbox"

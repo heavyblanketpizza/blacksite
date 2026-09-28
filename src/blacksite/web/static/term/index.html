@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="dark">
+  <title>blacksite://term</title>
+  <link rel="stylesheet" href="/static/term/term.css">
+  <script src="/static/term/fx.js" defer></script>
+  <script src="/static/term/term.js" defer></script>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+
+<!-- Access: a bare tty. Enter advances; nothing here explains itself. -->
+<main id="auth" class="auth" hidden>
+  <section class="gate" aria-labelledby="gate-word">
+    <div class="word" id="gate-word" aria-label="blacksite">blacksite</div>
+    <p class="hello" id="hello">hello, samurai.</p>
+    <div id="auth-step" class="tty"></div>
+    <div id="auth-error" class="nope" role="alert" hidden></div>
+  </section>
+</main>
+
+<!-- Console -->
+<div id="console" class="console" hidden>
+  <header class="status" aria-label="Status">
+    <span class="sess">[blacksite]</span>
+    <nav class="wins" aria-label="Panes">
+      <button type="button" data-win="cases">0:cases</button>
+      <button type="button" data-win="ops">1:ops</button>
+      <button type="button" data-win="ev">2:evidence</button>
+    </nav>
+    <span class="fill"></span>
+    <span id="st-model" class="seg"></span>
+    <span class="seg">cloud:<b>0</b></span>
+    <span id="st-user" class="seg"></span>
+    <span class="seg clock" data-clock></span>
+  </header>
+
+  <aside class="pane cases" id="pane-cases" aria-label="Cases">
+    <div class="pane-head"><span>CASES</span><span id="case-count" class="dim"></span></div>
+    <ol id="case-list" class="case-list"></ol>
+    <div class="pane-foot dim"><kbd>j</kbd>/<kbd>k</kbd> move · <kbd>⏎</kbd> load · <kbd>n</kbd> new</div>
+  </aside>
+
+  <main class="pane ops" id="pane-ops" aria-label="Operations log">
+    <div class="pane-head"><span id="ops-title">OPS</span><span id="ops-state" class="dim"></span></div>
+    <div id="log" class="log" role="log" aria-live="polite"></div>
+  </main>
+
+  <aside class="pane ev" id="pane-ev" aria-label="Evidence">
+    <div class="pane-head"><span>EVIDENCE</span><span id="ev-state" class="dim"></span></div>
+    <div id="ev" class="ev-body"></div>
+  </aside>
+
+  <form class="prompt" id="prompt" autocomplete="off">
+    <label for="cmd" class="ps1"><span class="ask" id="ps-ask"></span><span class="u" id="ps-user">operator</span><span class="at">@</span><span class="h">blacksite</span><span class="c">:</span><span class="p" id="ps-path">~/cases</span><span class="d">$</span></label>
+    <input id="cmd" name="cmd" spellcheck="false" autocapitalize="none" aria-describedby="hint">
+    <span id="hint" class="hint">tab completes · ↑↓ history · help</span>
+  </form>
+  <div id="complete" class="complete" hidden></div>
+</div>
+
+<input type="file" id="upload" multiple hidden>
+<div id="drop" class="drop" aria-hidden="true" hidden><span>drop files to open a case</span></div>
+</body>
+</html>

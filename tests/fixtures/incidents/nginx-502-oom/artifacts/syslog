@@ -1,0 +1,38 @@
+Sep 27 01:00:00 web01 CRON[25305]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 01:10:00 web01 CRON[22471]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 01:20:00 web01 CRON[26468]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 01:30:00 web01 CRON[20791]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 01:40:00 web01 CRON[21186]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 01:49:58 web01 sshd[18811]: Accepted publickey for deploy from 10.0.1.20 port 51234 ssh2: ED25519 SHA256:3fK9
+Sep 27 01:50:00 web01 CRON[28779]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 01:50:00 web01 systemd[1]: Stopping app.service - Order API...
+Sep 27 01:50:01 web01 systemd[1]: Stopped app.service - Order API.
+Sep 27 01:50:01 web01 systemd[1]: Started app.service - Order API.
+Sep 27 02:00:00 web01 CRON[21542]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 02:10:00 web01 CRON[25991]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 02:14:05 web01 systemd[1]: app.service: A process of this unit has been killed by the OOM killer.
+Sep 27 02:14:05 web01 systemd[1]: app.service: Main process exited, code=killed, status=9/KILL
+Sep 27 02:14:05 web01 systemd[1]: app.service: Failed with result 'oom-kill'.
+Sep 27 02:14:10 web01 systemd[1]: app.service: Scheduled restart job, restart counter is at 1.
+Sep 27 02:14:10 web01 systemd[1]: Stopped app.service - Order API.
+Sep 27 02:14:10 web01 systemd[1]: Started app.service - Order API.
+Sep 27 02:19:40 web01 systemd[1]: app.service: A process of this unit has been killed by the OOM killer.
+Sep 27 02:19:40 web01 systemd[1]: app.service: Main process exited, code=killed, status=9/KILL
+Sep 27 02:19:40 web01 systemd[1]: app.service: Failed with result 'oom-kill'.
+Sep 27 02:19:45 web01 systemd[1]: app.service: Scheduled restart job, restart counter is at 2.
+Sep 27 02:19:45 web01 systemd[1]: Stopped app.service - Order API.
+Sep 27 02:19:45 web01 systemd[1]: Started app.service - Order API.
+Sep 27 02:20:00 web01 CRON[29548]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 02:25:12 web01 systemd[1]: app.service: A process of this unit has been killed by the OOM killer.
+Sep 27 02:25:12 web01 systemd[1]: app.service: Main process exited, code=killed, status=9/KILL
+Sep 27 02:25:12 web01 systemd[1]: app.service: Failed with result 'oom-kill'.
+Sep 27 02:25:17 web01 systemd[1]: app.service: Scheduled restart job, restart counter is at 3.
+Sep 27 02:25:17 web01 systemd[1]: Stopped app.service - Order API.
+Sep 27 02:25:17 web01 systemd[1]: Started app.service - Order API.
+Sep 27 02:30:00 web01 CRON[20950]: (root) CMD (/usr/local/bin/backup-check >/dev/null 2>&1)
+Sep 27 02:30:51 web01 systemd[1]: app.service: A process of this unit has been killed by the OOM killer.
+Sep 27 02:30:51 web01 systemd[1]: app.service: Main process exited, code=killed, status=9/KILL
+Sep 27 02:30:51 web01 systemd[1]: app.service: Failed with result 'oom-kill'.
+Sep 27 02:30:56 web01 systemd[1]: app.service: Scheduled restart job, restart counter is at 4.
+Sep 27 02:30:56 web01 systemd[1]: Stopped app.service - Order API.
+Sep 27 02:30:56 web01 systemd[1]: Started app.service - Order API.

@@ -1,0 +1,3 @@
+# The Compose overlay mounts this separately from your existing Holmes config.
+# Add your toolsets here, or set VLLM_HOLMES_CONFIG_FILE to a config with model: vllm.
+model: vllm

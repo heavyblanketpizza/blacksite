@@ -1,0 +1,4 @@
+# Blacksite demo model: Qwen3.8-27B (Q4_K_M) with a 64k-token context window.
+# Create with: ollama create blacksite-qwen3.8 -f demo/Modelfile   (no download)
+FROM qwen3.8:27b-q4_K_M
+PARAMETER num_ctx 65536

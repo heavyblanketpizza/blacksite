@@ -1,0 +1,26 @@
+2026-09-27 03:20:01.114 UTC [1874] LOG:  checkpoint starting: time
+2026-09-27 03:20:44.902 UTC [1874] LOG:  checkpoint complete: wrote 2291 buffers (14.0%); 0 WAL file(s) added, 1 removed, 0 recycled
+2026-09-27 03:40:11.345 UTC [2201] orders@orders ERROR:  could not extend file "base/16384/24576.0": No space left on device
+2026-09-27 03:40:11.345 UTC [2201] orders@orders HINT:  Check free disk space.
+2026-09-27 03:40:11.345 UTC [2201] orders@orders STATEMENT:  INSERT INTO orders (id, customer_id, total_cents, status) VALUES ($1, $2, $3, $4)
+2026-09-27 03:40:38.345 UTC [2202] orders@orders ERROR:  could not extend file "base/16384/24576.1": No space left on device
+2026-09-27 03:40:38.345 UTC [2202] orders@orders HINT:  Check free disk space.
+2026-09-27 03:40:38.345 UTC [2202] orders@orders STATEMENT:  INSERT INTO orders (id, customer_id, total_cents, status) VALUES ($1, $2, $3, $4)
+2026-09-27 03:41:02.345 UTC [2203] orders@orders ERROR:  could not extend file "base/16384/24576.2": No space left on device
+2026-09-27 03:41:02.345 UTC [2203] orders@orders HINT:  Check free disk space.
+2026-09-27 03:41:02.345 UTC [2203] orders@orders STATEMENT:  INSERT INTO orders (id, customer_id, total_cents, status) VALUES ($1, $2, $3, $4)
+2026-09-27 03:41:12.345 UTC [2204] orders@orders ERROR:  could not extend file "base/16384/24576.0": No space left on device
+2026-09-27 03:41:12.345 UTC [2204] orders@orders HINT:  Check free disk space.
+2026-09-27 03:41:12.345 UTC [2204] orders@orders STATEMENT:  INSERT INTO orders (id, customer_id, total_cents, status) VALUES ($1, $2, $3, $4)
+2026-09-27 03:41:40.345 UTC [2205] orders@orders ERROR:  could not extend file "base/16384/24576.1": No space left on device
+2026-09-27 03:41:40.345 UTC [2205] orders@orders HINT:  Check free disk space.
+2026-09-27 03:41:40.345 UTC [2205] orders@orders STATEMENT:  INSERT INTO orders (id, customer_id, total_cents, status) VALUES ($1, $2, $3, $4)
+2026-09-27 03:42:05.345 UTC [2206] orders@orders ERROR:  could not extend file "base/16384/24576.2": No space left on device
+2026-09-27 03:42:05.345 UTC [2206] orders@orders HINT:  Check free disk space.
+2026-09-27 03:42:05.345 UTC [2206] orders@orders STATEMENT:  INSERT INTO orders (id, customer_id, total_cents, status) VALUES ($1, $2, $3, $4)
+2026-09-27 03:42:31.017 UTC [2211] PANIC:  could not write to file "pg_wal/xlogtemp.2211": No space left on device
+2026-09-27 03:42:31.120 UTC [1860] LOG:  WAL writer process (PID 2211) was terminated by signal 6: Aborted
+2026-09-27 03:42:31.121 UTC [1860] LOG:  terminating any other active server processes
+2026-09-27 03:42:31.480 UTC [1860] LOG:  all server processes terminated; reinitializing
+2026-09-27 03:42:32.011 UTC [2230] FATAL:  could not write lock file "postmaster.pid": No space left on device
+2026-09-27 03:42:32.012 UTC [1860] LOG:  database system is shut down

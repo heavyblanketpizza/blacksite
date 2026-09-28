@@ -1,0 +1,35 @@
+# Laptop demo on llama.cpp's llama-server. Start the server with:
+#   uv run blacksite --config demo/llamacpp.toml serve model --from-ollama qwen3.8:27b-q4_K_M
+# (or --model path/to/Qwen3.8-27B-Q4_K_M.gguf). Paths resolve against this directory.
+
+[model]
+provider = "llamacpp"
+base_url = "http://127.0.0.1:8080/v1"
+name = "blacksite-qwen3.8"
+api_key_env = "LLAMA_API_KEY"
+timeout = 900.0
+context = 65536
+
+[agent]
+thinking = "low"
+max_tool_calls = 12
+
+[rag]
+docs_dir = "knowledge"
+index_path = "../var/demo/knowledge.sqlite"
+
+[learning]
+store_path = "../var/demo/learning.sqlite"
+
+# Accounts and the audit ledger for the web app; see README "Access and audit".
+[auth]
+totp_enabled = false
+store_path = "../var/demo/access.sqlite"
+keys_dir = "../var/demo/keys"
+
+[audit]
+store_path = "../var/demo/audit.sqlite"
+
+[usb]
+enabled = true
+sandbox_dir = "../var/demo/sandbox"

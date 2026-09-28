@@ -1,0 +1,6 @@
+{
+  "id": "postgres-disk-full",
+  "title": "Checkout fails: orders database rejects writes",
+  "description": "Checkout returns HTTP 500 since about 03:40 UTC and the orders database on db01 now refuses connections. Yesterday afternoon we turned on debug logging for the payments worker, which runs on the same host, to chase a refund bug.",
+  "year": 2026
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="no-referrer">
+  <title>Sign in · Blacksite</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%231a2028'/><path d='M4 11h8M4 8h5M4 5h8' stroke='%23fbeed6' stroke-width='1.6'/></svg>">
+  <meta name="blacksite-i18n" content="/static/i18n.json">
+  <script src="/static/boot.js"></script>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="login-body">
+<main class="login-shell">
+  <section class="login-card" aria-labelledby="login-title">
+    <header class="login-head">
+      <div class="login-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div>
+        <div class="login-brand">Blacksite</div>
+        <div class="login-tagline" data-i18n="brand.tagline">Offline incident analyst</div>
+      </div>
+      <span class="spacer"></span>
+      <div class="seg compact" id="lang-toggle" role="group" data-i18n-aria="top.language">
+        <button type="button" data-lang="en" lang="en">EN</button>
+        <button type="button" data-lang="ko" lang="ko">한국어</button>
+      </div>
+    </header>
+
+    <h1 id="login-title" class="login-title"></h1>
+    <p id="login-lead" class="login-lead"></p>
+    <div id="login-error" class="login-error" role="alert" hidden></div>
+    <div id="login-step"></div>
+
+    <footer class="login-foot">
+      <span class="pill"><span class="dot ok"></span><span data-i18n="login.local">This computer only</span></span>
+      <span class="faint" data-i18n="login.audit">Every sign-in and action is recorded in a tamper-evident log.</span>
+    </footer>
+  </section>
+</main>
+<script src="/static/login.js"></script>
+</body>
+</html>

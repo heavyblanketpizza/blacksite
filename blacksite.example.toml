@@ -1,0 +1,89 @@
+# Copy to blacksite.toml (ignored by Git) or pass --config. Every value shown is the
+# default. Relative paths resolve against this file's directory.
+#
+# Override any setting without editing the file:
+#   blacksite --set rag.enabled=true ...
+#   BLACKSITE__RAG__ENABLED=true blacksite ...
+
+[model]
+# OpenAI-compatible endpoint used by the agent and `blacksite learn reflect`.
+provider = "vllm"          # vllm (GPU server), llamacpp (llama-server), or ollama
+base_url = "http://localhost:8000/v1"
+name = "holmes-local"
+api_key_env = "VLLM_API_KEY"
+timeout = 600.0
+context = 65536            # tokens; used by `blacksite serve model` for llama.cpp and vLLM
+
+[agent]
+thinking = "low"           # none, low, or medium reasoning effort per model call
+max_tool_calls = 14        # per turn, before the agent must answer or ask
+language = "en"            # language of guides and questions: en or ko (Korean)
+
+[evidence]
+max_output_chars = 12000   # per tool result; lower it for small context windows
+max_line_chars = 2000      # longer lines are cut at ingest
+redact = true              # mask passwords, tokens, and keys before indexing
+
+# Retrieval over rag.docs_dir. Off until evaluation shows it helps.
+[rag]
+enabled = false
+mode = "tool"              # tool: search_docs/read_doc tools; inject: top hits added to context
+retriever = "bm25"         # bm25 (SQLite FTS5) or hybrid (+ dense embeddings, needs numpy)
+rerank = false             # reorder candidates with a cross-encoder
+top_k = 5
+candidates = 40            # pool size before fusion and reranking
+docs_dir = "knowledge"
+index_path = "var/knowledge.sqlite"
+embedding_url = "http://localhost:8001/v1"
+embedding_model = "Qwen/Qwen3-Embedding-0.6B"
+rerank_url = "http://localhost:8002/v1"
+rerank_model = "Qwen/Qwen3-Reranker-0.6B"
+inject_chars = 6000        # budget for inject mode
+
+[learning]
+store_path = "var/learning.sqlite"
+require_approval = true    # new cases and bullets wait for `blacksite learn approve`
+max_playbook_updates = 6   # per reflected incident
+
+# Past incidents with confirmed outcomes. Off until evaluation shows it helps.
+[learning.cases]
+enabled = false
+mode = "tool"              # tool: recall_cases tool; inject: similar cases added to context
+top_k = 3
+
+# Approved lessons added to the agent's instructions. Off until evaluation shows it helps.
+[learning.playbook]
+enabled = false
+max_bullets = 40
+
+# Accounts for the web app. It serves only this computer (127.0.0.1) and needs a login:
+# create the first admin with `blacksite users add NAME --admin`. Two-step sign-in
+# is paused for everyone; set totp_enabled=true to require it for admins again.
+[auth]
+store_path = "var/access.sqlite"
+keys_dir = "var/keys"          # master secret and signing key; keep this folder private
+totp_enabled = false          # preserves existing authenticators; password sign-in still required
+session_hours = 12.0           # a session ends after this long, active or not
+idle_minutes = 30.0            # or after this long without activity
+lockout_attempts = 5           # wrong passwords before the account locks
+lockout_minutes = 15.0         # first lock; each later lock lasts twice as long (up to a day)
+confirm_minutes = 5.0          # admin actions ask for the password again after this long
+
+# The tamper-evident audit ledger: who did what, with no evidence content or secrets.
+[audit]
+store_path = "var/audit.sqlite"
+checkpoint_every = 100         # sign the ledger head every this many records (and daily)
+verify_minutes = 60.0          # re-check new records in the background this often
+
+# USB mode: a drive with a "blacksite" folder is copied into a sandbox and investigated;
+# the solution is saved back to the drive and the sandbox is wiped.
+[usb]
+enabled = false
+marker = "blacksite"
+roots = []                 # parents of mounted drives; empty = this OS's usual places
+sandbox_dir = "var/sandbox"
+poll_seconds = 2.0
+max_bytes = 2000000000     # stop copying past this many bytes
+max_files = 20000
+auto_investigate = true
+wipe_after_export = true

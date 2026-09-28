@@ -1,0 +1,9 @@
+Sep 27 00:00:01 db01 logrotate[88112]: ALERT exited abnormally with [1]
+Sep 27 00:00:01 db01 logrotate[88112]: error: skipping "/var/log/payments-worker/worker.log" because parent directory has insecure permissions (It's world writable or writable by group which is not "root") Set "su" directive in config file to tell logrotate which user/group should be used for rotation.
+Sep 27 03:12:40 db01 systemd-journald[412]: Under memory pressure, flushing caches.
+Sep 27 03:39:58 db01 systemd-journald[412]: Failed to write entry (22 items, 698 bytes), ignoring: No space left on device
+Sep 27 03:42:32 db01 systemd[1]: postgresql@16-main.service: Main process exited, code=exited, status=1/FAILURE
+Sep 27 03:42:32 db01 systemd[1]: postgresql@16-main.service: Failed with result 'exit-code'.
+Sep 27 03:42:37 db01 systemd[1]: postgresql@16-main.service: Scheduled restart job, restart counter is at 1.
+Sep 27 03:42:38 db01 postgresql@16-main[2244]: Error: /usr/lib/postgresql/16/bin/pg_ctl /usr/lib/postgresql/16/bin/pg_ctl start -D /var/lib/postgresql/16/main -l /var/log/postgresql/postgresql-16-main.log -s -o -c config_file="/etc/postgresql/16/main/postgresql.conf" exited with status 1:
+Sep 27 03:42:38 db01 systemd[1]: postgresql@16-main.service: Failed with result 'exit-code'.
