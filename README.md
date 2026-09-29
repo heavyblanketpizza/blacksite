@@ -4,8 +4,6 @@
 
 Offline incident analysis on local LLMs. Prepping for the post-AGI apocalypse from a blacksite homestead I don't own. Tin foil hat sold separately.
 
-![Off-grid coding workstation](assets/blacksite-homestead.png)
-
 Give Blacksite a server's logs, configs, and command output. It investigates with read-only tools and writes a repair guide with cited log lines, expected results, and rollback steps. It cannot run commands on your servers.
 
 Runs on **Ollama, llama.cpp, or vLLM**, through a local web app or the CLI.
@@ -15,6 +13,8 @@ Runs on **Ollama, llama.cpp, or vLLM**, through a local web app or the CLI.
 https://github.com/user-attachments/assets/07dc0837-7fa2-468e-a823-b9375bc70171
 
 A 59-second walkthrough of sign-in, evidence search, a live investigation, the cited guide, signature check, download, sharing, and audit verification. Qwen 3.8 27B runs on llama.cpp from local GGUF weights with a 64k context, on synthetic logs and accounts. The video plays at 2×, and the 7-minute investigation at 15.5×, as the on-screen labels show.
+
+![Off-grid coding workstation](assets/blacksite-homestead.png)
 
 ## Quick start
 
