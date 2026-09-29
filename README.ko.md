@@ -14,8 +14,6 @@ https://github.com/user-attachments/assets/07dc0837-7fa2-468e-a823-b9375bc70171
 
 59초 데모: 로그인, 근거 검색, 실시간 조사, 인용이 달린 가이드, 서명 검증, 다운로드, 공유, 감사 기록 검증. Qwen 3.8 27B를 llama.cpp에서 로컬 GGUF 가중치와 64k 컨텍스트로 실행하며, 로그와 계정은 합성 자료입니다. 영상은 2배속, 7분간의 조사 구간은 15.5배속이며 화면에 배속을 표시합니다.
 
-![픽셀 아트로 그린 오프라인 작업 공간](assets/blacksite-homestead.png)
-
 ## 빠른 시작
 
 Python 3.11 이상, [uv](https://docs.astral.sh/uv/), 실행 중인 [Ollama](https://ollama.com) 서버가 필요합니다. 프로젝트 폴더에서 실행하세요.
