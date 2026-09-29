@@ -144,7 +144,7 @@ async function advance(stage) {
 
 function stagePassword() {
   S.stage = "password";
-  hello("hello, samurai.");
+  hello("wake up, samurai.");
   show(tty([["user", { name: "username", autocomplete: "username" }], ["password", { name: "password", type: "password", autocomplete: "current-password" }]],
     async ([who, key]) => {
       const data = await call("/auth/login", { json: { username: who, password: key } });
