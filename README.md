@@ -1,7 +1,5 @@
 # Blacksite
 
-[English](README.md) | [한국어](README.ko.md)
-
 Offline incident analysis on local models. Prepping for the post-AGI apocalypse from a blacksite homestead I don't own. Tin foil hat sold separately.
 
 Runs on **Ollama, llama.cpp, or vLLM**, through a local web app or the CLI.
