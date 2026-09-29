@@ -2,9 +2,7 @@
 
 [English](README.md) | [한국어](README.ko.md)
 
-Offline incident analysis on local LLMs. Prepping for the post-AGI apocalypse from a blacksite homestead I don't own. Tin foil hat sold separately.
-
-Give Blacksite a server's logs, configs, and command output. It investigates with read-only tools and writes a repair guide with cited log lines, expected results, and rollback steps. It cannot run commands on your servers.
+Offline incident analysis on local models. Prepping for the post-AGI apocalypse from a blacksite homestead I don't own. Tin foil hat sold separately.
 
 Runs on **Ollama, llama.cpp, or vLLM**, through a local web app or the CLI.
 
