@@ -12,6 +12,10 @@ rebuild. Windows cannot replace a file that another process has open.
 
 The model never reads files directly. Every query goes through this index, which holds
 redacted text only.
+
+A record that spans several lines (a stack trace after an error line) is folded: its first
+line carries the template, and its later lines carry the record's time and level but no
+template, so patterns and the timeline count records while search still finds every line.
 """
 
 from __future__ import annotations
@@ -24,7 +28,7 @@ import os
 import tempfile
 import threading
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -33,21 +37,27 @@ import duckdb
 
 from .._fs import remove_quietly, replace
 from ..config import EvidenceSettings
-from .parse import SEVERITIES, SEVERITY_RANK, LineParser, parse_time_filter
+from .parse import SEVERITIES, SEVERITY_RANK, TRACEBACK_PREAMBLE, LineParser, RecordFolder, parse_time_filter
 from .patterns import TemplateMiner
 from .safety import RULES_VERSION, Redactor, looks_like_instructions
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 ARTIFACTS_DIR = "artifacts"
 INCIDENT_FILE = "incident.json"
 DB_PREFIX = "evidence."
 DB_SUFFIX = ".duckdb"
 _BINARY_SNIFF = 8192
+# Separates a folded record's first line from its exception line in a template.
+DETAIL_SEPARATOR = "⏎"
 
+# ``rec`` is the ord of the line that starts the record; ``detail`` is a folded record's
+# first unindented continuation line, usually the exception.
 _LINE_COLUMNS = {
     "ord": "BIGINT", "file": "VARCHAR", "line_no": "BIGINT", "ts": "TIMESTAMP", "sev": "TINYINT",
     "guessed": "BOOLEAN", "template_id": "INTEGER", "flagged": "BOOLEAN", "text": "VARCHAR",
+    "rec": "BIGINT", "detail": "VARCHAR",
 }
+_LINE_SELECT = "file, line_no, ts, sev, guessed, flagged, coalesce(text, ''), rec <> ord, detail"
 
 
 class EvidenceError(ValueError):
@@ -120,6 +130,8 @@ class LogLine:
     guessed: bool
     flagged: bool
     text: str
+    cont: bool  # continues the record above; the time and level are that record's
+    detail: str | None
 
 
 @dataclass(frozen=True)
@@ -132,6 +144,7 @@ class Event:
     file: str
     line_no: int
     text: str
+    detail: str | None
 
 
 class Evidence:
@@ -247,11 +260,7 @@ class Evidence:
         params = [*params, pattern]
         try:
             total = self._query(f"SELECT count(*) FROM lines WHERE {where}", params)[0][0]
-            rows = self._query(
-                "SELECT file, line_no, ts, sev, guessed, flagged, coalesce(text, '') "
-                f"FROM lines WHERE {where} ORDER BY ord LIMIT ?",
-                [*params, limit],
-            )
+            rows = self._query(f"SELECT {_LINE_SELECT} FROM lines WHERE {where} ORDER BY ord LIMIT ?", [*params, limit])
         except duckdb.InvalidInputException as exc:
             raise EvidenceError(
                 f"Invalid RE2 regular expression ({_first_line(exc)}). "
@@ -262,8 +271,7 @@ class Evidence:
     def read_lines(self, file: str, start: int, end: int) -> list[LogLine]:
         self._require_file(file)
         rows = self._query(
-            "SELECT file, line_no, ts, sev, guessed, flagged, coalesce(text, '') FROM lines "
-            "WHERE file = ? AND line_no BETWEEN ? AND ? ORDER BY line_no",
+            f"SELECT {_LINE_SELECT} FROM lines WHERE file = ? AND line_no BETWEEN ? AND ? ORDER BY line_no",
             [file, start, end],
         )
         return [_log_line(row) for row in rows]
@@ -279,19 +287,19 @@ class Evidence:
         runs = (
             "WITH base AS (SELECT *, CASE WHEN lag(ts) OVER w IS NULL "
             "OR ts - lag(ts) OVER w > to_seconds(CAST(? AS DOUBLE)) THEN 1 ELSE 0 END AS starts "
-            f"FROM lines WHERE ts IS NOT NULL AND {where} "
+            f"FROM lines WHERE ts IS NOT NULL AND template_id IS NOT NULL AND {where} "
             "WINDOW w AS (PARTITION BY template_id ORDER BY ts, ord)), "
             "runs AS (SELECT *, sum(starts) OVER (PARTITION BY template_id ORDER BY ts, ord "
             "ROWS UNBOUNDED PRECEDING) AS run FROM base) "
             "SELECT min(ts) AS first_ts, max(ts), count(*), max(sev), "
             "coalesce(bool_and(guessed) FILTER (WHERE sev IS NOT NULL), false), "
-            "arg_min(file, ord), arg_min(line_no, ord), arg_min(coalesce(text, ''), ord), min(ord) AS first_ord "
-            "FROM runs GROUP BY template_id, run"
+            "arg_min(file, ord), arg_min(line_no, ord), arg_min(coalesce(text, ''), ord), arg_min(detail, ord), "
+            "min(ord) AS first_ord FROM runs GROUP BY template_id, run"
         )
         run_params = [gap_seconds, *params]
         total = self._query(f"SELECT count(*) FROM ({runs})", run_params)[0][0]
         rows = self._query(f"{runs} ORDER BY first_ts, first_ord LIMIT ?", [*run_params, limit])
-        events = [Event(row[0], row[1], row[2], _level(row[3]), row[4], row[5], row[6], row[7]) for row in rows]
+        events = [Event(row[0], row[1], row[2], _level(row[3]), row[4], row[5], row[6], row[7], row[8]) for row in rows]
         return events, total
 
     def histogram(self, level: str = "warning",
@@ -307,7 +315,8 @@ class Evidence:
         size = max(10, int(-(-span // buckets) + 9) // 10 * 10)
         rows = self._query(
             "SELECT CAST(floor((epoch(ts) - epoch(CAST(? AS TIMESTAMP))) / ?) AS INTEGER) AS bucket, file, count(*) "
-            "FROM lines WHERE ts IS NOT NULL AND sev >= ? GROUP BY bucket, file ORDER BY bucket, file",
+            "FROM lines WHERE ts IS NOT NULL AND template_id IS NOT NULL AND sev >= ? "
+            "GROUP BY bucket, file ORDER BY bucket, file",
             [first, size, SEVERITY_RANK[level]],
         )
         return first, size, [(row[0], row[1], row[2]) for row in rows]
@@ -378,6 +387,26 @@ class Evidence:
         return digest.hexdigest()
 
 
+@dataclass
+class _Record:
+    """One log record as its lines are read: the first line and any continuation lines."""
+
+    line_no: int
+    text: str
+    ts: datetime | None
+    level: str | None
+    guessed: bool
+    message: str
+    flagged: bool
+    continuations: list[tuple[int, str, bool]] = field(default_factory=list)
+    detail: str | None = None
+
+    def add(self, line_no: int, text: str, flagged: bool) -> None:
+        self.continuations.append((line_no, text, flagged))
+        if self.detail is None and not text[0].isspace() and not TRACEBACK_PREAMBLE.match(text):
+            self.detail = text
+
+
 class _Ingest:
     def __init__(self, evidence: Evidence, target: Path) -> None:
         self.evidence = evidence
@@ -444,9 +473,11 @@ class _Ingest:
         parser = LineParser(year=self.evidence.incident.year or mtime.year,
                             latest=None if self.evidence.incident.year else mtime)
         redactor = Redactor()
+        folder = RecordFolder()
         count = errors = redactions = flagged = 0
         first = last = None
         limit = self.settings.max_line_chars
+        record: _Record | None = None
         with opener(path, "rb") as handle:
             for count, raw in enumerate(handle, 1):
                 text = raw.decode("utf-8", errors="replace").rstrip("\r\n").replace("\r", " ").replace("\0", "")
@@ -458,18 +489,36 @@ class _Ingest:
                 suspicious = looks_like_instructions(text)
                 flagged += suspicious
                 parsed = parser.parse(text)
-                sev = SEVERITY_RANK[parsed.level] if parsed.level else None
-                errors += sev is not None and sev >= SEVERITY_RANK["error"]
+                if folder.feed(text, parsed.ts is not None) and record is not None:
+                    record.add(count, text, suspicious)
+                    continue
+                errors += self._write(writer, relative, record)
+                record = _Record(count, text, parsed.ts, parsed.level, parsed.level_guessed, parsed.message, suspicious)
                 if parsed.ts:
                     first = parsed.ts if first is None or parsed.ts < first else first
                     last = parsed.ts if last is None or parsed.ts > last else last
-                writer.writerow([
-                    self.ord, relative, count, parsed.ts.isoformat(sep=" ") if parsed.ts else "",
-                    "" if sev is None else sev, parsed.level_guessed,
-                    self.miner.add(parsed.message, parsed.level or ""), suspicious, text,
-                ])
-                self.ord += 1
+            errors += self._write(writer, relative, record)
         return (relative, "gzip" if compressed else "text", size, count, first, last, errors, redactions, flagged)
+
+    def _write(self, writer: Any, relative: str, record: _Record | None) -> int:
+        """Write a record's rows: the first line with its template, then any continuation lines.
+
+        Returns 1 when the record is an error or worse, so files count records, not lines.
+        """
+        if record is None:
+            return 0
+        message = record.message if record.detail is None else f"{record.message} {DETAIL_SEPARATOR} {record.detail}"
+        template = self.miner.add(message, record.level or "")
+        ts = record.ts.isoformat(sep=" ") if record.ts else ""
+        rank = SEVERITY_RANK[record.level] if record.level else None
+        sev = "" if rank is None else rank
+        head = self.ord
+        writer.writerow([head, relative, record.line_no, ts, sev, record.guessed, template, record.flagged,
+                         record.text, head, record.detail or ""])
+        for offset, (line_no, text, flagged) in enumerate(record.continuations, 1):
+            writer.writerow([head + offset, relative, line_no, ts, sev, record.guessed, "", flagged, text, head, ""])
+        self.ord = head + len(record.continuations) + 1
+        return int(rank is not None and rank >= SEVERITY_RANK["error"])
 
 
 def artifact_files(directory: Path) -> Iterator[tuple[Path, str]]:
@@ -496,7 +545,7 @@ def _level(sev: int | None) -> str | None:
 
 
 def _log_line(row: tuple[Any, ...]) -> LogLine:
-    return LogLine(row[0], row[1], row[2], _level(row[3]), row[4], row[5], row[6])
+    return LogLine(row[0], row[1], row[2], _level(row[3]), row[4], row[5], row[6], row[7], row[8])
 
 
 def _first_line(exc: Exception) -> str:

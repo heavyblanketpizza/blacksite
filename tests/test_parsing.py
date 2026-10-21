@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from blacksite.evidence.parse import LineParser, parse_time_filter
+from blacksite.evidence.parse import LineParser, RecordFolder, parse_time_filter
 from blacksite.evidence.patterns import TemplateMiner, mask
 from blacksite.evidence.safety import Redactor, defang, looks_like_instructions
 
@@ -22,6 +22,17 @@ from blacksite.evidence.safety import Redactor, defang, looks_like_instructions
         ('{"ts": "2026-09-27T02:14:05Z", "level": "warn", "msg": "heap high"}',
          datetime(2026, 9, 27, 2, 14, 5), "warning", False),
         ('{"time": 1790475245000, "level": 50, "msg": "boom"}', datetime(2026, 9, 27, 2, 14, 5), "error", False),
+        ("[Tue Oct 21 02:14:05.123456 2026] [proxy:error] [pid 1234:tid 5678] AH00957: HTTP: attempt to connect "
+         "to 127.0.0.1:8080 failed", datetime(2026, 10, 21, 2, 14, 5, 123456), "error", False),
+        ("[Tue Oct 21 02:14:05 2026] Out of memory: Killed process 42 (app)",
+         datetime(2026, 10, 21, 2, 14, 5), "error", True),
+        ("Oct 21 02:14:06.123456 web1 systemd[1]: app.service: Main process exited, code=killed, status=9/KILL",
+         datetime(2026, 10, 21, 2, 14, 6, 123456), "error", True),
+        ("Tue 2026-10-21 02:14:06 UTC web1 app[12]: ready", datetime(2026, 10, 21, 2, 14, 6), None, False),
+        ("I1021 02:14:05.123456       1 main.go:42] started controller",
+         datetime(2026, 10, 21, 2, 14, 5, 123456), "info", False),
+        ('{"__REALTIME_TIMESTAMP": "1792548845123456", "PRIORITY": "3", "MESSAGE": "db connect failed"}',
+         datetime(2026, 10, 21, 2, 14, 5, 123456), "error", False),
         ("level=info msg=ready", None, "info", False),
         ("no timestamp, just words", None, None, False),
     ],
@@ -36,9 +47,32 @@ def test_syslog_year_rolls_back_across_new_year() -> None:
     assert parser.parse("Dec 31 23:59:59 host app: tick").ts == datetime(2026, 12, 31, 23, 59, 59)
 
 
+def test_folder_attaches_stack_traces_and_tracebacks_to_their_record() -> None:
+    lines = [
+        ("2026-10-21 02:14:01,123 ERROR OrderController - Failed to place order 9931", True),
+        ('java.lang.NullPointerException: Cannot invoke "Cart.total()" because "cart" is null', False),
+        ("\tat com.example.OrderController.place(OrderController.java:88)", False),
+        ("Caused by: java.io.IOException: boom", False),
+        ("... 12 more", False),
+        ("2026-10-21 02:14:02,004 INFO ready", True),
+        ("", False),
+        ("Traceback (most recent call last):", False),
+        ('  File "/srv/app/worker.py", line 42, in run', False),
+        ("    payment.charge(order)", False),
+        ("app.errors.GatewayTimeout: upstream 504", False),
+        ("plain words after the traceback", False),
+        ("\tat com.example.Other.run(Other.java:1)", False),
+    ]
+    folder = RecordFolder()
+    continued = [folder.feed(text, timed) for text, timed in lines]
+    assert continued == [False, True, True, True, True, False, False, False, True, True, True, False, True]
+
+
 def test_timestamp_is_removed_from_the_template_message() -> None:
     parsed = LineParser(year=2026).parse("Sep 27 02:14:05 web01 kernel: oom")
     assert parsed.message == "kernel: oom"
+    parsed = LineParser(year=2026).parse("[Tue Oct 21 02:14:05 2026] [core:notice] [pid 1] AH00094: Command line")
+    assert parsed.message == "[core:notice] [pid 1] AH00094: Command line" and parsed.level == "info"
     parsed = LineParser(year=2026).parse('1.2.3.4 - - [27/Sep/2026:02:14:05 +0000] "GET / HTTP/1.1" 200 1')
     assert "[" not in parsed.message and "2026" not in parsed.message
 

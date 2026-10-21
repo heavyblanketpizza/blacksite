@@ -131,6 +131,7 @@ Keep `var/keys/` private and backed up. It holds the key that proves the ledger 
 
 ## Data and checks
 
+- Indexing reads syslog and journalctl (including its JSON export), ISO 8601, nginx, Apache, Common Log Format, JSON lines (pino, bunyan, Docker), klog, and `dmesg -T` timestamps. A record that spans several lines, such as a stack trace, is folded into the line that started it, so patterns and the timeline count records while search still finds every line.
 - Indexing redacts recognized secrets and flags suspicious instructions in logs.
 - Guide checks validate cited files and lines and flag risky commands. Review the guide and its warnings before acting.
 - Inference requests go to the model endpoints you configure, including embedding and reranking servers when enabled.

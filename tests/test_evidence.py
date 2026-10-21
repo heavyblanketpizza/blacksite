@@ -1,6 +1,7 @@
 import contextlib
 import gzip
 import os
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -94,6 +95,51 @@ def test_symlinks_hidden_and_binary_files_are_not_read(incident_dir: Path, tmp_p
     assert "link.log" not in files and ".hidden.log" not in files
     assert files["core.bin"].kind == "binary" and files["core.bin"].lines == 0
     assert files["old.log.gz"].kind == "gzip" and rows[0].level == "error"
+
+
+STACK_TRACES = """\
+2026-09-27 02:14:01,123 ERROR [http-nio-8080-exec-3] c.e.OrderController - Failed to place order 9931
+java.lang.NullPointerException: Cannot invoke "com.example.Cart.total()" because "cart" is null
+\tat com.example.OrderController.place(OrderController.java:88)
+\tat java.base/java.lang.Thread.run(Thread.java:1583)
+2026-09-27 02:14:02,004 ERROR [http-nio-8080-exec-7] c.e.OrderController - Failed to place order 9932
+java.lang.NullPointerException: Cannot invoke "com.example.Cart.total()" because "cart" is null
+\tat com.example.OrderController.place(OrderController.java:88)
+\tat java.base/java.lang.Thread.run(Thread.java:1583)
+2026-09-27 02:14:03,500 ERROR worker: payment failed
+Traceback (most recent call last):
+  File "/srv/app/worker.py", line 42, in run
+    payment.charge(order)
+app.errors.GatewayTimeout: upstream 504
+2026-09-27 02:14:04,000 INFO ready
+"""
+
+
+def test_multi_line_records_fold_into_their_first_line(incident_dir: Path) -> None:
+    (incident_dir / "artifacts" / "app" / "orders.log").write_text(STACK_TRACES, encoding="utf-8")
+    with Evidence(incident_dir) as evidence:
+        files = {item.file: item for item in evidence.artifacts()}
+        assert files["app/orders.log"].lines == 14 and files["app/orders.log"].errors == 3
+        templates = {pattern.template: pattern for pattern in evidence.patterns(top=100)}
+        exceptions = [template for template in templates if "NullPointerException" in template]
+        assert len(exceptions) == 1 and templates[exceptions[0]].count == 2 and " ⏎ " in exceptions[0]
+        assert any("GatewayTimeout" in template for template in templates)
+        assert not any(template.startswith(("at ", "File ")) for template in templates)
+
+        rows, total = evidence.search("OrderController.java:88", literal=True)
+        assert total == 2 and rows[0].line_no == 3 and rows[0].cont
+        assert rows[0].level == "error" and rows[0].ts == datetime(2026, 9, 27, 2, 14, 1, 123000)
+        events, _ = evidence.timeline(level="error", since="02:14:00", until="02:14:05")
+        traces = [event for event in events if event.file == "app/orders.log"]
+        assert [(event.count, (event.detail or "")[:9]) for event in traces] == [(2, "java.lang"), (1, "app.error")]
+
+        server = build_evidence_server(evidence)
+        _, text = call_tool(server, "search_logs", {"pattern": "Thread.run", "literal": True})
+        assert "app/orders.log:4  2026-09-27 02:14:01  error  ↳ \tat java.base" in text and "continues" in text
+        _, text = call_tool(server, "timeline", {"level": "error", "since": "02:14:00", "until": "02:14:05"})
+        assert "×2  error  app/orders.log:1" in text and " ⏎ java.lang.NullPointerException" in text
+        _, text = call_tool(server, "read_lines", {"file": "app/orders.log", "start": 10, "end": 13})
+        assert text.splitlines()[1] == "10  Traceback (most recent call last):"
 
 
 def test_server_exposes_exactly_five_read_only_tools(evidence: Evidence) -> None:

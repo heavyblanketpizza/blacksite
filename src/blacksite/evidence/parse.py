@@ -1,4 +1,5 @@
-"""Timestamps, severity, and message text for common server log formats."""
+"""Timestamps, severity, and message text for common server log formats, and the folding of
+multi-line records (stack traces, tracebacks, indented detail) into the line that started them."""
 
 from __future__ import annotations
 
@@ -27,19 +28,28 @@ _LEVEL_NAMES = {
 
 _ISO = re.compile(
     r"(?P<date>\d{4}-\d{2}-\d{2})[T ](?P<time>\d{2}:\d{2}:\d{2})(?:[.,](?P<frac>\d{1,9}))?"
-    r"\s?(?P<tz>Z|[+-]\d{2}:?\d{2}\b)?"
+    r"\s?(?P<tz>Z|UTC|GMT|[+-]\d{2}:?\d{2}\b)?"
 )
 _SLASH = re.compile(r"(?P<y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2}) (?P<time>\d{2}:\d{2}:\d{2})")
 _CLF = re.compile(
     r"\[(?P<d>\d{2})/(?P<mon>[A-Z][a-z]{2})/(?P<y>\d{4}):(?P<time>\d{2}:\d{2}:\d{2}) (?P<tz>[+-]\d{4})\]"
 )
-_SYSLOG = re.compile(r"^(?P<mon>[A-Z][a-z]{2}) {1,2}(?P<d>\d{1,2}) (?P<time>\d{2}:\d{2}:\d{2}) (?P<host>\S+) ")
+# Syslog and journalctl (short-precise adds microseconds): Oct 21 02:14:06.123456 web1 app[12]:
+_SYSLOG = re.compile(r"^(?P<mon>[A-Z][a-z]{2}) {1,2}(?P<d>\d{1,2}) (?P<time>\d{2}:\d{2}:\d{2})(?:\.(?P<frac>\d{1,6}))? "
+                     r"(?P<host>\S+) ")
+# Apache error logs and `dmesg -T`: [Tue Oct 21 02:14:05.123456 2026]
+_CTIME = re.compile(r"[A-Z][a-z]{2} (?P<mon>[A-Z][a-z]{2}) {1,2}(?P<d>\d{1,2}) (?P<time>\d{2}:\d{2}:\d{2})"
+                    r"(?:\.(?P<frac>\d{1,6}))? (?P<y>\d{4})")
+# Kubernetes components (klog): I1021 02:14:05.123456       1 main.go:42] started
+_KLOG = re.compile(r"^(?P<lvl>[IWEF])(?P<m>\d{2})(?P<d>\d{2}) (?P<time>\d{2}:\d{2}:\d{2})(?:\.(?P<frac>\d{1,6}))?"
+                   r"\s+\d+\s+[\w./-]+:\d+\] ")
+_KLOG_LEVELS = {"I": "info", "W": "warning", "E": "error", "F": "critical"}
 _TS_SEARCH_WINDOW = 80
 
 _LEVEL_WORD = re.compile(
     r"\b(EMERG(?:ENCY)?|ALERT|CRIT(?:ICAL)?|FATAL|SEVERE|PANIC|ERROR|ERR|WARN(?:ING)?|NOTICE|INFO|DEBUG|TRACE)\b"
 )
-_LEVEL_BRACKET = re.compile(r"\[(emerg|alert|crit|error|warn|notice|info|debug)\]")
+_LEVEL_BRACKET = re.compile(r"\[(?:[a-z_]+:)?(emerg|alert|crit|error|warn|notice|info|debug)\]")
 _LEVEL_KV = re.compile(r"(?i)\b(?:level|severity|lvl)[=:]\s*\"?(\w+)")
 _LEVEL_WINDOW = 120
 _HTTP_STATUS = re.compile(r'"[A-Z]+ \S+ HTTP/[\d.]+" (?P<status>[1-5]\d\d) ')
@@ -50,9 +60,19 @@ _ERROR_WORDS = re.compile(
 )
 _WARNING_WORDS = re.compile(r"(?i)\b(warn\w*|deprecated|retry\w*|degraded|slow)\b")
 
-_JSON_TIME_KEYS = ("ts", "time", "timestamp", "@timestamp", "t", "datetime")
-_JSON_LEVEL_KEYS = ("level", "severity", "lvl", "levelname", "log.level")
-_JSON_MESSAGE_KEYS = ("msg", "message", "event", "log")
+# The last entries are journalctl's JSON export.
+_JSON_TIME_KEYS = ("ts", "time", "timestamp", "@timestamp", "t", "datetime", "__REALTIME_TIMESTAMP")
+_JSON_LEVEL_KEYS = ("level", "severity", "lvl", "levelname", "log.level", "PRIORITY")
+_JSON_MESSAGE_KEYS = ("msg", "message", "event", "log", "MESSAGE")
+_SYSLOG_PRIORITIES = {0: "critical", 1: "critical", 2: "critical", 3: "error", 4: "warning", 5: "info", 6: "info",
+                      7: "debug"}
+# Bunyan/pino numeric levels: 10 trace ... 60 fatal.
+_PINO_LEVELS = {10: "debug", 20: "debug", 30: "info", 40: "warning", 50: "error", 60: "critical"}
+
+MAX_CONTINUATION = 1000
+TRACEBACK_PREAMBLE = re.compile(r"^Traceback \(most recent call last\):")
+# Java frames and chained causes, which are not indented.
+_CONTINUATION = re.compile(r"^(?:at |Caused by: |Suppressed: |\.\.\. \d+ more\b)")
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,6 +97,10 @@ class LineParser:
             parsed = self._parse_json(stripped)
             if parsed is not None:
                 return parsed
+        match = _KLOG.match(text)
+        if match:
+            ts = self._yearless(int(match["m"]), int(match["d"]), match["time"], match["frac"])
+            return ParsedLine(ts, _KLOG_LEVELS[match["lvl"]], False, text[match.end():])
 
         ts, message = self._timestamp(text)
         head = message[:_LEVEL_WINDOW]
@@ -99,13 +123,17 @@ class LineParser:
         if match:
             month = _MONTHS.get(match["mon"].lower())
             if month:
-                ts = _safe_datetime(self._year, month, int(match["d"]), match["time"])
-                if ts and self._latest and ts > self._latest + timedelta(days=1):
-                    ts = _safe_datetime(self._year - 1, month, int(match["d"]), match["time"])
-                return ts, text[match.end():]
+                return self._yearless(month, int(match["d"]), match["time"], match["frac"]), text[match.end():]
         match = _ISO.search(window)
         if match:
             ts = _parse_iso(match)
+            return ts, _cut(text, match)
+        match = _CTIME.search(window)
+        if match:
+            month = _MONTHS.get(match["mon"].lower())
+            ts = None
+            if month:
+                ts = _safe_datetime(int(match["y"]), month, int(match["d"]), match["time"], match["frac"])
             return ts, _cut(text, match)
         match = _CLF.search(window)
         if match:
@@ -119,6 +147,13 @@ class LineParser:
             ts = _safe_datetime(int(match["y"]), int(match["m"]), int(match["d"]), match["time"])
             return ts, _cut(text, match)
         return None, text
+
+    def _yearless(self, month: int, day: int, clock: str, frac: str | None) -> datetime | None:
+        """A date without a year gets the file's; later than the file itself means the year before."""
+        ts = _safe_datetime(self._year, month, day, clock, frac)
+        if ts and self._latest and ts > self._latest + timedelta(days=1):
+            ts = _safe_datetime(self._year - 1, month, day, clock, frac)
+        return ts
 
     def _parse_json(self, text: str) -> ParsedLine | None:
         try:
@@ -136,11 +171,12 @@ class LineParser:
         level = None
         for key in _JSON_LEVEL_KEYS:
             value = record.get(key)
-            if isinstance(value, str):
+            if key == "PRIORITY" and str(value).isdigit():
+                level = _SYSLOG_PRIORITIES.get(int(str(value)))
+            elif isinstance(value, str):
                 level = _LEVEL_NAMES.get(value.strip().lower())
             elif isinstance(value, int) and not isinstance(value, bool):
-                # Bunyan/pino numeric levels: 10 trace ... 60 fatal.
-                level = {10: "debug", 20: "debug", 30: "info", 40: "warning", 50: "error", 60: "critical"}.get(value)
+                level = _PINO_LEVELS.get(value)
             if level:
                 break
         message = next(
@@ -229,7 +265,7 @@ def _parse_iso(match: re.Match[str]) -> datetime | None:
 
 def _apply_offset(ts: datetime, tz: str) -> datetime:
     """Convert to naive UTC so lines from differently configured files sort together."""
-    if tz == "Z":
+    if tz in ("Z", "UTC", "GMT"):
         return ts
     sign = 1 if tz[0] == "+" else -1
     digits = tz[1:].replace(":", "")
@@ -240,8 +276,11 @@ def _apply_offset(ts: datetime, tz: str) -> datetime:
 def _json_time(value: object) -> datetime | None:
     if isinstance(value, bool):
         return None
+    if isinstance(value, str) and value.isdigit():
+        value = int(value)
     if isinstance(value, (int, float)):
-        seconds = value / 1000 if value > 1e11 else value
+        # Seconds, milliseconds, or microseconds (journalctl) since the epoch.
+        seconds = value / 1_000_000 if value > 1e14 else value / 1000 if value > 1e11 else value
         try:
             return datetime.fromtimestamp(seconds, tz=UTC).replace(tzinfo=None)
         except (OverflowError, OSError, ValueError):
@@ -253,9 +292,42 @@ def _json_time(value: object) -> datetime | None:
     return None
 
 
-def _safe_datetime(year: int, month: int, day: int, clock: str) -> datetime | None:
+def _safe_datetime(year: int, month: int, day: int, clock: str, frac: str | None = None) -> datetime | None:
     try:
         hour, minute, second = (int(part) for part in clock.split(":"))
-        return datetime(year, month, day, hour, minute, second)
+        return datetime(year, month, day, hour, minute, second, int(frac[:6].ljust(6, "0")) if frac else 0)
     except ValueError:
         return None
+
+
+class RecordFolder:
+    """Decides whether a line continues the record before it.
+
+    A line without a timestamp of its own continues the previous record when that record
+    started with a timestamp (a stack trace after a log line), when it is indented, when it
+    is a Java frame or cause, or when it is the exception that ends a Python traceback.
+    Blank lines always start a new record.
+    """
+
+    def __init__(self) -> None:
+        self._timed = False      # the current record's first line carried a timestamp
+        self._traceback = False  # the current record is a Python traceback whose last line is still to come
+        self._indented = False   # the previous line of the current record was indented
+        self._length = 0         # continuation lines in the current record
+
+    def feed(self, text: str, timed: bool) -> bool:
+        """True when ``text`` continues the current record; False when it starts a new one."""
+        if not timed and text.strip() and self._length < MAX_CONTINUATION:
+            indented = text[0].isspace()
+            closing = self._traceback and self._indented and not indented
+            if self._timed or indented or closing or _CONTINUATION.match(text):
+                self._length += 1
+                self._indented = indented
+                if closing:
+                    self._traceback = False
+                return True
+        self._timed = timed
+        self._traceback = TRACEBACK_PREAMBLE.match(text) is not None
+        self._indented = False
+        self._length = 0
+        return False

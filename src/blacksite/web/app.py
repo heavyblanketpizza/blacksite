@@ -683,7 +683,7 @@ async def _lines(state: DemoState, request: Request) -> Response:
             rows = evidence.read_lines(file, start, stop)
             return {"file": file, "total": total, "focus": [line, max(end, line)],
                     "lines": [{"n": row.line_no, "text": row.text, "level": row.level, "guessed": row.guessed,
-                               "flagged": row.flagged, "ts": _iso(row.ts)} for row in rows]}
+                               "flagged": row.flagged, "cont": row.cont, "ts": _iso(row.ts)} for row in rows]}
 
     return JSONResponse(await anyio.to_thread.run_sync(read))
 
@@ -702,7 +702,8 @@ async def _search(state: DemoState, request: Request) -> Response:
         with Evidence(path, state.settings().evidence) as evidence:
             rows, total = evidence.search(pattern, file, level, None, None, limit, ignore_case, literal)
             return {"total": total, "lines": [{"file": row.file, "n": row.line_no, "text": row.text, "level": row.level,
-                                               "flagged": row.flagged, "ts": _iso(row.ts)} for row in rows]}
+                                               "flagged": row.flagged, "cont": row.cont, "ts": _iso(row.ts)}
+                                              for row in rows]}
 
     return JSONResponse(await anyio.to_thread.run_sync(read))
 
