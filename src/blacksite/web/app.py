@@ -50,6 +50,7 @@ from ..learning.reflect import OUTCOME_FILE, record_outcome, reflect
 from ..learning.store import OUTCOMES, LearningError
 from ..llm import ChatClient, LLMError
 from ..modelserver import ModelServerError, Supervisor, find_llama_server, find_vllm, plan
+from ..profiles import profile
 from ..report import build_solution
 from ..services import Services
 from ..usb import (
@@ -339,7 +340,8 @@ async def _status(state: DemoState, request: Request) -> Response:
         elif failure := server.failure():
             loading, detail = False, f"{DISPLAY[model.provider]} stopped: {failure}"
     return JSONResponse({"version": __version__, "provider": model.provider, "backend": DISPLAY[model.provider],
-                         "model": model.name, "base_url": model.base_url, "reachable": health.reachable,
+                         "model": model.name, "family": profile(model).label, "base_url": model.base_url,
+                         "reachable": health.reachable,
                          "loaded": health.loaded, "loading": loading, "detail": detail,
                          "switching": state.switching, "features": feature_summary(settings),
                          "thinking": settings.agent.thinking})

@@ -10,6 +10,8 @@
 provider = "vllm"          # vllm (GPU server), llamacpp (llama-server), or ollama
 base_url = "http://localhost:8000/v1"
 name = "blacksite"
+family = "auto"            # read from the name; else qwen3-hybrid, qwen3-coder, qwen3, gpt-oss, glm,
+                           # deepseek, llama, mistral, kimi, or generic
 api_key_env = "VLLM_API_KEY"
 timeout = 600.0
 context = 65536            # tokens; used by `blacksite serve model` for llama.cpp and vLLM

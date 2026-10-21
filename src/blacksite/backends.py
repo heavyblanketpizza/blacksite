@@ -1,13 +1,9 @@
 """The model servers Blacksite runs on: Ollama, llama.cpp (llama-server), and vLLM.
 
-All three speak the OpenAI Chat Completions API. They differ in how a request turns
-Qwen3.8's thinking on or off, where the reasoning comes back, and how to tell whether
-the model is loaded, so every such difference lives here.
-
-Qwen3.8's chat template takes ``enable_thinking`` and ``reasoning_effort`` in
-{low, medium, xhigh} and raises an error on anything else; without them it thinks at
-``xhigh``, the slowest level. Ollama translates its own ``reasoning_effort`` request
-field; llama.cpp and vLLM pass ``chat_template_kwargs`` straight to the template.
+All three speak the OpenAI Chat Completions API. They differ in where a model's
+reasoning comes back and how to tell whether the model is loaded, so every such
+difference lives here; how a model family is asked to reason lives in
+``blacksite.profiles``.
 """
 
 from __future__ import annotations
@@ -19,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 from .config import ModelSettings, Provider, Settings
+from .profiles import thinking_fields
 
 if TYPE_CHECKING:
     from pydantic_ai.models.openai import OpenAIChatModelSettings
@@ -28,15 +25,6 @@ DISPLAY = {"ollama": "Ollama", "llamacpp": "llama.cpp", "vllm": "vLLM"}
 DEFAULT_URLS = {"ollama": "http://127.0.0.1:11434/v1", "llamacpp": "http://127.0.0.1:8080/v1",
                 "vllm": "http://127.0.0.1:8000/v1"}
 AGENT_MAX_TOKENS = 12_000
-
-
-def thinking_fields(provider: str, thinking: str) -> dict[str, Any]:
-    """Extra request fields that set the model's reasoning effort (none, low, or medium)."""
-    if provider == "ollama":
-        return {"reasoning_effort": thinking}
-    if thinking == "none":
-        return {"chat_template_kwargs": {"enable_thinking": False}}
-    return {"chat_template_kwargs": {"enable_thinking": True, "reasoning_effort": thinking}}
 
 
 def api_key(model: ModelSettings) -> str:
@@ -70,10 +58,12 @@ def agent_model(settings: Settings, http_client: httpx.AsyncClient | None = None
 
 def agent_settings(settings: Settings) -> OpenAIChatModelSettings:
     """Per-request model settings for the agent."""
-    thinking = settings.agent.thinking
-    if settings.model.provider == "ollama":
-        return {"openai_reasoning_effort": thinking, "max_tokens": AGENT_MAX_TOKENS}
-    return {"extra_body": thinking_fields(settings.model.provider, thinking), "max_tokens": AGENT_MAX_TOKENS}
+    fields = thinking_fields(settings.model, settings.agent.thinking)
+    if "reasoning_effort" in fields:
+        return {"openai_reasoning_effort": fields["reasoning_effort"], "max_tokens": AGENT_MAX_TOKENS}
+    if fields:
+        return {"extra_body": fields, "max_tokens": AGENT_MAX_TOKENS}
+    return {"max_tokens": AGENT_MAX_TOKENS}
 
 
 @dataclass(frozen=True)

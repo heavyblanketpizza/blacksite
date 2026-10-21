@@ -20,10 +20,8 @@ from urllib.parse import urlsplit
 
 from . import catalog
 from .config import Settings
+from .profiles import profile
 
-# Tool calls and thinking for the Qwen3.5/3.6/3.8 family (hybrid attention, XML tool calls).
-VLLM_TOOL_PARSER = "qwen3_xml"
-VLLM_REASONING_PARSER = "qwen3"
 DEFAULT_VLLM_MODEL = {"darwin": "mlx-community/Qwen3.8-27B-4bit"}
 DEFAULT_VLLM_MODEL_CUDA = "Qwen/Qwen3.8-27B-FP8"
 # KV cache and runtime room to reserve beside the weights on a Mac: a 64k-token
@@ -45,6 +43,7 @@ def plan(settings: Settings, model: str | None = None, from_ollama: str | None =
          binary: str | None = None, offline: bool = False, extra: Sequence[str] = ()) -> Launch:
     """The command that starts the configured backend; ``extra`` goes to the server as is."""
     provider = settings.model.provider
+    served = profile(settings.model)
     url = urlsplit(settings.model.base_url)
     host, port = url.hostname or "127.0.0.1", str(url.port or (8080 if provider == "llamacpp" else 8000))
     key = os.environ.get(settings.model.api_key_env, "")
@@ -58,8 +57,9 @@ def plan(settings: Settings, model: str | None = None, from_ollama: str | None =
         command = [binary or find_llama_server(), "-m", path, "--alias", settings.model.name,
                    "--host", host, "--port", port, "-c", str(settings.model.context),
                    # One slot gets the whole context; --jinja applies the model's chat template
-                   # (tool calls), and deepseek returns thinking in reasoning_content.
-                   "-np", "1", "--jinja", "--reasoning-format", "deepseek", "-ngl", "999", "-fa", "on"]
+                   # (tool calls), and the reasoning format returns thinking in reasoning_content.
+                   "-np", "1", "--jinja", "--reasoning-format", served.llamacpp_reasoning_format,
+                   "-ngl", "999", "-fa", "on"]
         if key:
             command += ["--api-key", key]
         return Launch([*command, *extra], env)
@@ -68,13 +68,16 @@ def plan(settings: Settings, model: str | None = None, from_ollama: str | None =
         name = model or DEFAULT_VLLM_MODEL.get(sys.platform, DEFAULT_VLLM_MODEL_CUDA)
         command = [executable, "serve", name, "--served-model-name", settings.model.name,
                    "--host", host, "--port", port, "--max-model-len", str(settings.model.context),
-                   "--enable-auto-tool-choice", "--tool-call-parser", VLLM_TOOL_PARSER,
-                   "--reasoning-parser", VLLM_REASONING_PARSER, "--enable-prefix-caching"]
+                   "--enable-auto-tool-choice", "--tool-call-parser", served.vllm_tool_parser,
+                   "--enable-prefix-caching"]
+        if served.vllm_reasoning_parser:
+            command += ["--reasoning-parser", served.vllm_reasoning_parser]
         if sys.platform != "darwin":
-            # NVIDIA: FP8 KV cache and the model's multi-token-prediction head. The Apple
-            # Silicon build supports neither for this hybrid model yet.
-            command += ["--kv-cache-dtype", "fp8",
-                        "--speculative-config", json.dumps({"method": "mtp", "num_speculative_tokens": 3})]
+            # NVIDIA: FP8 KV cache and, where the model has one, its multi-token-prediction
+            # head. The Apple Silicon build supports neither yet.
+            command += ["--kv-cache-dtype", "fp8"]
+            if served.speculative_mtp:
+                command += ["--speculative-config", json.dumps({"method": "mtp", "num_speculative_tokens": 3})]
         elif not any(arg.startswith("--gpu-memory-utilization") for arg in extra):
             fraction = metal_memory_fraction(name)
             if fraction:
@@ -82,10 +85,11 @@ def plan(settings: Settings, model: str | None = None, from_ollama: str | None =
         if key:
             command += ["--api-key", key]
         env.update({"VLLM_NO_USAGE_STATS": "1", "DO_NOT_TRACK": "1"})  # vLLM reports usage by default
-        # vLLM's strict tool calling adds a grammar that fixes parameter order and never lets
-        # Qwen3.8 stop after a tool call: in testing it kept calling tools until max_tokens.
-        # The agent validates every tool call against its schema itself.
-        env["VLLM_ENFORCE_STRICT_TOOL_CALLING"] = "0"
+        if not served.strict_tool_calling:
+            # vLLM's strict tool calling adds a grammar that fixes parameter order and never lets
+            # Qwen3.8 stop after a tool call: in testing it kept calling tools until max_tokens.
+            # The agent validates every tool call against its schema itself.
+            env["VLLM_ENFORCE_STRICT_TOOL_CALLING"] = "0"
         if offline:
             env.update({"HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1"})
         return Launch([*command, *extra], env)

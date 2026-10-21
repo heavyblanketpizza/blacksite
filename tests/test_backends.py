@@ -8,11 +8,12 @@ import httpx
 import pytest
 
 from blacksite import modelserver
-from blacksite.backends import agent_model, agent_settings, status, thinking_fields
+from blacksite.backends import agent_model, agent_settings, status
 from blacksite.check import run_checks
 from blacksite.cli import main
 from blacksite.llm import ChatClient
 from blacksite.modelserver import ModelServerError, ollama_model_path, plan
+from blacksite.profiles import thinking_fields
 
 BACKENDS = {
     "ollama": "http://localhost:11434/v1",
@@ -27,11 +28,12 @@ def backend(make_settings, provider: str, *overrides: str):
 
 
 @pytest.mark.parametrize("provider", ["llamacpp", "vllm"])
-def test_template_servers_get_thinking_through_chat_template_kwargs(provider) -> None:
-    assert thinking_fields(provider, "low") == {
+def test_template_servers_get_thinking_through_chat_template_kwargs(make_settings, provider) -> None:
+    model = backend(make_settings, provider).model
+    assert thinking_fields(model, "low") == {
         "chat_template_kwargs": {"enable_thinking": True, "reasoning_effort": "low"}}
-    assert thinking_fields(provider, "none") == {"chat_template_kwargs": {"enable_thinking": False}}
-    assert thinking_fields("ollama", "medium") == {"reasoning_effort": "medium"}
+    assert thinking_fields(model, "none") == {"chat_template_kwargs": {"enable_thinking": False}}
+    assert thinking_fields(backend(make_settings, "ollama").model, "medium") == {"reasoning_effort": "medium"}
 
 
 @pytest.mark.filterwarnings("ignore:`httpx.AsyncClient` support")  # the injected mock client
@@ -74,7 +76,7 @@ def test_chat_client_sends_the_same_thinking_fields(make_settings, provider) -> 
     settings = backend(make_settings, provider)
     ChatClient(settings.model, httpx.MockTransport(handler), thinking="none").complete([])
     assert {key: value for key, value in bodies[0].items() if key not in ("model", "messages", "max_tokens")} \
-        == thinking_fields(provider, "none")
+        == thinking_fields(settings.model, "none")
 
 
 def serve(routes: dict[str, httpx.Response]) -> httpx.AsyncBaseTransport:

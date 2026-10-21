@@ -65,6 +65,8 @@ uv run blacksite --config demo/llamacpp.toml check
 
 The web app's model picker lists the same models. Without a config file, Blacksite expects the model to be served as `blacksite`. Earlier versions expected `holmes-local`: if your server still uses that name, set `model.name = "holmes-local"` or restart it with `blacksite serve model`.
 
+Blacksite reads the model family from the model's name and sets the reasoning request, the server's tool-call and reasoning parsers, and `blacksite check`'s advice to match: Qwen3.5 and later (the reference model), Qwen3, Qwen3-Coder, gpt-oss, GLM, DeepSeek, Llama, Mistral, Kimi, or a generic tool-calling model. A name that says nothing, such as `blacksite`, gets the reference profile; set `model.family` when the served name hides a different family.
+
 ## Runbooks and learning
 
 Three switches add team knowledge to an investigation. All start off, because extra context can also make an agent worse: turn one on after it beats the baseline on your own incidents. Admins set them for everyone in the web app's sidebar; the CLI reads the config file and `--set`.

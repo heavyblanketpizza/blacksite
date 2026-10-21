@@ -56,9 +56,9 @@ class ChatClient(_Endpoint):
         self.model = settings.name
         self.extra: dict[str, Any] = {}
         if thinking:
-            from .backends import thinking_fields
+            from .profiles import thinking_fields
 
-            self.extra = thinking_fields(settings.provider, thinking)
+            self.extra = thinking_fields(settings, thinking)
 
     def complete(self, messages: list[dict[str, str]], schema: dict[str, Any] | None = None,
                  max_tokens: int = 16_384) -> str:

@@ -274,10 +274,11 @@ def _serve_model(args: argparse.Namespace, settings: Settings) -> int:
 def _check(args: argparse.Namespace, settings: Settings) -> int:
     from .backends import DISPLAY
     from .check import run_checks
+    from .profiles import profile
 
     model = settings.model
     print(f"Checking {DISPLAY[model.provider]} at {model.base_url} (model {model.name}, "
-          f"thinking {settings.agent.thinking})")
+          f"{profile(model).label} profile, thinking {settings.agent.thinking})")
     failed = 0
     for result in run_checks(settings):
         mark = "ok  " if result.ok else "FAIL"

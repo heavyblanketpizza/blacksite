@@ -33,6 +33,10 @@ class ConfigError(ValueError):
 # vllm (GPU servers), llamacpp (llama-server, any hardware), or ollama. All speak the
 # OpenAI-compatible API; blacksite.backends handles their differences.
 Provider = Literal["vllm", "llamacpp", "ollama"]
+# The model family decides how reasoning is requested and which parsers a server needs
+# (see blacksite.profiles); "auto" reads it from the model's name.
+Family = Literal["auto", "qwen3-hybrid", "qwen3-coder", "qwen3", "gpt-oss", "glm", "deepseek", "llama", "mistral",
+                 "kimi", "generic"]
 
 
 @dataclass(frozen=True)
@@ -42,6 +46,7 @@ class ModelSettings:
     provider: Provider = "vllm"
     base_url: str = "http://localhost:8000/v1"
     name: str = "blacksite"
+    family: Family = "auto"
     api_key_env: str = "VLLM_API_KEY"
     timeout: float = 600.0
     # Context length `blacksite serve model` gives llama.cpp and vLLM (Ollama: demo/Modelfile).
