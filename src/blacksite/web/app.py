@@ -658,8 +658,9 @@ def _overview(path: Path, settings: Settings) -> dict[str, Any]:
             "summary": format_artifacts(evidence),
             "range": [_iso(first), _iso(last)],
             "artifacts": [{"file": item.file, "kind": item.kind, "lines": item.lines, "errors": item.errors,
-                           "redactions": item.redactions, "flagged": item.flagged,
-                           "first": _iso(item.first_ts), "last": _iso(item.last_ts)} for item in artifacts],
+                           "redactions": item.redactions, "flagged": item.flagged, "tools": list(item.tools),
+                           "facts": list(item.facts), "first": _iso(item.first_ts), "last": _iso(item.last_ts)}
+                          for item in artifacts],
             "histogram": {"start": _iso(start), "bucket_seconds": size,
                           "rows": [{"bucket": b, "file": f, "count": c} for b, f, c in buckets]},
             "patterns": [{"template": p.template, "count": p.count, "level": p.level, "guessed": p.guessed,

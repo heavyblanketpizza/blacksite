@@ -1357,10 +1357,11 @@ function renderEvidence() {
       },
         el("span", { class: "swatch", style: `background:${S.colors[item.file]}` }),
         el("span", { class: "name", title: item.file, text: item.file }),
-        el("span", { class: "n", text: item.kind === "binary" ? t("ev.binary") : t("ev.linesErrors", { lines: number(item.lines), errors: number(item.errors) }) }),
+        el("span", { class: "n", text: fileNote(item) }),
         item.redactions || item.flagged ? el("span", { class: "flags" },
           item.redactions ? el("span", { class: "badge ok", text: t("ev.redacted", { count: item.redactions }) }) : null,
-          item.flagged ? el("span", { class: "badge error", text: t("ev.suspicious", { count: item.flagged }) }) : null) : null)))),
+          item.flagged ? el("span", { class: "badge error", text: t("ev.suspicious", { count: item.flagged }) }) : null) : null,
+        item.facts.length ? el("div", { class: "facts" }, item.facts.map((fact) => el("div", { text: fact }))) : null)))),
     el("section", { class: "chart" }, el("div", { class: "label", text: t("ev.chart") }), histogram(data)),
     el("section", {}, el("div", { class: "label", text: t("ev.patterns") }),
       el("div", { class: "patterns" }, data.patterns.map((pattern) => {
@@ -1374,6 +1375,14 @@ function renderEvidence() {
               refButton(pattern.sample, sampleFile, Number(pattern.sample.split(":").pop())),
               el("span", { text: pattern.first ? `${hhmm(pattern.first)}–${hhmm(pattern.last)}` : "" }))));
       }))));
+}
+
+// What a file is: a log with its error count, a config, command output with its commands, or binary.
+function fileNote(item) {
+  if (item.kind === "binary") return t("ev.binary");
+  if (item.kind === "config") return t("ev.config", { lines: number(item.lines) });
+  if (item.kind === "output") return t("ev.output", { lines: number(item.lines), tools: item.tools.join(", ") });
+  return t("ev.linesErrors", { lines: number(item.lines), errors: number(item.errors) });
 }
 
 function histogram(data) {
@@ -1440,7 +1449,7 @@ function renderViewer() {
   const first = view.lines.length ? view.lines[0].n : from;
   const last = view.lines.length ? view.lines[view.lines.length - 1].n : to;
   const list = el("div", { class: "lines" }, view.lines.map((line) => el("div", {
-    class: `line${line.n >= from && line.n <= to ? " focus" : ""}${line.flagged ? " flagged" : ""}${line.level === "error" || line.level === "critical" ? " error" : ""}`,
+    class: `line${line.n >= from && line.n <= to ? " focus" : ""}${line.flagged ? " flagged" : ""}${line.level === "error" || line.level === "critical" ? " error" : ""}${line.cont ? " cont" : ""}`,
     title: [line.ts, line.level && `${line.level}${line.guessed ? "?" : ""}`, line.flagged && t("viewer.flagged")].filter(Boolean).join(" · "),
   }, el("span", { class: "n", text: String(line.n) }), el("span", { class: "t", text: (line.flagged ? "⚠ " : "") + line.text }))));
   body.replaceChildren(

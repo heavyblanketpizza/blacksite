@@ -97,7 +97,7 @@ uv run blacksite serve evidence var/incidents/INC-1
 uv run blacksite --config demo/blacksite.toml serve knowledge --incident var/incidents/INC-1
 ```
 
-- **evidence** has five read-only tools over one incident: `list_artifacts`, `log_patterns`, `search_logs`, `read_lines`, and `timeline`.
+- **evidence** has five read-only tools over one incident: `list_artifacts`, `log_patterns`, `search_logs`, `read_lines`, and `timeline`. `list_artifacts` also names configuration files and command output (`df`, `free`, `ps`, `ss`, `netstat`, `systemctl status`, `uptime`) with the facts they state, such as a full disk or a killed service.
 - **knowledge** offers `search_docs` and `read_doc` when runbook search is on, and `recall_cases` when past incidents are on, in tool mode. With every switch off it has no tools, which is the baseline.
 
 `blacksite context --incident DIR` prints what the switches add to the agent's instructions.
@@ -132,6 +132,7 @@ Keep `var/keys/` private and backed up. It holds the key that proves the ledger 
 ## Data and checks
 
 - Indexing reads syslog and journalctl (including its JSON export), ISO 8601, nginx, Apache, Common Log Format, JSON lines (pino, bunyan, Docker), klog, and `dmesg -T` timestamps. A record that spans several lines, such as a stack trace, is folded into the line that started it, so patterns and the timeline count records while search still finds every line.
+- Configuration files and command output are kept verbatim: searched and read, never templated or given a severity.
 - Indexing redacts recognized secrets and flags suspicious instructions in logs.
 - Guide checks validate cited files and lines and flag risky commands. Review the guide and its warnings before acting.
 - Inference requests go to the model endpoints you configure, including embedding and reranking servers when enabled.

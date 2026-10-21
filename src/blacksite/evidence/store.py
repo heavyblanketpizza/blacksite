@@ -37,6 +37,7 @@ import duckdb
 
 from .._fs import remove_quietly, replace
 from ..config import EvidenceSettings
+from .kinds import classify, summarize
 from .parse import SEVERITIES, SEVERITY_RANK, TRACEBACK_PREAMBLE, LineParser, RecordFolder, parse_time_filter
 from .patterns import TemplateMiner
 from .safety import RULES_VERSION, Redactor, looks_like_instructions
@@ -46,7 +47,8 @@ ARTIFACTS_DIR = "artifacts"
 INCIDENT_FILE = "incident.json"
 DB_PREFIX = "evidence."
 DB_SUFFIX = ".duckdb"
-_BINARY_SNIFF = 8192
+_SNIFF = 65536  # bytes read first: a binary check and the sample that decides a file's kind
+MAX_OUTPUT_LINES = 5000  # of command output kept for its facts
 # Separates a folded record's first line from its exception line in a template.
 DETAIL_SEPARATOR = "⏎"
 
@@ -97,7 +99,8 @@ class Incident:
 @dataclass(frozen=True)
 class ArtifactInfo:
     file: str
-    kind: str
+    kind: str  # log, config, output, or binary
+    compressed: bool
     bytes: int
     lines: int
     first_ts: datetime | None
@@ -105,6 +108,8 @@ class ArtifactInfo:
     errors: int
     redactions: int
     flagged: int
+    tools: tuple[str, ...]  # the commands an output file came from
+    facts: tuple[str, ...]  # what that output states
 
 
 @dataclass(frozen=True)
@@ -213,10 +218,12 @@ class Evidence:
 
     def artifacts(self) -> list[ArtifactInfo]:
         rows = self._query(
-            "SELECT file, kind, bytes, lines, first_ts, last_ts, errors, redactions, flagged "
+            "SELECT file, kind, compressed, bytes, lines, first_ts, last_ts, errors, redactions, flagged, tools, facts "
             "FROM artifacts ORDER BY file"
         )
-        return [ArtifactInfo(*row) for row in rows]
+        return [ArtifactInfo(file, kind, compressed, size, lines, first, last, errors, redactions, flagged,
+                             tuple(tools.split(",")) if tools else (), tuple(json.loads(facts)))
+                for file, kind, compressed, size, lines, first, last, errors, redactions, flagged, tools, facts in rows]
 
     def time_range(self) -> tuple[datetime | None, datetime | None]:
         return self._query("SELECT min(ts), max(ts) FROM lines")[0]
@@ -444,11 +451,12 @@ class _Ingest:
                     [str(templates_csv)],
                 )
                 con.execute(
-                    "CREATE TABLE artifacts (file VARCHAR, kind VARCHAR, bytes BIGINT, lines BIGINT, "
-                    "first_ts TIMESTAMP, last_ts TIMESTAMP, errors BIGINT, redactions BIGINT, flagged BIGINT)"
+                    "CREATE TABLE artifacts (file VARCHAR, kind VARCHAR, compressed BOOLEAN, bytes BIGINT, "
+                    "lines BIGINT, first_ts TIMESTAMP, last_ts TIMESTAMP, errors BIGINT, redactions BIGINT, "
+                    "flagged BIGINT, tools VARCHAR, facts VARCHAR)"
                 )
                 if artifacts:
-                    con.executemany("INSERT INTO artifacts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", artifacts)
+                    con.executemany("INSERT INTO artifacts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", artifacts)
                 con.execute("CREATE TABLE meta (key VARCHAR, value VARCHAR)")
                 con.executemany(
                     "INSERT INTO meta VALUES (?, ?)",
@@ -467,17 +475,21 @@ class _Ingest:
         compressed = path.suffix == ".gz"
         opener = gzip.open if compressed else open
         with opener(path, "rb") as handle:
-            if b"\0" in handle.read(_BINARY_SNIFF):
-                return (relative, "binary", size, 0, None, None, 0, 0, 0)
+            head = handle.read(_SNIFF)
+        if b"\0" in head:
+            return (relative, "binary", compressed, size, 0, None, None, 0, 0, 0, "", "[]")
         mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).replace(tzinfo=None)
         parser = LineParser(year=self.evidence.incident.year or mtime.year,
                             latest=None if self.evidence.incident.year else mtime)
+        sample = head.decode("utf-8", errors="replace").splitlines()
+        kind = classify(relative, sample[:-1] if len(head) == _SNIFF else sample, parser)
         redactor = Redactor()
         folder = RecordFolder()
         count = errors = redactions = flagged = 0
         first = last = None
         limit = self.settings.max_line_chars
         record: _Record | None = None
+        kept: list[str] = []  # command output, for its facts
         with opener(path, "rb") as handle:
             for count, raw in enumerate(handle, 1):
                 text = raw.decode("utf-8", errors="replace").rstrip("\r\n").replace("\r", " ").replace("\0", "")
@@ -488,6 +500,12 @@ class _Ingest:
                     redactions += found
                 suspicious = looks_like_instructions(text)
                 flagged += suspicious
+                if kind != "log":  # verbatim: no time, level, or template
+                    writer.writerow([self.ord, relative, count, "", "", False, "", suspicious, text, self.ord, ""])
+                    self.ord += 1
+                    if kind == "output" and len(kept) < MAX_OUTPUT_LINES:
+                        kept.append(text)
+                    continue
                 parsed = parser.parse(text)
                 if folder.feed(text, parsed.ts is not None) and record is not None:
                     record.add(count, text, suspicious)
@@ -498,7 +516,9 @@ class _Ingest:
                     first = parsed.ts if first is None or parsed.ts < first else first
                     last = parsed.ts if last is None or parsed.ts > last else last
             errors += self._write(writer, relative, record)
-        return (relative, "gzip" if compressed else "text", size, count, first, last, errors, redactions, flagged)
+        tools, facts = summarize(kept) if kind == "output" else ([], [])
+        return (relative, kind, compressed, size, count, first, last, errors, redactions, flagged, ",".join(tools),
+                json.dumps(facts))
 
     def _write(self, writer: Any, relative: str, record: _Record | None) -> int:
         """Write a record's rows: the first line with its template, then any continuation lines.

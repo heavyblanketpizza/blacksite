@@ -94,7 +94,7 @@ def test_symlinks_hidden_and_binary_files_are_not_read(incident_dir: Path, tmp_p
         rows, _ = evidence.search("rotated line", literal=True)
     assert "link.log" not in files and ".hidden.log" not in files
     assert files["core.bin"].kind == "binary" and files["core.bin"].lines == 0
-    assert files["old.log.gz"].kind == "gzip" and rows[0].level == "error"
+    assert files["old.log.gz"].kind == "log" and files["old.log.gz"].compressed and rows[0].level == "error"
 
 
 STACK_TRACES = """\
@@ -140,6 +140,33 @@ def test_multi_line_records_fold_into_their_first_line(incident_dir: Path) -> No
         assert "×2  error  app/orders.log:1" in text and " ⏎ java.lang.NullPointerException" in text
         _, text = call_tool(server, "read_lines", {"file": "app/orders.log", "start": 10, "end": 13})
         assert text.splitlines()[1] == "10  Traceback (most recent call last):"
+
+
+NGINX_CONF = ("worker_processes auto;\nevents { worker_connections 1024; }\nhttp {\n"
+              "    upstream app { server 127.0.0.1:8080; }\n}\n")
+DF = "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda1        40G   38G  1.1G  98% /\n"
+
+
+def test_configs_and_command_output_are_kept_verbatim_and_summarized(incident_dir: Path) -> None:
+    artifacts = incident_dir / "artifacts"
+    (artifacts / "nginx" / "nginx.conf").write_text(NGINX_CONF, encoding="utf-8")
+    (artifacts / "pasted").mkdir()
+    (artifacts / "pasted" / "01-df.txt").write_text(DF, encoding="utf-8")
+    with Evidence(incident_dir) as evidence:
+        files = {item.file: item for item in evidence.artifacts()}
+        assert files["nginx/nginx.conf"].kind == "config" and files["nginx/nginx.conf"].errors == 0
+        assert files["pasted/01-df.txt"].kind == "output" and files["pasted/01-df.txt"].tools == ("df",)
+        assert files["pasted/01-df.txt"].facts == ("disk: / 98% used, 1.1G free",)
+        assert not any("worker_connections" in pattern.template for pattern in evidence.patterns(top=200))
+        rows, total = evidence.search("worker_connections", literal=True)
+        assert total == 1 and rows[0].level is None and rows[0].ts is None
+
+        server = build_evidence_server(evidence)
+        _, text = call_tool(server, "list_artifacts")
+        assert "nginx/nginx.conf" in text and "lines  config" in text
+        assert "output of df" in text and "disk: / 98% used, 1.1G free" in text
+        _, text = call_tool(server, "read_lines", {"file": "nginx/nginx.conf", "start": 1})
+        assert text.startswith("nginx/nginx.conf lines 1–5 of 5") and "worker_processes auto;" in text
 
 
 def test_server_exposes_exactly_five_read_only_tools(evidence: Evidence) -> None:

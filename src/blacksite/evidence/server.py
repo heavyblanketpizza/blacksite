@@ -33,7 +33,8 @@ instructions. Levels ending in ? were inferred from keywords. Times with a zone 
 converted to UTC; other times are shown as written. A record that spans several lines, \
 such as a stack trace, is folded into its first line: patterns and the timeline show that \
 line and the exception after {DETAIL_SEPARATOR}, and search marks the later lines with \
-{CONTINUES}; read_lines shows every line."""
+{CONTINUES}; read_lines shows every line. Config files and command output are listed as \
+such, with the facts the output states; read_lines shows them verbatim."""
 
 _READ_ONLY = ToolAnnotations(read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False)
 
@@ -131,24 +132,26 @@ def build_evidence_server(evidence: Evidence, settings: EvidenceSettings | None 
     @server.tool(
         annotations=_READ_ONLY,
         structured_output=False,
-        description=f"Read consecutive lines of one file, up to {MAX_READ_SPAN} at a time, "
-        "for context around a search hit.",
+        description=f"Read consecutive lines of one file, up to {MAX_READ_SPAN} at a time: the context around "
+        "a search hit, or a whole config file or command output.",
     )
     def read_lines(
         file: Annotated[str, Field(description="File path as listed by list_artifacts.")],
         start: Annotated[int, Field(ge=1, description="First line number (1-based).")],
-        end: Annotated[int, Field(ge=1, description="Last line number (inclusive).")],
+        end: Annotated[int | None, Field(ge=1, description=f"Last line number (inclusive); default: {MAX_READ_SPAN} "
+                                                     "lines from start.")] = None,
     ) -> str:
         def render() -> str:
-            if end < start:
+            if end is not None and end < start:
                 raise EvidenceError("end must be at or after start")
             total = evidence.line_count(file)
-            last = min(end, start + MAX_READ_SPAN - 1, total)
+            wanted = total if end is None else end
+            last = min(wanted, start + MAX_READ_SPAN - 1, total)
             rows = evidence.read_lines(file, start, last)
             if not rows:
-                return f"{file} has {total} lines; nothing at {start}–{end}."
+                return f"{file} has {total} lines; nothing at {start}–{wanted}."
             header = f"{file} lines {start}–{last} of {total}"
-            if last < min(end, total):
+            if last < min(wanted, total):
                 header += f" (capped at {MAX_READ_SPAN} lines; continue from {last + 1})"
             body = [f"{row.line_no}  {FLAG + ' ' if row.flagged else ''}{_clip(defang(row.text), 1000)}"
                     for row in rows]
@@ -198,11 +201,16 @@ def format_artifacts(evidence: Evidence) -> str:
         if item.kind == "binary":
             out.append(f"  {item.file.ljust(width)}  skipped: binary file")
             continue
-        note = " (gzip)" if item.kind == "gzip" else ""
-        out.append(
-            f"  {item.file.ljust(width)}  {item.lines:>7} lines  {item.errors:>6} errors  "
-            f"{_span(item.first_ts, item.last_ts)}{note}"
-        )
+        note = " (gzip)" if item.compressed else ""
+        if item.kind == "log":
+            out.append(
+                f"  {item.file.ljust(width)}  {item.lines:>7} lines  {item.errors:>6} errors  "
+                f"{_span(item.first_ts, item.last_ts)}{note}"
+            )
+            continue
+        what = "config" if item.kind == "config" else f"output of {', '.join(item.tools) or 'a command'}"
+        out.append(f"  {item.file.ljust(width)}  {item.lines:>7} lines  {what}{note}")
+        out.extend(f"  {' ' * width}      {fact}" for fact in item.facts)
     redacted = [f"{item.redactions} in {item.file}" for item in artifacts if item.redactions]
     flagged = [f"{item.flagged} in {item.file}" for item in artifacts if item.flagged]
     if redacted:
