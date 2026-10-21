@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    name: Build, attest, and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.12"
+      - name: Check that the tag names the package version
+        run: |
+          version="$(uv version --short)"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match the version in pyproject.toml ($version)"
+            exit 1
+          fi
+      - name: Install
+        run: uv sync --locked
+      - name: Test
+        run: uv run pytest -q
+      - name: Build
+        run: uv build
+      - name: Write checksums
+        run: cd dist && sha256sum * > SHA256SUMS
+      - name: Attest the build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            dist/*.whl
+            dist/*.tar.gz
+      - name: Publish the release with the changelog entry as its notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          awk -v tag="[${GITHUB_REF_NAME#v}]" \
+            'index($0, "## ") == 1 { printing = index($0, tag) > 0; next } /^\[[^]]+\]: / { printing = 0 } printing' \
+            CHANGELOG.md > notes.md
+          if [ -s notes.md ]; then
+            gh release create "$GITHUB_REF_NAME" dist/* --title "Blacksite ${GITHUB_REF_NAME#v}" --notes-file notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --title "Blacksite ${GITHUB_REF_NAME#v}" --generate-notes
+          fi

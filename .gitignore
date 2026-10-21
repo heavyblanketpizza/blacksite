@@ -1,10 +1,14 @@
 # Local recovery copies; never publish these.
 /.local-backups/
 
-# Keep supporting Markdown notes local; publish the English and Korean READMEs.
+# Keep supporting Markdown notes local; publish the READMEs and the project files.
 *.[mM][dD]
 !/README.md
 !/README.ko.md
+!/CHANGELOG.md
+!/CONTRIBUTING.md
+!/SECURITY.md
+!/.github/pull_request_template.md
 
 # Keep the local GUI guide's PDF and screenshots with its ignored Markdown document.
 /docs/GUI-GUIDE.ko.pdf

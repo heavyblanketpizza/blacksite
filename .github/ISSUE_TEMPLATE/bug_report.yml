@@ -1,0 +1,36 @@
+name: Bug report
+description: Blacksite does something wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Paste synthetic or redacted evidence only, never real logs. Report security problems through the advisory form linked in SECURITY.md, not here.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The output of `uv run blacksite --version`, or the commit.
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model server and model
+      placeholder: llama.cpp, Qwen3.8-27B Q4_K_M
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: Command output, `blacksite check`, the browser console, or the lines from `var/` logs that show the problem.
+      render: text
