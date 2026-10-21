@@ -22,7 +22,7 @@ uv run blacksite --config demo/blacksite.toml users add admin --admin
 uv run blacksite --config demo/blacksite.toml demo --incidents var/demo/incidents --samples --open
 ```
 
-`users add` prints a temporary password once. Sign in at [localhost:8765](http://127.0.0.1:8765) and set your own. Open **Incidents**, pick one of the two samples, and click **Investigate**. Click any citation to see its source. The interface and guides are in English and Korean.
+`users add` prints a temporary password once. Sign in at [localhost:8765](http://127.0.0.1:8765) and set your own. Open **Incidents**, pick one of the fifteen samples, and click **Investigate**. Click any citation to see its source. The interface and guides are in English and Korean.
 
 To run disconnected, fetch dependencies and model weights first, keep model endpoints local, and use `uv run --offline`.
 
@@ -157,7 +157,7 @@ Keep `var/keys/` private and backed up. It holds the key that proves the ledger 
 - Indexing reads syslog and journalctl (including its JSON export), ISO 8601, nginx, Apache, Common Log Format, JSON lines (pino, bunyan, Docker), klog, Redis, and `dmesg -T` timestamps. A record that spans several lines, such as a stack trace, is folded into the line that started it, so patterns and the timeline count records while search still finds every line.
 - Configuration files and command output are kept verbatim: searched and read, never templated or given a severity.
 - Indexing redacts recognized secrets and flags suspicious instructions in logs.
-- Guide checks validate cited files and lines and flag risky commands. Review the guide and its warnings before acting.
+- Guide checks verify that every cited line exists and shows what the citation claims, label risky commands, and block unsafe ones. Review the guide and its warnings before acting.
 - Inference requests go to the model endpoints you configure, including embedding and reranking servers when enabled.
 - Runtime data lives in `var/`, which Git ignores. `tests/fixtures/` holds synthetic samples only; keep real evidence out.
 
@@ -177,7 +177,7 @@ Tests mock the model and need no GPU. The browser tests in `tests/e2e/` run sepa
 | [src/blacksite/learning](src/blacksite/learning/) | Outcome reports, reflection, and the store of cases and lessons |
 | [src/blacksite/auth](src/blacksite/auth/), [audit](src/blacksite/audit/) | Accounts and sign-in, the audit ledger, and guide provenance |
 | [src/blacksite/web](src/blacksite/web/) | The web app: API, dashboard, admin console, and front end |
-| [src/blacksite](src/blacksite/) | The CLI, settings, model servers and checks, USB mode, and exported reports |
+| [src/blacksite](src/blacksite/) | The CLI, settings, model profiles, servers, and checks, evaluation, install bundles, USB mode, and exported reports |
 | [tests](tests/) | The test suite, with synthetic sample incidents and runbooks in `tests/fixtures/` |
 | [demo](demo/) | Example configs, the Ollama Modelfile, and sample runbooks |
 | [scripts](scripts/) | Tools that record the demo videos and rebuild the banner |

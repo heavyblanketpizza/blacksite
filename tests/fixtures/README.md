@@ -7,3 +7,7 @@ are kept out of Git.
 `tests/test_fixtures.py` enforces this: addresses must be private, loopback, or reserved
 for documentation (RFC 1918, RFC 5737), hosts must use reserved names (RFC 2606), and any
 line that the redaction rules would mask must be marked `EXAMPLE` or use a known fake password.
+
+Each incident's `incident.json` also carries an `expected` block: the labels `blacksite eval`
+scores a guide against. `tests/test_fixtures.py` checks that every incident has one and that
+the files it names exist.
