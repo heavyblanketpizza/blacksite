@@ -1,9 +1,9 @@
 """What the agent hands the developer, and the checks run before they see it.
 
 The checks are deterministic code, not another model call: every cited line must
-exist in the evidence, state-changing commands are labelled by risk, and risky steps
-need a way back. Problems the model can fix are sent back to it once; anything left
-over is shown to the developer as a warning.
+exist in the evidence and contain what the citation says it shows, state-changing
+commands are labelled by risk, and risky steps need a way back. Problems the model can
+fix are sent back to it once; anything left over is shown to the developer as a warning.
 """
 
 from __future__ import annotations
@@ -75,6 +75,20 @@ _REF = re.compile(r"^\s*(?P<file>[^\s:][^:]*?):(?P<spans>\d+(?:\s*[-–]\s*\d+)?
 _SPAN = re.compile(r"(\d+)(?:\s*[-–]\s*(\d+))?")
 _CASE_REF = re.compile(r"^case-\d{4,}$")
 
+# A citation's claim must name or quote something in the cited lines. Quoted fragments
+# count first; then words of four letters or more, lightly stemmed, that are not filler.
+_QUOTED = re.compile(r"[`\"“”]([^`\"“”\n]{3,})[`\"“”]")
+_CLAIM_TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9_.:/-]{3,}|\d{3,}")
+_CLAIM_FILLER = frozenset("""
+    this that these those shows show showing shown line lines evidence indicates indicating confirms confirming
+    proves prove means meaning there their they them with without from when while after before until because
+    which where what here then than also each every about being been were have having will would could should
+    does done just more most some such only same other very first last again still started starts starting
+    begins began beginning time times repeated repeatedly several multiple many once twice happens happened
+    occurs occurred right into over under above below around another itself cited note notes
+""".split())
+MAX_SUPPORT_LINES = 60
+
 # Commands that change state: (pattern, minimum risk, reason key). See REASONS for labels.
 _RISK_RULES: list[tuple[str, Risk, str]] = [
     (r"\brm\s+(-\w*[rf]\w*\s+)", "high", "recursive_delete"),
@@ -140,6 +154,15 @@ def review_guide(guide: Guide, evidence: Evidence, known_docs: AbstractSet[str] 
     if good:
         checks.append(Check("ok", f"{count(good, 'citation')} verified against the evidence", "citations_ok",
                             {"count": good}))
+    unsupported = [citation.ref for citation in guide.evidence
+                   if citation.ref not in bad_refs and supports(citation, evidence) is False]
+    if unsupported:
+        listed = ", ".join(unsupported)
+        fixes.append(f"The cited lines do not contain what these citations say they show: {listed}. "
+                     "Cite the line that shows it, or quote a few of its words in the citation.")
+        checks.append(Check("warn", f"{count(len(unsupported), 'citation')} may not show what "
+                                    f"{'it claims' if len(unsupported) == 1 else 'they claim'}: {listed}",
+                            "citations_unsupported", {"count": len(unsupported), "refs": listed}))
 
     for number, step in enumerate(guide.steps, 1):
         for command in step.commands:
@@ -173,6 +196,41 @@ def review_guide(guide: Guide, evidence: Evidence, known_docs: AbstractSet[str] 
 def count(n: int, noun: str) -> str:
     """'1 citation', '3 citations'."""
     return f"{n} {noun}{'' if n == 1 else 's'}"
+
+
+def supports(citation: Citation, evidence: Evidence) -> bool | None:
+    """Whether the cited lines contain what the citation says they show.
+
+    None when it cannot be judged: a runbook or case reference, lines that cannot be
+    read, or a claim that names nothing (filler only, or no Latin text at all).
+    """
+    parsed = parse_reference(citation.ref)
+    if parsed is None:
+        return None
+    file, spans = parsed
+    try:
+        rows = [row for start, end in spans
+                for row in evidence.read_lines(file, start, min(end, start + MAX_SUPPORT_LINES - 1))]
+    except EvidenceError:
+        return None
+    haystack = "\n".join(row.text for row in rows).lower()
+    if not haystack.strip():
+        return None
+    if any(fragment.lower() in haystack for fragment in _QUOTED.findall(citation.shows)):
+        return True
+    names = {part.lower() for part in re.split(r"[/.:]", file)}  # the file's own name proves nothing
+    stems = {_stem(token.lower()) for token in _CLAIM_TOKEN.findall(citation.shows)
+             if token.lower() not in _CLAIM_FILLER and token.lower() not in names}
+    if not stems:
+        return None
+    return any(stem in haystack for stem in stems)
+
+
+def _stem(word: str) -> str:
+    for suffix in ("ing", "ies", "ed", "es", "s"):
+        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
+            return word[: -len(suffix)]
+    return word
 
 
 # Guides recorded before checks carried codes: recognise their text so the page can
@@ -227,7 +285,7 @@ Confidence: <high, medium, or low>
 <The underlying cause, citing file:line.>
 
 ## Evidence
-- file:line: <what this line proves>
+- file:line: <what this line proves, naming or quoting words from it>
 
 ## Steps
 ### 1. <Imperative title> (read-only)

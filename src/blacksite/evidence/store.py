@@ -24,6 +24,7 @@ import csv
 import gzip
 import hashlib
 import json
+import multiprocessing
 import os
 import tempfile
 import threading
@@ -651,7 +652,9 @@ class _Ingest:
 
         total = sum(path.stat().st_size for path, _, _ in jobs)
         if self.settings.parallel and len(jobs) > 1 and total >= POOL_MIN_BYTES:
-            with ProcessPoolExecutor(max_workers=min(len(jobs), os.cpu_count() or 1)) as pool:
+            # Spawned workers start clean on every platform; forking a process with threads can deadlock.
+            context = multiprocessing.get_context("spawn")
+            with ProcessPoolExecutor(max_workers=min(len(jobs), os.cpu_count() or 1), mp_context=context) as pool:
                 futures = [pool.submit(ingest_file, path, relative, csv_path, self.settings, year)
                            for path, relative, csv_path in jobs]
                 for future in as_completed(futures):

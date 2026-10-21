@@ -8,12 +8,14 @@ from pydantic_ai.models.function import AgentInfo, DeltaThinkingPart, DeltaToolC
 
 from blacksite.agent.guide import (
     AnswerFormatError,
+    Citation,
     Guide,
     InfoRequest,
     command_risk,
     parse_answer,
     review_guide,
     review_request,
+    supports,
 )
 from blacksite.agent.investigator import CONVERSATION_FILE, Investigator
 from blacksite.evidence.store import Evidence
@@ -107,6 +109,31 @@ def test_review_verifies_citations_against_the_evidence(evidence: Evidence) -> N
     checks, fixes = review_guide(guide, evidence)
     assert "app/app.log:9999" in fixes[0] and "invented.log:1" in fixes[0]
     assert any(c.level == "error" for c in checks)
+
+
+def test_review_checks_that_cited_lines_show_what_the_citation_claims(evidence: Evidence) -> None:
+    guide = parse_answer(GUIDE)
+    assert review_guide(guide, evidence)[1] == []
+    guide.evidence[1].shows = "nginx returned 502 to every client"
+    checks, fixes = review_guide(guide, evidence)
+    assert len(fixes) == 1 and "kern.log:3, 6" in fixes[0] and "quote" in fixes[0]
+    assert [(check.code, check.params["count"]) for check in checks if check.level == "warn"] == [
+        ("citations_unsupported", 1)]
+    guide.evidence[1].shows = 'the kernel logged "Killed process" twice'
+    assert review_guide(guide, evidence)[1] == []
+
+
+@pytest.mark.parametrize(("ref", "shows", "verdict"), [
+    ("app/app.log:3", "max_entries is unbounded", True),
+    ("app/app.log:3", "the heap is exhausted", False),
+    ("app/app.log:3", "앱 캐시에 항목 제한이 없음", None),  # nothing in Latin letters to look for
+    ("app/app.log:3", "this line shows the evidence", None),  # filler only
+    ("runbooks/oom.md:1-4", "the runbook says to restart", None),  # not an evidence file
+    ("case-0001", "a past incident", None),
+])
+def test_support_is_judged_only_when_a_claim_names_something(evidence: Evidence, ref: str, shows: str,
+                                                              verdict: bool | None) -> None:
+    assert supports(Citation(ref=ref, shows=shows), evidence) is verdict
 
 
 def test_review_raises_risk_and_blocks_unsafe_commands(evidence: Evidence) -> None:

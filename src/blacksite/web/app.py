@@ -552,6 +552,7 @@ async def _create_incident(state: DemoState, request: Request) -> Response:
             continue
         with (artifacts / name).open("wb") as stream:
             shutil.copyfileobj(upload.file, stream)
+        await upload.close()
         count += 1
     if not count:
         shutil.rmtree(target)
