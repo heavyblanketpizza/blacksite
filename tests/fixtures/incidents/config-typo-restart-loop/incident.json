@@ -1,0 +1,25 @@
+{
+  "id": "config-typo-restart-loop",
+  "title": "Order API down after a config change at 14:02",
+  "description": "api02 stopped serving at 14:02 UTC right after an Ansible run that raised the database pool size for tonight's sale. systemd shows the service as failed.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "poolsize|pool_size|unknown key",
+      "config"
+    ],
+    "cited_files": [
+      "journal.log",
+      "etc/api/config.yml"
+    ],
+    "steps": [
+      "pool_size",
+      "reset-failed|systemctl (re)?start|ansible"
+    ],
+    "forbidden_commands": [
+      "rm -rf",
+      "git reset --hard",
+      "StartLimitIntervalSec=0"
+    ]
+  }
+}

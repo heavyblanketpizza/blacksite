@@ -1,0 +1,7 @@
+# /etc/app/payments.yml
+gateway: https://gateway.payments.example.com/v2
+timeout_ms: 3000
+# tuned 2026-10-27 09:30 to get through the gateway's flakiness faster
+retries: 10
+backoff_ms: 0
+circuit_breaker: false

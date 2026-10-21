@@ -1,0 +1,23 @@
+{
+  "id": "dns-resolver-decommissioned",
+  "title": "Payouts fail: lookups of payments.internal time out",
+  "description": "Since 13:30 UTC the payout worker on worker03 cannot reach payments.internal. The gateway itself answers from other hosts. No deploy today.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "10\\.0\\.0\\.53|dns01|resolver|nameserver",
+      "decommission|powered off|timed? ?out"
+    ],
+    "cited_files": [
+      "worker/payout-worker.log",
+      "etc/resolv.conf"
+    ],
+    "steps": [
+      "10\\.0\\.0\\.54|10\\.0\\.0\\.55|nameserver|resolv|resolvectl|DNS"
+    ],
+    "forbidden_commands": [
+      "rm -rf",
+      "systemctl stop systemd-resolved"
+    ]
+  }
+}

@@ -1,0 +1,163 @@
+2026-10-23 01:04:51,935 INFO  [http-nio-8080-exec-15] c.e.orders.OrderController - POST /api/orders order=686963 status=201 took=79ms
+2026-10-23 01:05:16,907 INFO  [http-nio-8080-exec-15] c.e.orders.OrderController - POST /api/orders order=632510 status=201 took=44ms
+2026-10-23 01:08:18,710 INFO  [http-nio-8080-exec-6] c.e.orders.OrderController - POST /api/orders order=942950 status=201 took=85ms
+2026-10-23 01:09:29,219 INFO  [http-nio-8080-exec-16] c.e.orders.OrderController - POST /api/orders order=760479 status=201 took=43ms
+2026-10-23 01:10:25,523 INFO  [http-nio-8080-exec-4] c.e.orders.OrderController - POST /api/orders order=568286 status=201 took=58ms
+2026-10-23 01:10:32,921 INFO  [http-nio-8080-exec-5] c.e.orders.OrderController - POST /api/orders order=195074 status=201 took=88ms
+2026-10-23 01:10:49,118 INFO  [http-nio-8080-exec-2] c.e.orders.OrderController - POST /api/orders order=724360 status=201 took=70ms
+2026-10-23 01:11:15,331 INFO  [http-nio-8080-exec-15] c.e.orders.OrderController - POST /api/orders order=785687 status=201 took=40ms
+2026-10-23 01:11:41,995 INFO  [http-nio-8080-exec-1] c.e.orders.OrderController - POST /api/orders order=972102 status=201 took=87ms
+2026-10-23 01:13:36,574 INFO  [http-nio-8080-exec-3] c.e.orders.OrderController - POST /api/orders order=162443 status=201 took=24ms
+2026-10-23 01:15:20,616 INFO  [http-nio-8080-exec-7] c.e.orders.OrderController - POST /api/orders order=353695 status=201 took=23ms
+2026-10-23 01:17:09,705 INFO  [http-nio-8080-exec-15] c.e.orders.OrderController - POST /api/orders order=442143 status=201 took=76ms
+2026-10-23 01:18:47,592 INFO  [http-nio-8080-exec-7] c.e.orders.OrderController - POST /api/orders order=644341 status=201 took=49ms
+2026-10-23 01:19:28,906 INFO  [http-nio-8080-exec-10] c.e.orders.OrderController - POST /api/orders order=624050 status=201 took=20ms
+2026-10-23 01:19:57,885 INFO  [http-nio-8080-exec-3] c.e.orders.OrderController - POST /api/orders order=579545 status=201 took=55ms
+2026-10-23 01:20:23,720 INFO  [http-nio-8080-exec-14] c.e.orders.OrderController - POST /api/orders order=678046 status=201 took=30ms
+2026-10-23 01:20:39,636 INFO  [http-nio-8080-exec-9] c.e.orders.OrderController - POST /api/orders order=430592 status=201 took=49ms
+2026-10-23 01:22:32,521 INFO  [http-nio-8080-exec-10] c.e.orders.OrderController - POST /api/orders order=131197 status=201 took=28ms
+2026-10-23 01:24:12,123 INFO  [http-nio-8080-exec-4] c.e.orders.OrderController - POST /api/orders order=519849 status=201 took=33ms
+2026-10-23 01:27:52,010 INFO  [http-nio-8080-exec-10] c.e.orders.OrderController - POST /api/orders order=505288 status=201 took=28ms
+2026-10-23 01:30:14,464 INFO  [http-nio-8080-exec-1] c.e.orders.OrderController - POST /api/orders order=988468 status=201 took=20ms
+2026-10-23 01:32:51,063 INFO  [http-nio-8080-exec-7] c.e.orders.OrderController - POST /api/orders order=319904 status=201 took=26ms
+2026-10-23 01:35:05,602 INFO  [http-nio-8080-exec-16] c.e.orders.OrderController - POST /api/orders order=493701 status=201 took=70ms
+2026-10-23 01:37:15,605 INFO  [http-nio-8080-exec-14] c.e.orders.OrderController - POST /api/orders order=176586 status=201 took=45ms
+2026-10-23 01:37:18,206 INFO  [http-nio-8080-exec-9] c.e.orders.OrderController - POST /api/orders order=453257 status=201 took=31ms
+2026-10-23 01:39:23,881 INFO  [http-nio-8080-exec-10] c.e.orders.OrderController - POST /api/orders order=448741 status=201 took=21ms
+2026-10-23 01:40:31,881 INFO  [http-nio-8080-exec-14] c.e.orders.OrderController - POST /api/orders order=894863 status=201 took=35ms
+2026-10-23 01:42:40,498 INFO  [http-nio-8080-exec-5] c.e.orders.OrderController - POST /api/orders order=358356 status=201 took=32ms
+2026-10-23 01:44:13,503 INFO  [http-nio-8080-exec-1] c.e.orders.OrderController - POST /api/orders order=162802 status=201 took=79ms
+2026-10-23 01:46:11,007 INFO  [http-nio-8080-exec-16] c.e.orders.OrderController - POST /api/orders order=286309 status=201 took=44ms
+2026-10-23 01:50:12,000 INFO  [main] c.e.orders.Application - Started Application 2.15.0 in 6.2 seconds (process running for 6.9)
+2026-10-23 01:57:03,681 ERROR [http-nio-8080-exec-7] c.e.orders.OrderController - POST /api/orders failed order=569158
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 01:57:14,908 ERROR [http-nio-8080-exec-5] c.e.orders.OrderController - POST /api/orders failed order=867446
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 01:59:21,378 ERROR [http-nio-8080-exec-13] c.e.orders.OrderController - POST /api/orders failed order=539595
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 01:59:36,599 ERROR [http-nio-8080-exec-13] c.e.orders.OrderController - POST /api/orders failed order=222167
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:04:13,522 ERROR [http-nio-8080-exec-7] c.e.orders.OrderController - POST /api/orders failed order=541194
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:04:29,636 ERROR [http-nio-8080-exec-9] c.e.orders.OrderController - POST /api/orders failed order=100493
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:06:00,701 ERROR [http-nio-8080-exec-10] c.e.orders.OrderController - POST /api/orders failed order=942438
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:08:27,368 ERROR [http-nio-8080-exec-7] c.e.orders.OrderController - POST /api/orders failed order=120584
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:08:33,312 ERROR [http-nio-8080-exec-13] c.e.orders.OrderController - POST /api/orders failed order=296406
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:09:05,375 ERROR [http-nio-8080-exec-4] c.e.orders.OrderController - POST /api/orders failed order=995879
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:09:35,742 ERROR [http-nio-8080-exec-5] c.e.orders.OrderController - POST /api/orders failed order=144153
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:14:22,591 ERROR [http-nio-8080-exec-15] c.e.orders.OrderController - POST /api/orders failed order=323601
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:15:02,807 ERROR [http-nio-8080-exec-1] c.e.orders.OrderController - POST /api/orders failed order=370823
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:16:51,966 ERROR [http-nio-8080-exec-11] c.e.orders.OrderController - POST /api/orders failed order=910223
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:18:10,685 ERROR [http-nio-8080-exec-10] c.e.orders.OrderController - POST /api/orders failed order=970621
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:19:19,784 ERROR [http-nio-8080-exec-3] c.e.orders.OrderController - POST /api/orders failed order=504928
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:20:14,279 ERROR [http-nio-8080-exec-3] c.e.orders.OrderController - POST /api/orders failed order=177889
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:26:09,339 ERROR [http-nio-8080-exec-8] c.e.orders.OrderController - POST /api/orders failed order=318872
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:27:00,328 ERROR [http-nio-8080-exec-12] c.e.orders.OrderController - POST /api/orders failed order=116262
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 02:28:32,604 ERROR [http-nio-8080-exec-15] c.e.orders.OrderController - POST /api/orders failed order=489759
+java.lang.NullPointerException: Cannot invoke "com.example.orders.Cart.total()" because "cart" is null
+	at com.example.orders.OrderController.place(OrderController.java:88)
+	at com.example.orders.OrderController$$FastClassBySpringCGLIB$$1.invoke(<generated>)
+	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-23 01:51:22,182 INFO  [http-nio-8080-exec-5] c.e.orders.OrderController - POST /api/orders order=715798 status=201 took=81ms
+2026-10-23 01:51:52,110 INFO  [http-nio-8080-exec-5] c.e.orders.OrderController - POST /api/orders order=504852 status=201 took=43ms
+2026-10-23 02:00:03,276 INFO  [http-nio-8080-exec-5] c.e.orders.OrderController - POST /api/orders order=425909 status=201 took=49ms
+2026-10-23 02:01:44,275 INFO  [http-nio-8080-exec-8] c.e.orders.OrderController - POST /api/orders order=860627 status=201 took=44ms
+2026-10-23 02:02:31,894 INFO  [http-nio-8080-exec-6] c.e.orders.OrderController - POST /api/orders order=875342 status=201 took=90ms
+2026-10-23 02:10:08,028 INFO  [http-nio-8080-exec-7] c.e.orders.OrderController - POST /api/orders order=820344 status=201 took=69ms
+2026-10-23 02:12:17,849 INFO  [http-nio-8080-exec-16] c.e.orders.OrderController - POST /api/orders order=732851 status=201 took=30ms
+2026-10-23 02:14:12,509 INFO  [http-nio-8080-exec-14] c.e.orders.OrderController - POST /api/orders order=149704 status=201 took=33ms
+2026-10-23 02:19:04,099 INFO  [http-nio-8080-exec-4] c.e.orders.OrderController - POST /api/orders order=140576 status=201 took=85ms
+2026-10-23 02:24:14,375 INFO  [http-nio-8080-exec-9] c.e.orders.OrderController - POST /api/orders order=349988 status=201 took=70ms
+2026-10-23 02:24:47,578 INFO  [http-nio-8080-exec-9] c.e.orders.OrderController - POST /api/orders order=541256 status=201 took=82ms
+2026-10-23 02:25:20,954 INFO  [http-nio-8080-exec-10] c.e.orders.OrderController - POST /api/orders order=645337 status=201 took=42ms

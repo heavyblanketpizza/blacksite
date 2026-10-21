@@ -1,0 +1,2 @@
+# /etc/cron.d/app-sessions
+# 15 * * * * app /usr/local/bin/app sessions gc   (disabled 2026-07-02, see ticket APP-2211)

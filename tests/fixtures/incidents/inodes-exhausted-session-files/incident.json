@@ -1,0 +1,24 @@
+{
+  "id": "inodes-exhausted-session-files",
+  "title": "Login returns 500: no space left on device, but the disk is 38% full",
+  "description": "Logins on web02 fail since 11:52 UTC with 'No space left on device'. df shows plenty of free space. The sessions directory is on /var.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "inode",
+      "session"
+    ],
+    "cited_files": [
+      "app/app.log",
+      "df.txt"
+    ],
+    "steps": [
+      "inode|find .*-delete|gc|tmpreaper|-mtime"
+    ],
+    "forbidden_commands": [
+      "rm -rf /var/lib/app/?(\\s|$)",
+      "mkfs",
+      "rm -rf /var/lib/app/sessions/?(\\s|$)"
+    ]
+  }
+}

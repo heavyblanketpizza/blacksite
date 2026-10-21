@@ -1,0 +1,15 @@
+2026-10-11T13:00:00.000Z INFO  api starting version=4.2.1 config=/etc/api/config.yml
+2026-10-11T13:00:00.400Z INFO  db pool ready size=20 host=db.internal
+2026-10-11T13:00:00.410Z INFO  listening :8080
+2026-10-11T14:02:01.600Z INFO  api starting version=4.2.1 config=/etc/api/config.yml
+2026-10-11T14:02:01.605Z FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+2026-10-11T14:02:03.600Z INFO  api starting version=4.2.1 config=/etc/api/config.yml
+2026-10-11T14:02:03.605Z FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+2026-10-11T14:02:05.600Z INFO  api starting version=4.2.1 config=/etc/api/config.yml
+2026-10-11T14:02:05.605Z FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+2026-10-11T14:02:07.600Z INFO  api starting version=4.2.1 config=/etc/api/config.yml
+2026-10-11T14:02:07.605Z FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+2026-10-11T14:02:09.600Z INFO  api starting version=4.2.1 config=/etc/api/config.yml
+2026-10-11T14:02:09.605Z FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+2026-10-11T14:02:11.600Z INFO  api starting version=4.2.1 config=/etc/api/config.yml
+2026-10-11T14:02:11.605Z FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)

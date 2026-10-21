@@ -1,0 +1,6 @@
+[Wed Oct 21 02:14:04 2026] node invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=0
+[Wed Oct 21 02:14:04 2026] memory: usage 524288kB, limit 524288kB, failcnt 44101
+[Wed Oct 21 02:14:04 2026] Memory cgroup out of memory: Killed process 4321 (node) total-vm:1104812kB, anon-rss:519112kB, file-rss:0kB, shmem-rss:0kB, UID:1000 pgtables:1236kB oom_score_adj:0
+[Wed Oct 21 02:19:12 2026] node invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=0
+[Wed Oct 21 02:19:12 2026] memory: usage 524288kB, limit 524288kB, failcnt 44210
+[Wed Oct 21 02:19:12 2026] Memory cgroup out of memory: Killed process 4412 (node) total-vm:1104812kB, anon-rss:519204kB, file-rss:0kB, shmem-rss:0kB, UID:1000 pgtables:1240kB oom_score_adj:0

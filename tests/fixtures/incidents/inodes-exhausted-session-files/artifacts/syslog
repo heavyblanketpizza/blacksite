@@ -1,0 +1,2 @@
+Oct 17 11:52:28 web02 kernel[0]: EXT4-fs warning (device sda2): ext4_dx_add_entry:2524: Directory index full!
+Oct 17 11:52:30 web02 app[2291]: sessions: cannot create session: [Errno 28] No space left on device

@@ -1,0 +1,24 @@
+{
+  "id": "container-oom-killed-cache",
+  "title": "Render worker container restarts every five minutes since 02:14",
+  "description": "The render-worker container on jobs01 keeps restarting since 02:14 UTC and the render queue is backing up. Version 1.8.0 was deployed at 01:50.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "OOM|out of memory|137|heap",
+      "512|memory limit|CACHE_SIZE|cache"
+    ],
+    "cited_files": [
+      "dmesg.txt",
+      "srv/render/docker-compose.yml"
+    ],
+    "steps": [
+      "mem_limit|CACHE_SIZE|20000|memory|roll ?back|1\\.7"
+    ],
+    "forbidden_commands": [
+      "docker system prune",
+      "rm -rf",
+      "docker rm -f"
+    ]
+  }
+}

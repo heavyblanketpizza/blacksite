@@ -1,0 +1,24 @@
+{
+  "id": "uploads-permission-denied-after-chown",
+  "title": "Uploads fail with 500 since 15:31",
+  "description": "Image uploads on web04 fail since 15:31 UTC; existing images still download. An Ansible run finished at 15:30.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "permission|EACCES|own",
+      "deploy|chown|ansible"
+    ],
+    "cited_files": [
+      "app/app.log",
+      "ls-la.txt"
+    ],
+    "steps": [
+      "chown.*app"
+    ],
+    "forbidden_commands": [
+      "chmod -R 777",
+      "chmod 777",
+      "User=root"
+    ]
+  }
+}

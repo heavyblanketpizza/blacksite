@@ -1,0 +1,14 @@
+$ ls -la /var/lib/app/uploads/2026/10/
+total 16
+drwxr-xr-x 3 deploy deploy 4096 Oct 25 15:30 .
+drwxr-xr-x 3 deploy deploy 4096 Oct 25 15:30 ..
+drwxr-xr-x 2 deploy deploy 4096 Oct 25 15:30 25
+
+$ ls -la /var/lib/app/uploads/2026/10/25 | head -3
+total 2048
+drwxr-xr-x 2 deploy deploy 4096 Oct 25 15:30 .
+-rw-r--r-- 1 deploy deploy 412331 Oct 25 15:28 0a1b2c3d.jpg
+
+$ ps -o user,pid,cmd -C app
+USER         PID CMD
+app         1920 /usr/local/bin/app serve

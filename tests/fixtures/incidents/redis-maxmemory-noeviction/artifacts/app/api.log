@@ -1,0 +1,187 @@
+{"level": 30, "time": 1790929837651, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/3201"}, "res": {"statusCode": 200}, "responseTime": 12}
+{"level": 30, "time": 1790929875507, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/5179"}, "res": {"statusCode": 200}, "responseTime": 15}
+{"level": 30, "time": 1790929905119, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/9117"}, "res": {"statusCode": 200}, "responseTime": 36}
+{"level": 30, "time": 1790929949473, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/8737"}, "res": {"statusCode": 200}, "responseTime": 32}
+{"level": 30, "time": 1790930027583, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/4439"}, "res": {"statusCode": 200}, "responseTime": 14}
+{"level": 30, "time": 1790930036249, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/8993"}, "res": {"statusCode": 200}, "responseTime": 9}
+{"level": 30, "time": 1790930195310, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/7386"}, "res": {"statusCode": 200}, "responseTime": 35}
+{"level": 30, "time": 1790930263497, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/1034"}, "res": {"statusCode": 200}, "responseTime": 36}
+{"level": 30, "time": 1790930277422, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/5363"}, "res": {"statusCode": 200}, "responseTime": 22}
+{"level": 30, "time": 1790930407276, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/2674"}, "res": {"statusCode": 200}, "responseTime": 28}
+{"level": 30, "time": 1790930498188, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/1501"}, "res": {"statusCode": 200}, "responseTime": 9}
+{"level": 30, "time": 1790930561537, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/1416"}, "res": {"statusCode": 200}, "responseTime": 8}
+{"level": 30, "time": 1790930905733, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/7245"}, "res": {"statusCode": 200}, "responseTime": 21}
+{"level": 30, "time": 1790930935472, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/7915"}, "res": {"statusCode": 200}, "responseTime": 9}
+{"level": 30, "time": 1790930947898, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/9644"}, "res": {"statusCode": 200}, "responseTime": 22}
+{"level": 30, "time": 1790930964475, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/8174"}, "res": {"statusCode": 200}, "responseTime": 39}
+{"level": 30, "time": 1790930968781, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/4818"}, "res": {"statusCode": 200}, "responseTime": 30}
+{"level": 30, "time": 1790931054430, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/4782"}, "res": {"statusCode": 200}, "responseTime": 22}
+{"level": 30, "time": 1790931074681, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/8530"}, "res": {"statusCode": 200}, "responseTime": 26}
+{"level": 30, "time": 1790931084890, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/1352"}, "res": {"statusCode": 200}, "responseTime": 34}
+{"level": 30, "time": 1790931103001, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/2638"}, "res": {"statusCode": 200}, "responseTime": 19}
+{"level": 30, "time": 1790931126236, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/5856"}, "res": {"statusCode": 200}, "responseTime": 15}
+{"level": 30, "time": 1790931205028, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/6450"}, "res": {"statusCode": 200}, "responseTime": 40}
+{"level": 30, "time": 1790931274335, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/7915"}, "res": {"statusCode": 200}, "responseTime": 40}
+{"level": 30, "time": 1790931345062, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/4110"}, "res": {"statusCode": 200}, "responseTime": 27}
+{"level": 30, "time": 1790931381005, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/5655"}, "res": {"statusCode": 200}, "responseTime": 39}
+{"level": 30, "time": 1790931407132, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/9278"}, "res": {"statusCode": 200}, "responseTime": 33}
+{"level": 30, "time": 1790931441345, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/1565"}, "res": {"statusCode": 200}, "responseTime": 38}
+{"level": 30, "time": 1790931462748, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/4977"}, "res": {"statusCode": 200}, "responseTime": 33}
+{"level": 30, "time": 1790931540530, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/7788"}, "res": {"statusCode": 200}, "responseTime": 19}
+{"level": 30, "time": 1790931576602, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/7014"}, "res": {"statusCode": 200}, "responseTime": 31}
+{"level": 30, "time": 1790931614000, "pid": 4121, "msg": "deploy 3.9.0 started: cart snapshots cached in redis for 24h (CART_SNAPSHOT_TTL=86400)"}
+{"level": 30, "time": 1790931621000, "pid": 4310, "msg": "server listening", "port": 3000}
+{"level": 30, "time": 1790931629471, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:907952", "bytes": 112302}
+{"level": 30, "time": 1790931634799, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:665829", "bytes": 203743}
+{"level": 30, "time": 1790931662471, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:343454", "bytes": 166025}
+{"level": 30, "time": 1790931663819, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:638728", "bytes": 150131}
+{"level": 30, "time": 1790931673331, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:988627", "bytes": 211465}
+{"level": 30, "time": 1790931720109, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:470434", "bytes": 180358}
+{"level": 30, "time": 1790931721968, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:382359", "bytes": 232809}
+{"level": 30, "time": 1790931733639, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:674615", "bytes": 219631}
+{"level": 30, "time": 1790931790371, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/2416"}, "res": {"statusCode": 200}, "responseTime": 36}
+{"level": 30, "time": 1790931810545, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:864831", "bytes": 61496}
+{"level": 30, "time": 1790931832207, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/9330"}, "res": {"statusCode": 200}, "responseTime": 14}
+{"level": 30, "time": 1790931853855, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:502327", "bytes": 194348}
+{"level": 30, "time": 1790931879831, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:948444", "bytes": 93881}
+{"level": 30, "time": 1790931900374, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:643873", "bytes": 207156}
+{"level": 30, "time": 1790931908941, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/3682"}, "res": {"statusCode": 200}, "responseTime": 33}
+{"level": 30, "time": 1790931914492, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/7070"}, "res": {"statusCode": 200}, "responseTime": 39}
+{"level": 30, "time": 1790931924757, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:315466", "bytes": 171697}
+{"level": 30, "time": 1790931948504, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:158849", "bytes": 186117}
+{"level": 30, "time": 1790932006034, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:482453", "bytes": 209421}
+{"level": 30, "time": 1790932035802, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:681331", "bytes": 112386}
+{"level": 30, "time": 1790932074341, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:629237", "bytes": 168370}
+{"level": 30, "time": 1790932076988, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:608480", "bytes": 153530}
+{"level": 30, "time": 1790932080490, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:534555", "bytes": 150722}
+{"level": 30, "time": 1790932094618, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:101661", "bytes": 201158}
+{"level": 30, "time": 1790932097127, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:666345", "bytes": 223444}
+{"level": 30, "time": 1790932119768, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/1484"}, "res": {"statusCode": 200}, "responseTime": 38}
+{"level": 30, "time": 1790932179519, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:924646", "bytes": 220550}
+{"level": 30, "time": 1790932185348, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:447222", "bytes": 180100}
+{"level": 30, "time": 1790932201573, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:728993", "bytes": 67333}
+{"level": 30, "time": 1790932221542, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/1712"}, "res": {"statusCode": 200}, "responseTime": 27}
+{"level": 30, "time": 1790932245309, "pid": 4310, "msg": "cart snapshot stored", "key": "cart:snapshot:943652", "bytes": 120189}
+{"level": 30, "time": 1790932265305, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/7448"}, "res": {"statusCode": 200}, "responseTime": 18}
+{"level": 30, "time": 1790932299186, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/3762"}, "res": {"statusCode": 200}, "responseTime": 40}
+{"level": 30, "time": 1790932304117, "pid": 4121, "msg": "request completed", "req": {"method": "GET", "url": "/api/cart/4718"}, "res": {"statusCode": 200}, "responseTime": 8}
+{"level": 50, "time": 1790932346097, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:766234", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932346100, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 4}
+{"level": 50, "time": 1790932448426, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:677509", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932448429, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 7}
+{"level": 50, "time": 1790932525089, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:289565", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932525092, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790932547440, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:196051", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932547443, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790932548428, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:677795", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932548431, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790932555510, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:992625", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932555513, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790932576129, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:367695", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932576132, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790932576911, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:982633", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932576914, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790932628166, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:173875", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932628169, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790932643974, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:117501", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932643977, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790932659181, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:115267", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932659184, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790932673367, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:892290", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932673370, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 5}
+{"level": 50, "time": 1790932692985, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:361681", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932692988, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 5}
+{"level": 50, "time": 1790932712558, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:214807", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932712561, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790932721941, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:755152", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932721944, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 4}
+{"level": 50, "time": 1790932730442, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:461153", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932730445, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 5}
+{"level": 50, "time": 1790932730844, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:172892", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932730847, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 4}
+{"level": 50, "time": 1790932761509, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:267379", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932761512, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 5}
+{"level": 50, "time": 1790932767415, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:652998", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932767418, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 4}
+{"level": 50, "time": 1790932771415, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:788554", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932771418, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 5}
+{"level": 50, "time": 1790932800680, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:779689", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932800683, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790932833408, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:408798", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932833411, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790932866631, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:836756", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932866634, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 5}
+{"level": 50, "time": 1790932954348, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:620611", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932954351, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790932958239, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:219737", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790932958242, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790933009222, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:427160", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933009225, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790933068035, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:460020", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933068038, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790933068460, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:934879", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933068463, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 4}
+{"level": 50, "time": 1790933071518, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:370973", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933071521, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790933092072, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:365770", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933092075, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790933119999, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:634895", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933120002, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 4}
+{"level": 50, "time": 1790933167519, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:735068", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933167522, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790933174600, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:956728", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933174603, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790933229963, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:336321", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933229966, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790933244956, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:516615", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933244959, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 4}
+{"level": 50, "time": 1790933284799, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:137042", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933284802, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790933302037, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:268010", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933302040, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790933373962, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:838832", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933373965, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 7}
+{"level": 50, "time": 1790933379011, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:811118", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933379014, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790933453492, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:671161", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933453495, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790933497992, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:331315", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933497995, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790933510618, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:936565", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933510621, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790933512663, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:641693", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933512666, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790933522514, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:334037", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933522517, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 7}
+{"level": 50, "time": 1790933597467, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:780008", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933597470, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790933616120, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:514080", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933616123, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790933622487, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:703818", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933622490, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790933633951, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:436850", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933633954, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790933701366, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:761596", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933701369, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790933709171, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:161640", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933709174, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790933722715, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:413111", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933722718, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 4}
+{"level": 50, "time": 1790933729137, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:322436", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933729140, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790933746360, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:421269", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933746363, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790933758049, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:180159", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933758052, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 5}
+{"level": 50, "time": 1790933777684, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:412349", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933777687, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 8}
+{"level": 50, "time": 1790933797995, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:265892", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933797998, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 6}
+{"level": 50, "time": 1790933799043, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:692383", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933799046, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 5}
+{"level": 50, "time": 1790933836164, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:236725", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933836167, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 3}
+{"level": 50, "time": 1790933971873, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:687954", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790933971876, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 9}
+{"level": 50, "time": 1790934035099, "pid": 4310, "msg": "ReplyError: OOM command not allowed when used memory > 'maxmemory'.", "command": "SET", "key": "cart:snapshot:139758", "err": {"code": "ERR_OOM"}}
+{"level": 50, "time": 1790934035102, "pid": 4310, "msg": "request errored", "req": {"method": "POST", "url": "/api/cart/items"}, "res": {"statusCode": 500}, "responseTime": 7}

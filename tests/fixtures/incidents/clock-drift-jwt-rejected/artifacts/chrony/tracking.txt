@@ -1,0 +1,24 @@
+$ chronyc tracking
+Reference ID    : 0A00000A (ntp.internal)
+Stratum         : 0
+Ref time (UTC)  : Mon Oct 13 06:48:11 2026
+System time     : 312.418 seconds slow of NTP time
+Last offset     : -0.000211 seconds
+RMS offset      : 0.000483 seconds
+Frequency       : 11.902 ppm slow
+Residual freq   : +0.000 ppm
+Skew            : 0.014 ppm
+Root delay      : 0.000000 seconds
+Leap status     : Not synchronised
+
+$ chronyc sources
+MS Name/IP address         Stratum Poll Reach LastRx Last sample
+===============================================================================
+^? ntp.internal                  0   6     0   77m     +0ns[   +0ns] +/-    0ns
+
+$ timedatectl
+               Local time: Mon 2026-10-13 08:00:02 UTC
+           Universal time: Mon 2026-10-13 08:00:02 UTC
+         System clock synchronized: no
+                NTP service: active
+            RTC in local TZ: no

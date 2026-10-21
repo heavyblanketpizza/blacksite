@@ -1,0 +1,3 @@
+2026-10-23T01:49:30.000Z INFO  deploy orders-api 2.15.0 to api01 (from 2.14.3)
+2026-10-23T01:49:31.000Z INFO  changes since 2.14.3: ORD-812 guest checkout without a saved cart, ORD-830 faster totals
+2026-10-23T01:50:14.000Z INFO  deploy orders-api 2.15.0 to api01 finished: healthy

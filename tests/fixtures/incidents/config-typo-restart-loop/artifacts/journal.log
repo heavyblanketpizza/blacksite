@@ -1,0 +1,37 @@
+Oct 11 14:01:58 api02 ansible-playbook[90112]: TASK [api : template config.yml] changed=1 (api02)
+Oct 11 14:01:59 api02 ansible-playbook[90112]: TASK [api : restart api] changed=1 (api02)
+Oct 11 14:02:00 api02 systemd[1]: Stopping api.service - Order API...
+Oct 11 14:02:01 api02 systemd[1]: api.service: Deactivated successfully.
+Oct 11 14:02:01 api02 systemd[1]: Stopped api.service - Order API.
+Oct 11 14:02:01 api02 systemd[1]: Started api.service - Order API.
+Oct 11 14:02:01 api02 api[5000]: FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+Oct 11 14:02:01 api02 systemd[1]: api.service: Main process exited, code=exited, status=1/FAILURE
+Oct 11 14:02:01 api02 systemd[1]: api.service: Failed with result 'exit-code'.
+Oct 11 14:02:02 api02 systemd[1]: api.service: Scheduled restart job, restart counter is at 1.
+Oct 11 14:02:03 api02 systemd[1]: Started api.service - Order API.
+Oct 11 14:02:03 api02 api[5001]: FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+Oct 11 14:02:03 api02 systemd[1]: api.service: Main process exited, code=exited, status=1/FAILURE
+Oct 11 14:02:03 api02 systemd[1]: api.service: Failed with result 'exit-code'.
+Oct 11 14:02:04 api02 systemd[1]: api.service: Scheduled restart job, restart counter is at 2.
+Oct 11 14:02:05 api02 systemd[1]: Started api.service - Order API.
+Oct 11 14:02:05 api02 api[5002]: FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+Oct 11 14:02:05 api02 systemd[1]: api.service: Main process exited, code=exited, status=1/FAILURE
+Oct 11 14:02:05 api02 systemd[1]: api.service: Failed with result 'exit-code'.
+Oct 11 14:02:06 api02 systemd[1]: api.service: Scheduled restart job, restart counter is at 3.
+Oct 11 14:02:07 api02 systemd[1]: Started api.service - Order API.
+Oct 11 14:02:07 api02 api[5003]: FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+Oct 11 14:02:07 api02 systemd[1]: api.service: Main process exited, code=exited, status=1/FAILURE
+Oct 11 14:02:07 api02 systemd[1]: api.service: Failed with result 'exit-code'.
+Oct 11 14:02:08 api02 systemd[1]: api.service: Scheduled restart job, restart counter is at 4.
+Oct 11 14:02:09 api02 systemd[1]: Started api.service - Order API.
+Oct 11 14:02:09 api02 api[5004]: FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+Oct 11 14:02:09 api02 systemd[1]: api.service: Main process exited, code=exited, status=1/FAILURE
+Oct 11 14:02:09 api02 systemd[1]: api.service: Failed with result 'exit-code'.
+Oct 11 14:02:10 api02 systemd[1]: api.service: Scheduled restart job, restart counter is at 5.
+Oct 11 14:02:11 api02 systemd[1]: Started api.service - Order API.
+Oct 11 14:02:11 api02 api[5005]: FATAL config: unknown key "db.poolsize" in /etc/api/config.yml (did you mean "db.pool_size"?)
+Oct 11 14:02:11 api02 systemd[1]: api.service: Main process exited, code=exited, status=1/FAILURE
+Oct 11 14:02:11 api02 systemd[1]: api.service: Failed with result 'exit-code'.
+Oct 11 14:02:12 api02 systemd[1]: api.service: Start request repeated too quickly.
+Oct 11 14:02:12 api02 systemd[1]: api.service: Failed with result 'start-limit-hit'.
+Oct 11 14:02:12 api02 systemd[1]: Failed to start api.service - Order API.

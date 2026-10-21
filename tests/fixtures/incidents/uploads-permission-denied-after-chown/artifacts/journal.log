@@ -1,0 +1,3 @@
+Oct 25 15:30:02 web04 ansible-playbook[40221]: TASK [app : ensure app directories] changed=1 (web04) path=/var/lib/app owner=deploy group=deploy recurse=true
+Oct 25 15:30:09 web04 ansible-playbook[40221]: TASK [app : restart app] skipped (web04)
+Oct 25 15:30:10 web04 ansible-playbook[40221]: PLAY RECAP web04 : ok=12 changed=1 unreachable=0 failed=0

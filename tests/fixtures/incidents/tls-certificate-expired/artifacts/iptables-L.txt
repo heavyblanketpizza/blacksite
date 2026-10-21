@@ -1,0 +1,5 @@
+Chain INPUT (policy DROP)
+target     prot opt source               destination
+ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0            tcp dpt:443
+ACCEPT     tcp  --  10.0.0.0/8           0.0.0.0/0            tcp dpt:22
+DROP       tcp  --  0.0.0.0/0            0.0.0.0/0            tcp dpt:80

@@ -106,6 +106,17 @@ def _parser() -> argparse.ArgumentParser:
     command.add_argument("--reset", action="store_true", help="Forget the previous conversation")
     command.set_defaults(handler=_investigate)
 
+    command = commands.add_parser("eval", help="Score the agent on labeled incidents with each switch on or off")
+    command.add_argument("incident", type=Path, nargs="+", help="Incident directories, or directories of them")
+    command.add_argument("--presets", default="baseline", metavar="NAMES",
+                         help="Comma-separated presets, e.g. baseline,rag,all (default: baseline)")
+    command.add_argument("--repeat", type=int, default=1, help="Runs per incident and preset (default: 1)")
+    command.add_argument("--out", type=Path, help="Write one JSON line per run here")
+    command.add_argument("--report", type=Path, help="Write the Markdown scorecard here as well as printing it")
+    command.add_argument("--work", type=Path,
+                         help="Keep each run's copy of the incident here (default: a temporary directory)")
+    command.set_defaults(handler=_eval)
+
     command = commands.add_parser("demo", help="Run the local web demo")
     command.add_argument("--incidents", type=Path, default=Path("var/incidents"), help="Where incidents are stored")
     command.add_argument("--host", default="127.0.0.1")
@@ -414,6 +425,39 @@ def _investigate(args: argparse.Namespace, settings: Settings) -> int:
         return status
 
     return anyio.run(run)
+
+
+def _eval(args: argparse.Namespace, settings: Settings) -> int:
+    import tempfile
+    from contextlib import AbstractContextManager, nullcontext
+
+    from .evaluation import Expected, Result, evaluate, find_incidents, report_markdown
+
+    incidents = find_incidents(args.incident)
+    labeled = [path for path in incidents if Expected.load(path) is not None]
+    if not labeled:
+        raise EvidenceError("No labeled incidents: add an expected block to incident.json (see the README)")
+    if len(labeled) < len(incidents):
+        print(f"Skipping {len(incidents) - len(labeled)} incident(s) without an expected block", file=sys.stderr)
+    presets = [name.strip() for name in args.presets.split(",") if name.strip()]
+
+    def show(result: Result) -> None:
+        score = result.score
+        state = "pass" if score.passed else "FAIL: " + "; ".join(score.problems)
+        print(f"{result.incident}  {result.preset}  run {result.run}: {state} "
+              f"({score.seconds:.0f} s, {score.tool_calls} tool calls)", flush=True)
+
+    keep: AbstractContextManager[str] = (nullcontext(str(args.work)) if args.work
+                                         else tempfile.TemporaryDirectory(prefix="blacksite-eval-"))
+    with keep as work:
+        results = evaluate(labeled, presets, Path(work), args.config, args.set, args.repeat, progress=show)
+    if args.out:
+        args.out.write_text("".join(json.dumps(result.as_json()) + "\n" for result in results), encoding="utf-8")
+    report = report_markdown(results)
+    if args.report:
+        args.report.write_text(report, encoding="utf-8")
+    print("\n" + report, end="")
+    return 0 if all(result.score.passed for result in results) else 1
 
 
 def _demo(args: argparse.Namespace, settings: Settings) -> int:

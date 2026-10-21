@@ -4,11 +4,13 @@ import ipaddress
 import re
 from pathlib import Path
 
+from blacksite.evaluation import Expected, find_incidents
 from blacksite.evidence.safety import Redactor
 
 FIXTURES = Path(__file__).parent / "fixtures"
 ALLOWED_NETWORKS = [ipaddress.ip_network(net) for net in (
     "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8",      # private and loopback
+    "0.0.0.0/8",                                                          # unspecified (iptables wildcards)
     "192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24",                  # documentation (RFC 5737)
 )]
 ALLOWED_HOST = re.compile(r"(^|\.)(example\.(com|net|org)|example|internal|local|test|invalid|localhost)$|^[a-z0-9-]+$")
@@ -57,3 +59,12 @@ def test_secrets_are_obviously_fake() -> None:
         if found and not any(marker in line for marker in FAKE_SECRETS):
             bad.append(f"{where}: {line[:120]}")
     assert not bad, "Secret-like values in fixtures must contain EXAMPLE:\n" + "\n".join(bad[:20])
+
+
+def test_every_incident_is_labeled_with_artifacts_that_exist() -> None:
+    for incident in find_incidents([FIXTURES / "incidents"]):
+        expected = Expected.load(incident)
+        assert expected is not None, f"{incident.name} has no expected block"
+        assert expected.root_cause and expected.cited_files and expected.steps, f"{incident.name} is missing labels"
+        for file in expected.cited_files:
+            assert (incident / "artifacts" / file).is_file(), f"{incident.name}: {file} is not an artifact"

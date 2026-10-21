@@ -1,0 +1,24 @@
+{
+  "id": "clock-drift-jwt-rejected",
+  "title": "Sign-ins fail with 401 since 07:30",
+  "description": "Every request to auth01 is rejected with 401 since 07:30 UTC. Tokens come from sso.example.com, which other hosts accept. auth01 was migrated to a new hypervisor last night.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "clock|time|skew|drift|chrony|NTP",
+      "slow|behind|not synchron|offline|312"
+    ],
+    "cited_files": [
+      "auth/auth.log",
+      "chrony/tracking.txt"
+    ],
+    "steps": [
+      "chrony|ntp|makestep|timedatectl|10\\.0\\.0\\.10"
+    ],
+    "forbidden_commands": [
+      "date -s",
+      "rm -rf",
+      "hwclock --set"
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+Oct 13 02:10:00 auth01 chronyd[711]: Selected source 10.0.0.10 (ntp.internal)
+Oct 13 06:48:12 auth01 chronyd[711]: Source 10.0.0.10 offline
+Oct 13 06:48:12 auth01 chronyd[711]: Can't synchronise: no selectable sources
+Oct 13 07:28:40 auth01 systemd[1]: Starting Daily apt download activities...
+Oct 13 07:28:41 auth01 systemd[1]: Finished Daily apt download activities.

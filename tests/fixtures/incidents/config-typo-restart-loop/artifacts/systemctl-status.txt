@@ -1,0 +1,6 @@
+× api.service - Order API
+     Loaded: loaded (/etc/systemd/system/api.service; enabled; preset: enabled)
+     Active: failed (Result: start-limit-hit) since Sat 2026-10-11 14:02:12 UTC; 4min ago
+    Process: 5005 ExecStart=/usr/local/bin/api (code=exited, status=1/FAILURE)
+   Main PID: 5005 (code=exited, status=1/FAILURE)
+        CPU: 112ms

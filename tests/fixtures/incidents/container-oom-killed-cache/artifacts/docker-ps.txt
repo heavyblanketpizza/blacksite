@@ -1,0 +1,6 @@
+$ docker ps -a --filter name=render
+CONTAINER ID   IMAGE                                      STATUS                          NAMES
+9f1c2a3b4d5e   registry.example.com/render-worker:1.8.0   Restarting (137) 28 seconds ago   render-render-worker-1
+
+$ docker inspect render-render-worker-1 --format '{{.State.OOMKilled}} {{.HostConfig.Memory}}'
+true 536870912

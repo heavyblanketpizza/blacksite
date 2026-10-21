@@ -40,6 +40,10 @@ _SYSLOG = re.compile(r"^(?P<mon>[A-Z][a-z]{2}) {1,2}(?P<d>\d{1,2}) (?P<time>\d{2
 # Apache error logs and `dmesg -T`: [Tue Oct 21 02:14:05.123456 2026]
 _CTIME = re.compile(r"[A-Z][a-z]{2} (?P<mon>[A-Z][a-z]{2}) {1,2}(?P<d>\d{1,2}) (?P<time>\d{2}:\d{2}:\d{2})"
                     r"(?:\.(?P<frac>\d{1,6}))? (?P<y>\d{4})")
+# Redis: 882:M 02 Oct 2026 09:12:01.097 # WARNING ...; the mark is the level.
+_REDIS = re.compile(r"^(?P<pid>\d+):(?P<role>[MSCX]) (?P<d>\d{1,2}) (?P<mon>[A-Z][a-z]{2}) (?P<y>\d{4}) "
+                    r"(?P<time>\d{2}:\d{2}:\d{2})(?:\.(?P<frac>\d{1,6}))? (?P<mark>[#*\-.]) ")
+_REDIS_LEVELS = {"#": "warning", "*": "info", "-": "debug", ".": "debug"}
 # Kubernetes components (klog): I1021 02:14:05.123456       1 main.go:42] started
 _KLOG = re.compile(r"^(?P<lvl>[IWEF])(?P<m>\d{2})(?P<d>\d{2}) (?P<time>\d{2}:\d{2}:\d{2})(?:\.(?P<frac>\d{1,6}))?"
                    r"\s+\d+\s+[\w./-]+:\d+\] ")
@@ -103,6 +107,9 @@ class LineParser:
         if match:
             ts = self._yearless(int(match["m"]), int(match["d"]), match["time"], match["frac"])
             return ParsedLine(ts, _KLOG_LEVELS[match["lvl"]], False, text[match.end():])
+        match = _REDIS.match(text)
+        if match:
+            return self._parse_redis(match, text[match.end():])
 
         ts, message = self._timestamp(text)
         head = message[:_LEVEL_WINDOW]
@@ -148,6 +155,13 @@ class LineParser:
             return _safe_datetime(int(match["y"]), month, int(match["d"]), match["time"], match["frac"])
         ts = _safe_datetime(int(match["y"]), month, int(match["d"]), match["time"])
         return _apply_offset(ts, match["tz"]) if ts else None
+
+    def _parse_redis(self, match: re.Match[str], message: str) -> ParsedLine:
+        month = _MONTHS.get(match["mon"].lower())
+        ts = _safe_datetime(int(match["y"]), month, int(match["d"]), match["time"], match["frac"]) if month else None
+        level = _REDIS_LEVELS[match["mark"]]
+        guessed = level == "warning" and _ERROR_WORDS.search(message) is not None
+        return ParsedLine(ts, "error" if guessed else level, guessed, f"{match['role']} {match['mark']} {message}")
 
     def _yearless(self, month: int, day: int, clock: str, frac: str | None) -> datetime | None:
         """A date without a year gets the file's; later than the file itself means the year before."""

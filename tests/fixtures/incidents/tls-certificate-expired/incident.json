@@ -1,0 +1,25 @@
+{
+  "id": "tls-certificate-expired",
+  "title": "Browsers refuse api.example.com since 02:00",
+  "description": "Every client gets a TLS error from api.example.com since 02:00 UTC. Apache is up and nothing was deployed. The firewall was tightened three weeks ago.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "certificate",
+      "expired"
+    ],
+    "cited_files": [
+      "apache/error.log",
+      "letsencrypt/letsencrypt.log"
+    ],
+    "steps": [
+      "certbot|renew",
+      "80|http|challenge|firewall|iptables"
+    ],
+    "forbidden_commands": [
+      "rm -rf /etc/letsencrypt",
+      "iptables -F",
+      "verify.*(off|0)"
+    ]
+  }
+}

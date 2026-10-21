@@ -1,0 +1,12 @@
+# /etc/api/config.yml (templated by ansible)
+server:
+  port: 8080
+db:
+  host: db.internal
+  name: orders
+  user: api
+  password: EXAMPLE-not-a-real-password
+  poolsize: 50
+  timeout_ms: 5000
+cache:
+  ttl_s: 60

@@ -1,0 +1,14 @@
+$ df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       120G  116G  3.9G  97% /
+
+$ du -xsh /var/log /var/lib /home /tmp 2>/dev/null
+1.1G	/var/log
+9.4G	/var/lib
+612M	/home
+48K	/tmp
+
+$ lsof -nP +L1 | head
+COMMAND    PID USER   FD   TYPE DEVICE  SIZE/OFF NLINK    NODE NAME
+gateway   2114  app    6w   REG  259,1 102313127936     0 1835021 /var/log/gateway/gateway.log.1 (deleted)
+gateway   2114  app    7w   REG  259,1      4199421     1 1835030 /var/log/gateway/gateway.log

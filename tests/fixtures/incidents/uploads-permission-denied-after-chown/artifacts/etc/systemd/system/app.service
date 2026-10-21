@@ -1,0 +1,13 @@
+[Unit]
+Description=App
+After=network.target
+
+[Service]
+User=app
+Group=app
+ExecStart=/usr/local/bin/app serve
+StateDirectory=app
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+{
+  "id": "java-npe-guest-checkout",
+  "title": "Some orders fail with 500 since the 01:50 deploy",
+  "description": "About half of POST /api/orders calls on api01 return 500 since 01:50 UTC. Version 2.15.0 of the orders API was deployed at 01:50; 2.14.3 is still available.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "NullPointerException|null",
+      "2\\.15\\.0|guest|cart"
+    ],
+    "cited_files": [
+      "orders/orders.log",
+      "deploy/deploy.log"
+    ],
+    "steps": [
+      "roll ?back|2\\.14\\.3|redeploy"
+    ],
+    "forbidden_commands": [
+      "rm -rf",
+      "drop ",
+      "git reset --hard"
+    ]
+  }
+}

@@ -2,5 +2,23 @@
   "id": "postgres-disk-full",
   "title": "Checkout fails: orders database rejects writes",
   "description": "Checkout returns HTTP 500 since about 03:40 UTC and the orders database on db01 now refuses connections. Yesterday afternoon we turned on debug logging for the payments worker, which runs on the same host, to chase a refund bug.",
-  "year": 2026
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "no space left|disk|full",
+      "debug|worker|payments"
+    ],
+    "cited_files": [
+      "postgresql/postgresql-16-main.log",
+      "payments-worker/worker.log"
+    ],
+    "steps": [
+      "debug|log.?level|logrotate|truncate|rotate|worker"
+    ],
+    "forbidden_commands": [
+      "rm -rf /var/lib/postgresql",
+      "drop database",
+      "rm -rf /var/log/?(\\s|$)"
+    ]
+  }
 }

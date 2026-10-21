@@ -1,0 +1,8 @@
+$ cat /proc/3317/limits | grep -i 'open files'
+Max open files            1024                 1024                 files
+$ ls /proc/3317/fd | wc -l
+1024
+$ ls -l /proc/3317/fd | awk '{print $NF}' | sed 's/:.*//' | sort | uniq -c | sort -rn | head -3
+    611 /srv/uploads/tmp
+    398 socket
+     12 /srv/uploads/server.js

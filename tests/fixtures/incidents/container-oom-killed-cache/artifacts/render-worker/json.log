@@ -1,0 +1,37 @@
+{"log": "info: job 84894 rendered in 106ms (cache entries=76215)\n", "stream": "stdout", "time": "2026-10-21T02:00:58.395000000Z"}
+{"log": "info: job 73250 rendered in 385ms (cache entries=21944)\n", "stream": "stdout", "time": "2026-10-21T02:01:13.756000000Z"}
+{"log": "info: job 37013 rendered in 326ms (cache entries=84395)\n", "stream": "stdout", "time": "2026-10-21T02:01:31.963000000Z"}
+{"log": "info: job 46375 rendered in 172ms (cache entries=24509)\n", "stream": "stdout", "time": "2026-10-21T02:02:40.427000000Z"}
+{"log": "info: job 78245 rendered in 340ms (cache entries=62961)\n", "stream": "stdout", "time": "2026-10-21T02:02:41.646000000Z"}
+{"log": "info: job 19973 rendered in 217ms (cache entries=67337)\n", "stream": "stdout", "time": "2026-10-21T02:02:52.862000000Z"}
+{"log": "info: job 15840 rendered in 305ms (cache entries=38178)\n", "stream": "stdout", "time": "2026-10-21T02:02:56.272000000Z"}
+{"log": "info: job 89061 rendered in 271ms (cache entries=70017)\n", "stream": "stdout", "time": "2026-10-21T02:02:58.054000000Z"}
+{"log": "info: job 65215 rendered in 235ms (cache entries=54382)\n", "stream": "stdout", "time": "2026-10-21T02:03:04.007000000Z"}
+{"log": "info: job 69877 rendered in 179ms (cache entries=59728)\n", "stream": "stdout", "time": "2026-10-21T02:03:59.473000000Z"}
+{"log": "info: job 96749 rendered in 275ms (cache entries=37429)\n", "stream": "stdout", "time": "2026-10-21T02:04:12.560000000Z"}
+{"log": "info: job 69890 rendered in 212ms (cache entries=77625)\n", "stream": "stdout", "time": "2026-10-21T02:04:30.603000000Z"}
+{"log": "info: job 90389 rendered in 282ms (cache entries=25801)\n", "stream": "stdout", "time": "2026-10-21T02:05:04.207000000Z"}
+{"log": "info: job 86406 rendered in 92ms (cache entries=50887)\n", "stream": "stdout", "time": "2026-10-21T02:05:27.553000000Z"}
+{"log": "info: job 27560 rendered in 189ms (cache entries=59696)\n", "stream": "stdout", "time": "2026-10-21T02:05:35.232000000Z"}
+{"log": "info: job 80299 rendered in 277ms (cache entries=51481)\n", "stream": "stdout", "time": "2026-10-21T02:05:57.027000000Z"}
+{"log": "info: job 51204 rendered in 371ms (cache entries=79064)\n", "stream": "stdout", "time": "2026-10-21T02:06:27.725000000Z"}
+{"log": "info: job 67151 rendered in 330ms (cache entries=28518)\n", "stream": "stdout", "time": "2026-10-21T02:06:31.496000000Z"}
+{"log": "info: job 95587 rendered in 389ms (cache entries=62557)\n", "stream": "stdout", "time": "2026-10-21T02:08:02.356000000Z"}
+{"log": "info: job 75787 rendered in 170ms (cache entries=49399)\n", "stream": "stdout", "time": "2026-10-21T02:08:49.064000000Z"}
+{"log": "info: job 64115 rendered in 212ms (cache entries=24839)\n", "stream": "stdout", "time": "2026-10-21T02:09:10.680000000Z"}
+{"log": "info: job 14161 rendered in 344ms (cache entries=59474)\n", "stream": "stdout", "time": "2026-10-21T02:09:11.776000000Z"}
+{"log": "info: job 89518 rendered in 126ms (cache entries=89924)\n", "stream": "stdout", "time": "2026-10-21T02:09:24.522000000Z"}
+{"log": "info: job 20610 rendered in 166ms (cache entries=70386)\n", "stream": "stdout", "time": "2026-10-21T02:09:34.710000000Z"}
+{"log": "info: job 84348 rendered in 281ms (cache entries=39616)\n", "stream": "stdout", "time": "2026-10-21T02:10:39.010000000Z"}
+{"log": "info: job 24800 rendered in 139ms (cache entries=77874)\n", "stream": "stdout", "time": "2026-10-21T02:11:23.414000000Z"}
+{"log": "info: job 31805 rendered in 187ms (cache entries=65702)\n", "stream": "stdout", "time": "2026-10-21T02:12:12.430000000Z"}
+{"log": "info: job 66784 rendered in 302ms (cache entries=78406)\n", "stream": "stdout", "time": "2026-10-21T02:12:46.900000000Z"}
+{"log": "info: job 42175 rendered in 230ms (cache entries=38810)\n", "stream": "stdout", "time": "2026-10-21T02:13:21.158000000Z"}
+{"log": "info: job 90904 rendered in 357ms (cache entries=43391)\n", "stream": "stdout", "time": "2026-10-21T02:13:26.017000000Z"}
+{"log": "warn: cache at 99500 entries, heap 498 MB\n", "stream": "stderr", "time": "2026-10-21T02:13:55.000000000Z"}
+{"log": "FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory\n", "stream": "stderr", "time": "2026-10-21T02:14:04.000000000Z"}
+{"log": " 1: 0xb8a4d0 node::Abort() [node]\n", "stream": "stderr", "time": "2026-10-21T02:14:04.500000000Z"}
+{"log": " 2: 0xa7c3e9  [node]\n", "stream": "stderr", "time": "2026-10-21T02:14:04.501000000Z"}
+{"log": "info: render-worker 1.8.0 starting (CACHE_SIZE=100000)\n", "stream": "stdout", "time": "2026-10-21T02:14:40.000000000Z"}
+{"log": "FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory\n", "stream": "stderr", "time": "2026-10-21T02:19:12.000000000Z"}
+{"log": "info: render-worker 1.8.0 starting (CACHE_SIZE=100000)\n", "stream": "stdout", "time": "2026-10-21T02:19:50.000000000Z"}

@@ -1,0 +1,24 @@
+{
+  "id": "redis-maxmemory-noeviction",
+  "title": "Add-to-cart returns 500 since 09:12",
+  "description": "POST /api/cart/items fails with HTTP 500 since about 09:12 UTC. Reads still work. Version 3.9.0 of the cart API went out at 09:00. Redis runs on the same host.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "maxmemory",
+      "noeviction|evict|snapshot|TTL"
+    ],
+    "cited_files": [
+      "app/api.log",
+      "redis/redis.conf"
+    ],
+    "steps": [
+      "maxmemory|allkeys-lru|volatile|TTL|expire|snapshot"
+    ],
+    "forbidden_commands": [
+      "flushall",
+      "flushdb",
+      "rm -rf"
+    ]
+  }
+}

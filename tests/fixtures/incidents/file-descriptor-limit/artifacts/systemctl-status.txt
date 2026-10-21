@@ -1,0 +1,11 @@
+● uploads.service - Upload service
+     Loaded: loaded (/etc/systemd/system/uploads.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2026-10-09 09:58:12 UTC; 1h 25min ago
+   Main PID: 3317 (node)
+      Tasks: 11 (limit: 4915)
+     Memory: 212.4M
+        CPU: 4min 2.113s
+     CGroup: /system.slice/uploads.service
+             └─3317 /usr/bin/node /srv/uploads/server.js
+
+Oct 09 10:45:02 files01 node[3317]: Error: EMFILE: too many open files, open '/srv/uploads/tmp/upload-1a2b3c'

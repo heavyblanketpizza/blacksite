@@ -1,0 +1,6 @@
+Oct 19 00:00:01 edge01 logrotate[71022]: rotating pattern: /var/log/gateway/*.log  after 1 days (7 rotations)
+Oct 19 00:00:01 edge01 logrotate[71022]: rotating log /var/log/gateway/gateway.log, log->rotateCount is 7
+Oct 19 00:00:01 edge01 logrotate[71022]: renaming /var/log/gateway/gateway.log to /var/log/gateway/gateway.log.1
+Oct 19 00:00:01 edge01 logrotate[71022]: creating new /var/log/gateway/gateway.log mode = 0640 uid = 1001 gid = 1001
+Oct 19 08:10:44 edge01 prometheus-node-exporter[904]: level=warn msg="filesystem /: 95% full"
+Oct 19 09:40:10 edge01 prometheus-node-exporter[904]: level=warn msg="filesystem /: 97% full"

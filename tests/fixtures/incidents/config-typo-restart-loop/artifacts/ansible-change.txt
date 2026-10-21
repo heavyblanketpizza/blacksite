@@ -1,0 +1,12 @@
+$ git -C /srv/ansible log -1 --stat
+commit 8f21c0e (HEAD -> main)
+Author: Sam Park <sam@example.com>
+Date:   Sat Oct 11 13:58:02 2026 +0000
+
+    api: raise the db pool for the sale
+
+ roles/api/templates/config.yml.j2 | 2 +-
+
+$ git -C /srv/ansible show HEAD -- roles/api/templates/config.yml.j2 | grep '^[-+] '
+-  pool_size: 20
++  poolsize: 50

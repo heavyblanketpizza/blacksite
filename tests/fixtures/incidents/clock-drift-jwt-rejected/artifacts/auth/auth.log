@@ -1,0 +1,140 @@
+{"ts": "2026-10-13T07:04:10.852Z", "level": "info", "msg": "token issued", "sub": "user-912", "ttl": 900}
+{"ts": "2026-10-13T07:04:51.603Z", "level": "info", "msg": "token issued", "sub": "user-687", "ttl": 900}
+{"ts": "2026-10-13T07:05:10.911Z", "level": "info", "msg": "token issued", "sub": "user-941", "ttl": 900}
+{"ts": "2026-10-13T07:07:30.258Z", "level": "info", "msg": "token issued", "sub": "user-182", "ttl": 900}
+{"ts": "2026-10-13T07:08:27.676Z", "level": "info", "msg": "token issued", "sub": "user-596", "ttl": 900}
+{"ts": "2026-10-13T07:08:35.858Z", "level": "info", "msg": "token issued", "sub": "user-880", "ttl": 900}
+{"ts": "2026-10-13T07:09:17.871Z", "level": "info", "msg": "token issued", "sub": "user-367", "ttl": 900}
+{"ts": "2026-10-13T07:09:18.483Z", "level": "info", "msg": "token issued", "sub": "user-137", "ttl": 900}
+{"ts": "2026-10-13T07:09:33.851Z", "level": "info", "msg": "token issued", "sub": "user-100", "ttl": 900}
+{"ts": "2026-10-13T07:09:47.332Z", "level": "info", "msg": "token issued", "sub": "user-249", "ttl": 900}
+{"ts": "2026-10-13T07:09:52.189Z", "level": "info", "msg": "token issued", "sub": "user-778", "ttl": 900}
+{"ts": "2026-10-13T07:10:25.260Z", "level": "info", "msg": "token issued", "sub": "user-700", "ttl": 900}
+{"ts": "2026-10-13T07:11:45.570Z", "level": "info", "msg": "token issued", "sub": "user-581", "ttl": 900}
+{"ts": "2026-10-13T07:12:34.322Z", "level": "info", "msg": "token issued", "sub": "user-877", "ttl": 900}
+{"ts": "2026-10-13T07:14:05.930Z", "level": "info", "msg": "token issued", "sub": "user-852", "ttl": 900}
+{"ts": "2026-10-13T07:14:20.408Z", "level": "info", "msg": "token issued", "sub": "user-482", "ttl": 900}
+{"ts": "2026-10-13T07:16:08.643Z", "level": "info", "msg": "token issued", "sub": "user-427", "ttl": 900}
+{"ts": "2026-10-13T07:17:55.246Z", "level": "info", "msg": "token issued", "sub": "user-888", "ttl": 900}
+{"ts": "2026-10-13T07:18:12.690Z", "level": "info", "msg": "token issued", "sub": "user-122", "ttl": 900}
+{"ts": "2026-10-13T07:18:19.327Z", "level": "info", "msg": "token issued", "sub": "user-379", "ttl": 900}
+{"ts": "2026-10-13T07:18:24.516Z", "level": "info", "msg": "token issued", "sub": "user-600", "ttl": 900}
+{"ts": "2026-10-13T07:19:58.535Z", "level": "info", "msg": "token issued", "sub": "user-921", "ttl": 900}
+{"ts": "2026-10-13T07:20:06.110Z", "level": "info", "msg": "token issued", "sub": "user-302", "ttl": 900}
+{"ts": "2026-10-13T07:20:40.435Z", "level": "info", "msg": "token issued", "sub": "user-847", "ttl": 900}
+{"ts": "2026-10-13T07:21:07.982Z", "level": "info", "msg": "token issued", "sub": "user-993", "ttl": 900}
+{"ts": "2026-10-13T07:22:04.413Z", "level": "info", "msg": "token issued", "sub": "user-523", "ttl": 900}
+{"ts": "2026-10-13T07:23:28.952Z", "level": "info", "msg": "token issued", "sub": "user-651", "ttl": 900}
+{"ts": "2026-10-13T07:25:55.176Z", "level": "info", "msg": "token issued", "sub": "user-652", "ttl": 900}
+{"ts": "2026-10-13T07:28:22.979Z", "level": "info", "msg": "token issued", "sub": "user-798", "ttl": 900}
+{"ts": "2026-10-13T07:28:26.510Z", "level": "info", "msg": "token issued", "sub": "user-196", "ttl": 900}
+{"ts": "2026-10-13T07:30:28.743Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791876940, "now": 1791876628, "sub": "user-297", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:30:28.744Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:32:45.438Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877077, "now": 1791876765, "sub": "user-676", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:32:45.439Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:33:33.552Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877125, "now": 1791876813, "sub": "user-666", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:33:33.553Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:34:17.791Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877169, "now": 1791876857, "sub": "user-816", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:34:17.792Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:35:36.694Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877248, "now": 1791876936, "sub": "user-924", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:35:36.695Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:35:39.204Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877251, "now": 1791876939, "sub": "user-846", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:35:39.205Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:36:00.552Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877272, "now": 1791876960, "sub": "user-371", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:36:00.553Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:36:03.164Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877275, "now": 1791876963, "sub": "user-778", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:36:03.165Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:36:03.356Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877275, "now": 1791876963, "sub": "user-922", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:36:03.357Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:37:26.492Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877358, "now": 1791877046, "sub": "user-724", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:37:26.493Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:38:20.028Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877412, "now": 1791877100, "sub": "user-802", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:38:20.029Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:38:43.424Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877435, "now": 1791877123, "sub": "user-190", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:38:43.425Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:39:47.221Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877499, "now": 1791877187, "sub": "user-964", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:39:47.222Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:40:09.963Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877521, "now": 1791877209, "sub": "user-534", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:40:09.964Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:40:43.503Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877555, "now": 1791877243, "sub": "user-443", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:40:43.504Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:40:45.530Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877557, "now": 1791877245, "sub": "user-195", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:40:45.531Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:41:59.548Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877631, "now": 1791877319, "sub": "user-470", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:41:59.549Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:41:59.717Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877631, "now": 1791877319, "sub": "user-919", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:41:59.718Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:41:59.768Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877631, "now": 1791877319, "sub": "user-519", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:41:59.769Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:42:00.854Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877632, "now": 1791877320, "sub": "user-924", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:42:00.855Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:42:27.124Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877659, "now": 1791877347, "sub": "user-356", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:42:27.125Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:42:40.424Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877672, "now": 1791877360, "sub": "user-555", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:42:40.425Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:42:47.036Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877679, "now": 1791877367, "sub": "user-816", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:42:47.037Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:42:56.109Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877688, "now": 1791877376, "sub": "user-196", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:42:56.110Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:43:58.046Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877750, "now": 1791877438, "sub": "user-873", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:43:58.047Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:44:56.164Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877808, "now": 1791877496, "sub": "user-301", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:44:56.165Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:46:12.436Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877884, "now": 1791877572, "sub": "user-817", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:46:12.437Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:46:15.979Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877887, "now": 1791877575, "sub": "user-750", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:46:15.980Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:46:32.359Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877904, "now": 1791877592, "sub": "user-915", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:46:32.360Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:46:35.224Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877907, "now": 1791877595, "sub": "user-398", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:46:35.225Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:47:46.907Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791877978, "now": 1791877666, "sub": "user-199", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:47:46.908Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:48:09.326Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878001, "now": 1791877689, "sub": "user-146", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:48:09.327Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:49:06.182Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878058, "now": 1791877746, "sub": "user-702", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:49:06.183Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:49:41.836Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878093, "now": 1791877781, "sub": "user-305", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:49:41.837Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:49:48.029Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878100, "now": 1791877788, "sub": "user-947", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:49:48.030Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:50:07.788Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878119, "now": 1791877807, "sub": "user-771", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:50:07.789Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:50:16.181Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878128, "now": 1791877816, "sub": "user-469", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:50:16.182Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:50:39.215Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878151, "now": 1791877839, "sub": "user-598", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:50:39.216Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:51:35.692Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878207, "now": 1791877895, "sub": "user-952", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:51:35.693Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:54:08.484Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878360, "now": 1791878048, "sub": "user-298", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:54:08.485Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:54:59.517Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878411, "now": 1791878099, "sub": "user-627", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:54:59.518Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:55:36.624Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878448, "now": 1791878136, "sub": "user-689", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:55:36.625Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:57:08.127Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878540, "now": 1791878228, "sub": "user-760", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:57:08.128Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:58:48.805Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878640, "now": 1791878328, "sub": "user-814", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:58:48.806Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T07:59:37.800Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878689, "now": 1791878377, "sub": "user-924", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T07:59:37.801Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:01:23.025Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878795, "now": 1791878483, "sub": "user-615", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:01:23.026Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:01:25.299Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878797, "now": 1791878485, "sub": "user-129", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:01:25.300Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:01:41.807Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878813, "now": 1791878501, "sub": "user-748", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:01:41.808Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:02:28.782Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878860, "now": 1791878548, "sub": "user-470", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:02:28.783Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:02:44.816Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878876, "now": 1791878564, "sub": "user-350", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:02:44.817Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:03:06.598Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878898, "now": 1791878586, "sub": "user-716", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:03:06.599Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:03:38.421Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878930, "now": 1791878618, "sub": "user-540", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:03:38.422Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:03:58.320Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878950, "now": 1791878638, "sub": "user-411", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:03:58.321Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:04:29.093Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878981, "now": 1791878669, "sub": "user-465", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:04:29.094Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}
+{"ts": "2026-10-13T08:04:36.792Z", "level": "warn", "msg": "token validation failed: token used before issued", "iat": 1791878988, "now": 1791878676, "sub": "user-703", "issuer": "sso.example.com"}
+{"ts": "2026-10-13T08:04:36.793Z", "level": "info", "msg": "request rejected", "path": "/api/me", "status": 401}

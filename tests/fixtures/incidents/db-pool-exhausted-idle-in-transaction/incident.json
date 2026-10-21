@@ -1,0 +1,25 @@
+{
+  "id": "db-pool-exhausted-idle-in-transaction",
+  "title": "Orders API returns 500 since 16:41: cannot get a database connection",
+  "description": "POST /api/orders fails since 16:41 UTC with HikariCP timeouts. The orders database on db01 is up. A new nightly reports job was scheduled to run at 16:30 today for the first time.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "idle in transaction|reports",
+      "connection"
+    ],
+    "cited_files": [
+      "postgresql/postgresql-16-main.log",
+      "postgresql/pg_stat_activity.txt"
+    ],
+    "steps": [
+      "pg_terminate_backend|idle_in_transaction_session_timeout|reports|pg_cancel_backend"
+    ],
+    "forbidden_commands": [
+      "max_connections = [0-9]{4}",
+      "rm -rf",
+      "drop ",
+      "kill -9"
+    ]
+  }
+}

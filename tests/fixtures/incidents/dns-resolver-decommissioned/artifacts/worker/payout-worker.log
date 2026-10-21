@@ -1,0 +1,150 @@
+2026-10-07T13:00:21.978Z level=info msg="payout settled" payout_id=73898 gateway=payments.internal took_ms=115
+2026-10-07T13:00:36.455Z level=info msg="payout settled" payout_id=78916 gateway=payments.internal took_ms=56
+2026-10-07T13:02:46.669Z level=info msg="payout settled" payout_id=76061 gateway=payments.internal took_ms=117
+2026-10-07T13:03:21.193Z level=info msg="payout settled" payout_id=77766 gateway=payments.internal took_ms=120
+2026-10-07T13:03:21.273Z level=info msg="payout settled" payout_id=79516 gateway=payments.internal took_ms=48
+2026-10-07T13:04:04.475Z level=info msg="payout settled" payout_id=79922 gateway=payments.internal took_ms=41
+2026-10-07T13:04:08.256Z level=info msg="payout settled" payout_id=77687 gateway=payments.internal took_ms=73
+2026-10-07T13:04:23.848Z level=info msg="payout settled" payout_id=79024 gateway=payments.internal took_ms=69
+2026-10-07T13:05:55.310Z level=info msg="payout settled" payout_id=73141 gateway=payments.internal took_ms=100
+2026-10-07T13:06:16.494Z level=info msg="payout settled" payout_id=78863 gateway=payments.internal took_ms=110
+2026-10-07T13:06:28.297Z level=info msg="payout settled" payout_id=77804 gateway=payments.internal took_ms=90
+2026-10-07T13:06:54.926Z level=info msg="payout settled" payout_id=72467 gateway=payments.internal took_ms=69
+2026-10-07T13:09:51.253Z level=info msg="payout settled" payout_id=72484 gateway=payments.internal took_ms=106
+2026-10-07T13:10:53.161Z level=info msg="payout settled" payout_id=76388 gateway=payments.internal took_ms=41
+2026-10-07T13:11:43.178Z level=info msg="payout settled" payout_id=71049 gateway=payments.internal took_ms=60
+2026-10-07T13:12:01.273Z level=info msg="payout settled" payout_id=79684 gateway=payments.internal took_ms=45
+2026-10-07T13:12:18.500Z level=info msg="payout settled" payout_id=74935 gateway=payments.internal took_ms=43
+2026-10-07T13:13:21.474Z level=info msg="payout settled" payout_id=74414 gateway=payments.internal took_ms=100
+2026-10-07T13:15:58.834Z level=info msg="payout settled" payout_id=79744 gateway=payments.internal took_ms=89
+2026-10-07T13:16:19.812Z level=info msg="payout settled" payout_id=76994 gateway=payments.internal took_ms=90
+2026-10-07T13:17:26.972Z level=info msg="payout settled" payout_id=79452 gateway=payments.internal took_ms=96
+2026-10-07T13:19:45.278Z level=info msg="payout settled" payout_id=72197 gateway=payments.internal took_ms=86
+2026-10-07T13:20:24.117Z level=info msg="payout settled" payout_id=71596 gateway=payments.internal took_ms=44
+2026-10-07T13:22:05.772Z level=info msg="payout settled" payout_id=72227 gateway=payments.internal took_ms=103
+2026-10-07T13:22:36.090Z level=info msg="payout settled" payout_id=73555 gateway=payments.internal took_ms=73
+2026-10-07T13:25:01.242Z level=info msg="payout settled" payout_id=77146 gateway=payments.internal took_ms=120
+2026-10-07T13:28:02.245Z level=info msg="payout settled" payout_id=74932 gateway=payments.internal took_ms=93
+2026-10-07T13:28:27.200Z level=info msg="payout settled" payout_id=78310 gateway=payments.internal took_ms=89
+2026-10-07T13:28:29.651Z level=info msg="payout settled" payout_id=79404 gateway=payments.internal took_ms=84
+2026-10-07T13:29:43.455Z level=info msg="payout settled" payout_id=78750 gateway=payments.internal took_ms=114
+2026-10-07T13:30:04.788Z level=error msg="payout failed" payout_id=86677 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:59144->10.0.0.53:53: i/o timeout"
+2026-10-07T13:30:05.788Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T13:30:25.557Z level=error msg="payout failed" payout_id=85517 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:40939->10.0.0.53:53: i/o timeout"
+2026-10-07T13:30:26.557Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:30:51.178Z level=error msg="payout failed" payout_id=89925 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:45344->10.0.0.53:53: i/o timeout"
+2026-10-07T13:30:52.178Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:31:30.166Z level=error msg="payout failed" payout_id=88876 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:58741->10.0.0.53:53: i/o timeout"
+2026-10-07T13:31:31.166Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:31:34.725Z level=error msg="payout failed" payout_id=83459 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:58793->10.0.0.53:53: i/o timeout"
+2026-10-07T13:31:35.725Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:31:58.692Z level=error msg="payout failed" payout_id=84668 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:44077->10.0.0.53:53: i/o timeout"
+2026-10-07T13:31:59.692Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:32:01.249Z level=error msg="payout failed" payout_id=87897 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:55843->10.0.0.53:53: i/o timeout"
+2026-10-07T13:32:02.249Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:32:32.582Z level=error msg="payout failed" payout_id=85637 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:42182->10.0.0.53:53: i/o timeout"
+2026-10-07T13:32:33.582Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T13:32:49.929Z level=error msg="payout failed" payout_id=82470 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:40659->10.0.0.53:53: i/o timeout"
+2026-10-07T13:32:50.929Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:33:08.580Z level=error msg="payout failed" payout_id=86998 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:53605->10.0.0.53:53: i/o timeout"
+2026-10-07T13:33:09.580Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:33:18.357Z level=error msg="payout failed" payout_id=80724 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:59824->10.0.0.53:53: i/o timeout"
+2026-10-07T13:33:19.357Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:33:40.899Z level=error msg="payout failed" payout_id=86189 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:59214->10.0.0.53:53: i/o timeout"
+2026-10-07T13:33:41.899Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:34:03.264Z level=error msg="payout failed" payout_id=89025 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:49144->10.0.0.53:53: i/o timeout"
+2026-10-07T13:34:04.264Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T13:34:31.285Z level=error msg="payout failed" payout_id=80590 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:50147->10.0.0.53:53: i/o timeout"
+2026-10-07T13:34:32.285Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:34:52.437Z level=error msg="payout failed" payout_id=81261 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:43542->10.0.0.53:53: i/o timeout"
+2026-10-07T13:34:53.437Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:35:06.002Z level=error msg="payout failed" payout_id=83233 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:53367->10.0.0.53:53: i/o timeout"
+2026-10-07T13:35:07.002Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:36:25.423Z level=error msg="payout failed" payout_id=84315 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:45118->10.0.0.53:53: i/o timeout"
+2026-10-07T13:36:26.423Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:36:34.354Z level=error msg="payout failed" payout_id=85567 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:50283->10.0.0.53:53: i/o timeout"
+2026-10-07T13:36:35.354Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:36:44.454Z level=error msg="payout failed" payout_id=82266 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:52379->10.0.0.53:53: i/o timeout"
+2026-10-07T13:36:45.454Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T13:37:46.852Z level=error msg="payout failed" payout_id=87543 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:57041->10.0.0.53:53: i/o timeout"
+2026-10-07T13:37:47.852Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T13:38:06.403Z level=error msg="payout failed" payout_id=89759 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:58325->10.0.0.53:53: i/o timeout"
+2026-10-07T13:38:07.403Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:38:35.039Z level=error msg="payout failed" payout_id=88307 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:48889->10.0.0.53:53: i/o timeout"
+2026-10-07T13:38:36.039Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T13:39:12.621Z level=error msg="payout failed" payout_id=83893 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:49866->10.0.0.53:53: i/o timeout"
+2026-10-07T13:39:13.621Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T13:39:47.899Z level=error msg="payout failed" payout_id=84230 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:57076->10.0.0.53:53: i/o timeout"
+2026-10-07T13:39:48.899Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:42:06.912Z level=error msg="payout failed" payout_id=88985 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:51105->10.0.0.53:53: i/o timeout"
+2026-10-07T13:42:07.912Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:42:09.598Z level=error msg="payout failed" payout_id=86802 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:59004->10.0.0.53:53: i/o timeout"
+2026-10-07T13:42:10.598Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:42:25.290Z level=error msg="payout failed" payout_id=80328 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:52337->10.0.0.53:53: i/o timeout"
+2026-10-07T13:42:26.290Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T13:43:12.759Z level=error msg="payout failed" payout_id=80984 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:50893->10.0.0.53:53: i/o timeout"
+2026-10-07T13:43:13.759Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T13:44:09.218Z level=error msg="payout failed" payout_id=85782 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:51553->10.0.0.53:53: i/o timeout"
+2026-10-07T13:44:10.218Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:44:52.192Z level=error msg="payout failed" payout_id=88020 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:40726->10.0.0.53:53: i/o timeout"
+2026-10-07T13:44:53.192Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:45:24.940Z level=error msg="payout failed" payout_id=80348 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:52096->10.0.0.53:53: i/o timeout"
+2026-10-07T13:45:25.940Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:46:03.342Z level=error msg="payout failed" payout_id=87476 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:49785->10.0.0.53:53: i/o timeout"
+2026-10-07T13:46:04.342Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:47:05.924Z level=error msg="payout failed" payout_id=82906 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:51926->10.0.0.53:53: i/o timeout"
+2026-10-07T13:47:06.924Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T13:47:50.984Z level=error msg="payout failed" payout_id=85122 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:52096->10.0.0.53:53: i/o timeout"
+2026-10-07T13:47:51.984Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:49:05.759Z level=error msg="payout failed" payout_id=84921 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:52358->10.0.0.53:53: i/o timeout"
+2026-10-07T13:49:06.759Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:49:52.517Z level=error msg="payout failed" payout_id=80441 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:58653->10.0.0.53:53: i/o timeout"
+2026-10-07T13:49:53.517Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T13:50:22.898Z level=error msg="payout failed" payout_id=85079 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:56384->10.0.0.53:53: i/o timeout"
+2026-10-07T13:50:23.898Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T13:50:56.149Z level=error msg="payout failed" payout_id=84413 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:47821->10.0.0.53:53: i/o timeout"
+2026-10-07T13:50:57.149Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:52:45.747Z level=error msg="payout failed" payout_id=83070 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:54261->10.0.0.53:53: i/o timeout"
+2026-10-07T13:52:46.747Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:53:02.940Z level=error msg="payout failed" payout_id=81668 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:59684->10.0.0.53:53: i/o timeout"
+2026-10-07T13:53:03.940Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:53:30.264Z level=error msg="payout failed" payout_id=85468 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:47355->10.0.0.53:53: i/o timeout"
+2026-10-07T13:53:31.264Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T13:56:29.203Z level=error msg="payout failed" payout_id=82773 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:42619->10.0.0.53:53: i/o timeout"
+2026-10-07T13:56:30.203Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T13:58:06.416Z level=error msg="payout failed" payout_id=83572 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:58625->10.0.0.53:53: i/o timeout"
+2026-10-07T13:58:07.416Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T13:58:49.416Z level=error msg="payout failed" payout_id=84433 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:47373->10.0.0.53:53: i/o timeout"
+2026-10-07T13:58:50.416Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T13:59:14.449Z level=error msg="payout failed" payout_id=80555 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:57354->10.0.0.53:53: i/o timeout"
+2026-10-07T13:59:15.449Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T13:59:32.842Z level=error msg="payout failed" payout_id=85163 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:58836->10.0.0.53:53: i/o timeout"
+2026-10-07T13:59:33.842Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T14:00:13.375Z level=error msg="payout failed" payout_id=84564 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:51144->10.0.0.53:53: i/o timeout"
+2026-10-07T14:00:14.375Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T14:00:49.036Z level=error msg="payout failed" payout_id=85657 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:59316->10.0.0.53:53: i/o timeout"
+2026-10-07T14:00:50.036Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T14:02:31.012Z level=error msg="payout failed" payout_id=86902 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:49566->10.0.0.53:53: i/o timeout"
+2026-10-07T14:02:32.012Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T14:02:35.012Z level=error msg="payout failed" payout_id=87613 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:51349->10.0.0.53:53: i/o timeout"
+2026-10-07T14:02:36.012Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T14:03:28.276Z level=error msg="payout failed" payout_id=84757 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:53755->10.0.0.53:53: i/o timeout"
+2026-10-07T14:03:29.276Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T14:03:43.292Z level=error msg="payout failed" payout_id=80582 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:53541->10.0.0.53:53: i/o timeout"
+2026-10-07T14:03:43.845Z level=error msg="payout failed" payout_id=83269 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:40152->10.0.0.53:53: i/o timeout"
+2026-10-07T14:03:44.292Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T14:03:44.845Z level=warn msg="retrying payout" attempt=5 backoff_ms=2000
+2026-10-07T14:05:16.674Z level=error msg="payout failed" payout_id=88358 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:54232->10.0.0.53:53: i/o timeout"
+2026-10-07T14:05:17.674Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T14:06:00.812Z level=error msg="payout failed" payout_id=80529 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:54964->10.0.0.53:53: i/o timeout"
+2026-10-07T14:06:01.812Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T14:07:09.358Z level=error msg="payout failed" payout_id=88910 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:51176->10.0.0.53:53: i/o timeout"
+2026-10-07T14:07:10.358Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T14:07:47.447Z level=error msg="payout failed" payout_id=81115 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:59289->10.0.0.53:53: i/o timeout"
+2026-10-07T14:07:48.447Z level=warn msg="retrying payout" attempt=4 backoff_ms=2000
+2026-10-07T14:08:08.385Z level=error msg="payout failed" payout_id=81966 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:48012->10.0.0.53:53: i/o timeout"
+2026-10-07T14:08:09.385Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000
+2026-10-07T14:09:06.656Z level=error msg="payout failed" payout_id=80575 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:56786->10.0.0.53:53: i/o timeout"
+2026-10-07T14:09:07.656Z level=warn msg="retrying payout" attempt=3 backoff_ms=2000
+2026-10-07T14:09:29.466Z level=error msg="payout failed" payout_id=87043 err="Post \"https://payments.internal/v1/payouts\": dial tcp: lookup payments.internal on 10.0.0.53:53: read udp 10.0.4.17:58905->10.0.0.53:53: i/o timeout"
+2026-10-07T14:09:30.466Z level=warn msg="retrying payout" attempt=2 backoff_ms=2000

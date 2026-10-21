@@ -1,0 +1,4 @@
+subject=CN = api.example.com
+issuer=C = US, O = Let's Encrypt, CN = R11
+notBefore=Jul  7 02:00:00 2026 GMT
+notAfter=Oct  5 02:00:00 2026 GMT

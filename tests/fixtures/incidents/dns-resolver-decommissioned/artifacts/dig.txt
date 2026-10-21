@@ -1,0 +1,14 @@
+$ dig +time=3 +tries=1 payments.internal @10.0.0.53
+
+;; connection timed out; no servers could be reached
+
+$ dig +short payments.internal @10.0.0.54
+10.0.9.21
+
+$ resolvectl status ens5
+Link 2 (ens5)
+    Current Scopes: DNS
+         Protocols: +DefaultRoute +LLMNR -mDNS -DNSOverTLS DNSSEC=no/unsupported
+Current DNS Server: 10.0.0.53
+       DNS Servers: 10.0.0.53 10.0.0.54
+        DNS Domain: internal

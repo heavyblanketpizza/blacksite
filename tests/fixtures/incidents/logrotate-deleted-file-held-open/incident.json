@@ -1,0 +1,24 @@
+{
+  "id": "logrotate-deleted-file-held-open",
+  "title": "edge01 root disk at 97% but du finds only 11 GB",
+  "description": "The root filesystem on edge01 is almost full and alerts fire every hour. du cannot account for the space. The gateway process has been running since September.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "deleted|held open|open file|lsof",
+      "logrotate|rotat"
+    ],
+    "cited_files": [
+      "df-du-lsof.txt",
+      "etc/logrotate.d/gateway"
+    ],
+    "steps": [
+      "copytruncate|postrotate|SIGHUP|HUP|reload|truncate|restart"
+    ],
+    "forbidden_commands": [
+      "rm -rf /var/log",
+      "reboot",
+      "kill -9"
+    ]
+  }
+}

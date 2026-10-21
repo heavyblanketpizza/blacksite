@@ -1,0 +1,187 @@
+2026-10-15 16:00:01.100 UTC [1874] LOG:  checkpoint starting: time
+2026-10-15 16:00:44.912 UTC [1874] LOG:  checkpoint complete: wrote 1203 buffers (7.3%); 0 WAL file(s) added, 1 removed, 0 recycled
+2026-10-15 16:30:00.055 UTC [24111] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:00.410 UTC [24111] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:00.412 UTC [24111] reports@orders LOG:  statement: SELECT o.id, o.total_cents, e.payload FROM orders o JOIN order_events e ON e.order_id = o.id WHERE o.created_at > now() - interval '90 days'
+2026-10-15 16:30:00.415 UTC [24113] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:00.595 UTC [24114] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:00.715 UTC [24113] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:00.775 UTC [24115] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:00.895 UTC [24114] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:00.955 UTC [24116] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:01.075 UTC [24115] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:01.135 UTC [24117] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:01.255 UTC [24116] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:01.315 UTC [24118] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:01.435 UTC [24117] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:01.495 UTC [24119] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:01.615 UTC [24118] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:01.675 UTC [24120] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:01.795 UTC [24119] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:01.855 UTC [24121] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:01.975 UTC [24120] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:02.035 UTC [24122] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:02.155 UTC [24121] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:02.215 UTC [24123] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:02.335 UTC [24122] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:02.395 UTC [24124] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:02.515 UTC [24123] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:02.575 UTC [24125] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:02.695 UTC [24124] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:02.755 UTC [24126] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:02.875 UTC [24125] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:02.935 UTC [24127] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:03.055 UTC [24126] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:03.115 UTC [24128] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:03.235 UTC [24127] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:03.295 UTC [24129] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:03.415 UTC [24128] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:03.475 UTC [24130] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:03.595 UTC [24129] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:03.655 UTC [24131] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:03.775 UTC [24130] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:03.835 UTC [24132] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:03.955 UTC [24131] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:04.015 UTC [24133] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:04.135 UTC [24132] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:04.195 UTC [24134] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:04.315 UTC [24133] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:04.375 UTC [24135] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:04.495 UTC [24134] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:04.555 UTC [24136] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:04.675 UTC [24135] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:04.735 UTC [24137] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:04.855 UTC [24136] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:04.915 UTC [24138] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:05.035 UTC [24137] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:05.095 UTC [24139] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:05.215 UTC [24138] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:05.275 UTC [24140] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:05.395 UTC [24139] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:05.455 UTC [24141] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:05.575 UTC [24140] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:05.635 UTC [24142] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:05.755 UTC [24141] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:05.815 UTC [24143] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:05.935 UTC [24142] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:05.995 UTC [24144] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:06.115 UTC [24143] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:06.175 UTC [24145] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:06.295 UTC [24144] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:06.355 UTC [24146] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:06.475 UTC [24145] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:06.535 UTC [24147] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:06.655 UTC [24146] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:06.715 UTC [24148] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:06.835 UTC [24147] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:06.895 UTC [24149] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:07.015 UTC [24148] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:07.075 UTC [24150] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:07.195 UTC [24149] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:07.255 UTC [24151] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:07.375 UTC [24150] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:07.435 UTC [24152] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:07.555 UTC [24151] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:07.615 UTC [24153] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:07.735 UTC [24152] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:07.795 UTC [24154] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:07.915 UTC [24153] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:07.975 UTC [24155] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:08.095 UTC [24154] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:08.155 UTC [24156] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:08.275 UTC [24155] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:08.335 UTC [24157] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:08.455 UTC [24156] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:08.515 UTC [24158] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:08.635 UTC [24157] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:08.695 UTC [24159] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:08.815 UTC [24158] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:08.875 UTC [24160] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:08.995 UTC [24159] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:09.055 UTC [24161] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:09.175 UTC [24160] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:09.235 UTC [24162] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:09.355 UTC [24161] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:09.415 UTC [24163] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:09.535 UTC [24162] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:09.595 UTC [24164] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:09.715 UTC [24163] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:09.775 UTC [24165] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:09.895 UTC [24164] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:09.955 UTC [24166] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:10.075 UTC [24165] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:10.135 UTC [24167] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:10.255 UTC [24166] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:10.315 UTC [24168] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:10.435 UTC [24167] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:10.495 UTC [24169] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:10.615 UTC [24168] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:10.675 UTC [24170] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:10.795 UTC [24169] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:10.855 UTC [24171] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:10.975 UTC [24170] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:11.035 UTC [24172] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:11.155 UTC [24171] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:11.215 UTC [24173] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:11.335 UTC [24172] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:11.395 UTC [24174] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:11.515 UTC [24173] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:11.575 UTC [24175] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:11.695 UTC [24174] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:11.755 UTC [24176] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:11.875 UTC [24175] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:11.935 UTC [24177] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:12.055 UTC [24176] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:12.115 UTC [24178] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:12.235 UTC [24177] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:12.295 UTC [24179] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:12.415 UTC [24178] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:12.475 UTC [24180] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:12.595 UTC [24179] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:12.655 UTC [24181] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:12.775 UTC [24180] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:12.835 UTC [24182] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:12.955 UTC [24181] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:13.015 UTC [24183] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:13.135 UTC [24182] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:13.195 UTC [24184] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:13.315 UTC [24183] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:13.375 UTC [24185] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:13.495 UTC [24184] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:13.555 UTC [24186] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:13.675 UTC [24185] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:13.735 UTC [24187] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:13.855 UTC [24186] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:13.915 UTC [24188] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:14.035 UTC [24187] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:14.095 UTC [24189] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:14.215 UTC [24188] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:14.275 UTC [24190] reports@orders LOG:  connection authorized: user=reports database=orders application_name=reports-worker
+2026-10-15 16:30:14.395 UTC [24189] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:30:14.575 UTC [24190] reports@orders LOG:  statement: BEGIN
+2026-10-15 16:35:00.055 UTC [24111] reports@orders LOG:  duration: 299643.102 ms  statement: SELECT o.id, o.total_cents, e.payload FROM orders o JOIN order_events e ON e.order_id = o.id WHERE o.created_at > now() - interval '90 days'
+2026-10-15 16:41:00.067 UTC [33800] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:41:04.337 UTC [33822] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:43:43.599 UTC [30197] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:43:53.685 UTC [37945] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:44:03.161 UTC [39652] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:47:27.669 UTC [32987] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:48:25.134 UTC [34304] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:48:31.227 UTC [34619] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:49:26.033 UTC [30067] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:51:04.841 UTC [32386] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:51:31.322 UTC [36864] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:51:35.996 UTC [38758] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:51:42.237 UTC [36049] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:51:57.672 UTC [39991] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:53:03.911 UTC [39278] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:53:20.504 UTC [35220] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 16:53:22.002 UTC [32056] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 17:00:44.406 UTC [38445] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 17:01:38.008 UTC [30884] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 17:01:57.098 UTC [37481] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 17:02:00.594 UTC [39163] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 17:03:10.756 UTC [36428] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 17:03:24.453 UTC [36521] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 17:03:52.646 UTC [36536] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections
+2026-10-15 17:04:52.897 UTC [36457] api@orders FATAL:  remaining connection slots are reserved for non-replication superuser connections

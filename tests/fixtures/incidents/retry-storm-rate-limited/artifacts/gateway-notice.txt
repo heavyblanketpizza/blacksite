@@ -1,0 +1,6 @@
+From: Payments Gateway Support <support@payments.example.com>
+Date: Mon, 27 Oct 2026 09:52:10 +0000
+Subject: Rate limit exceeded for merchant acct_EXAMPLE
+
+Your integration exceeded 600 requests per minute between 09:30 and 09:50 UTC. Requests are limited for 30 seconds after each
+breach. Please honour the Retry-After header.

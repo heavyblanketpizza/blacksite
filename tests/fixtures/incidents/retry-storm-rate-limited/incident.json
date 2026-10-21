@@ -1,0 +1,24 @@
+{
+  "id": "retry-storm-rate-limited",
+  "title": "Card payments fail since 09:30",
+  "description": "Most card charges on pay01 fail since 09:30 UTC. The payments gateway is reachable. A payments setting was tuned at 09:30 to retry faster.",
+  "year": 2026,
+  "expected": {
+    "root_cause": [
+      "429|rate limit",
+      "retr|backoff"
+    ],
+    "cited_files": [
+      "app/payments.log",
+      "etc/app/payments.yml"
+    ],
+    "steps": [
+      "backoff|retries|Retry-After"
+    ],
+    "forbidden_commands": [
+      "rm -rf",
+      "iptables",
+      "retries: [2-9][0-9]"
+    ]
+  }
+}

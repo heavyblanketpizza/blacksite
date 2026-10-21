@@ -1,0 +1,65 @@
+{"ts": "2026-10-25T15:00:42.452Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/797d76de.jpg", "bytes": 739409}
+{"ts": "2026-10-25T15:02:31.904Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/598b88db.jpg", "bytes": 450179}
+{"ts": "2026-10-25T15:03:20.887Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/5fefe911.jpg", "bytes": 337360}
+{"ts": "2026-10-25T15:06:39.046Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/9fcdb9e1.jpg", "bytes": 511430}
+{"ts": "2026-10-25T15:08:17.083Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/5e1ea978.jpg", "bytes": 406180}
+{"ts": "2026-10-25T15:10:03.986Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/e7edd867.jpg", "bytes": 111681}
+{"ts": "2026-10-25T15:11:32.087Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/331b2fb3.jpg", "bytes": 588464}
+{"ts": "2026-10-25T15:12:14.514Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/d7a7bf5e.jpg", "bytes": 69508}
+{"ts": "2026-10-25T15:12:25.772Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/eb3d7873.jpg", "bytes": 744204}
+{"ts": "2026-10-25T15:12:27.755Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/8248f803.jpg", "bytes": 145397}
+{"ts": "2026-10-25T15:13:04.943Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/71992790.jpg", "bytes": 742966}
+{"ts": "2026-10-25T15:15:09.192Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/d0d18fb0.jpg", "bytes": 469974}
+{"ts": "2026-10-25T15:16:55.826Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/9b811f47.jpg", "bytes": 750604}
+{"ts": "2026-10-25T15:17:32.188Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/98918dd8.jpg", "bytes": 549927}
+{"ts": "2026-10-25T15:17:49.197Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/9bfad94f.jpg", "bytes": 617436}
+{"ts": "2026-10-25T15:19:36.281Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/b9f09825.jpg", "bytes": 251186}
+{"ts": "2026-10-25T15:21:50.225Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/a9e16e27.jpg", "bytes": 423655}
+{"ts": "2026-10-25T15:23:21.683Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/f0eb21aa.jpg", "bytes": 773637}
+{"ts": "2026-10-25T15:23:23.758Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/4f55c73d.jpg", "bytes": 314637}
+{"ts": "2026-10-25T15:24:36.552Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/3c272728.jpg", "bytes": 430971}
+{"ts": "2026-10-25T15:24:55.663Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/2dedb6a7.jpg", "bytes": 449418}
+{"ts": "2026-10-25T15:26:31.509Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/6e1e98e2.jpg", "bytes": 594208}
+{"ts": "2026-10-25T15:27:10.203Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/0696f561.jpg", "bytes": 758474}
+{"ts": "2026-10-25T15:27:12.414Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/6d5fcd18.jpg", "bytes": 457105}
+{"ts": "2026-10-25T15:28:05.464Z", "level": "info", "msg": "upload saved", "path": "/var/lib/app/uploads/2026/10/25/9b774054.jpg", "bytes": 839887}
+{"ts": "2026-10-25T15:31:33.055Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/8ccaec71.jpg'", "status": 500}
+{"ts": "2026-10-25T15:33:31.645Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/2d94a778.jpg'", "status": 500}
+{"ts": "2026-10-25T15:34:13.394Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/b22635cb.jpg'", "status": 500}
+{"ts": "2026-10-25T15:35:15.890Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/096ebec4.jpg'", "status": 500}
+{"ts": "2026-10-25T15:39:18.064Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/46cbd355.jpg'", "status": 500}
+{"ts": "2026-10-25T15:39:52.975Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/75923260.jpg'", "status": 500}
+{"ts": "2026-10-25T15:40:38.602Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/35737c8f.jpg'", "status": 500}
+{"ts": "2026-10-25T15:42:04.727Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/482a52a2.jpg'", "status": 500}
+{"ts": "2026-10-25T15:42:11.787Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/7b246c17.jpg'", "status": 500}
+{"ts": "2026-10-25T15:42:19.768Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/2ae568ba.jpg'", "status": 500}
+{"ts": "2026-10-25T15:42:35.426Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/5d3bbce0.jpg'", "status": 500}
+{"ts": "2026-10-25T15:44:08.747Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/bf9f842d.jpg'", "status": 500}
+{"ts": "2026-10-25T15:44:11.113Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/577f8847.jpg'", "status": 500}
+{"ts": "2026-10-25T15:44:18.337Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/0a3ef19e.jpg'", "status": 500}
+{"ts": "2026-10-25T15:44:22.517Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/9e7bd62f.jpg'", "status": 500}
+{"ts": "2026-10-25T15:44:45.298Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/fbdb4de8.jpg'", "status": 500}
+{"ts": "2026-10-25T15:45:24.379Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/80ebe557.jpg'", "status": 500}
+{"ts": "2026-10-25T15:45:52.332Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/d4faf4b1.jpg'", "status": 500}
+{"ts": "2026-10-25T15:46:12.323Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/a3b0718f.jpg'", "status": 500}
+{"ts": "2026-10-25T15:46:43.587Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/7a3621f5.jpg'", "status": 500}
+{"ts": "2026-10-25T15:47:15.487Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/a0835b6b.jpg'", "status": 500}
+{"ts": "2026-10-25T15:48:15.118Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/f2597377.jpg'", "status": 500}
+{"ts": "2026-10-25T15:48:21.143Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/29828207.jpg'", "status": 500}
+{"ts": "2026-10-25T15:48:22.806Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/df880b11.jpg'", "status": 500}
+{"ts": "2026-10-25T15:48:42.329Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/473effcf.jpg'", "status": 500}
+{"ts": "2026-10-25T15:49:07.389Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/b22b2e65.jpg'", "status": 500}
+{"ts": "2026-10-25T15:49:17.000Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/4143da51.jpg'", "status": 500}
+{"ts": "2026-10-25T15:50:56.949Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/aeec6a9b.jpg'", "status": 500}
+{"ts": "2026-10-25T15:52:12.446Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/b1b0d8fe.jpg'", "status": 500}
+{"ts": "2026-10-25T15:52:19.570Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/e2ed8971.jpg'", "status": 500}
+{"ts": "2026-10-25T15:53:06.554Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/6b9a4742.jpg'", "status": 500}
+{"ts": "2026-10-25T15:53:38.255Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/3dc1523c.jpg'", "status": 500}
+{"ts": "2026-10-25T15:55:15.493Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/6f6e71b7.jpg'", "status": 500}
+{"ts": "2026-10-25T15:56:00.358Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/fabf0a79.jpg'", "status": 500}
+{"ts": "2026-10-25T15:57:58.954Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/f644d360.jpg'", "status": 500}
+{"ts": "2026-10-25T15:58:02.480Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/c2abd260.jpg'", "status": 500}
+{"ts": "2026-10-25T15:59:04.977Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/6aeb7dbd.jpg'", "status": 500}
+{"ts": "2026-10-25T15:59:08.734Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/96a3b48b.jpg'", "status": 500}
+{"ts": "2026-10-25T15:59:14.118Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/e6a56ae6.jpg'", "status": 500}
+{"ts": "2026-10-25T15:59:20.852Z", "level": "error", "msg": "EACCES: permission denied, open '/var/lib/app/uploads/2026/10/25/ca0b296a.jpg'", "status": 500}

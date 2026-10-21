@@ -1,0 +1,17 @@
+2026-09-20 03:14:05,000:INFO:certbot._internal.renewal:Certificate not yet due for renewal
+2026-09-25 03:14:05,000:INFO:certbot._internal.renewal:Attempting to renew cert (api.example.com) from /etc/letsencrypt/renewal/api.example.com.conf
+2026-09-25 03:14:09,000:WARNING:certbot._internal.auth_handler:Challenge failed for domain api.example.com
+2026-09-25 03:14:09,000:ERROR:certbot._internal.renewal:Failed to renew certificate api.example.com with error: Some challenges have failed.
+2026-09-25 03:14:09,000:ERROR:certbot._internal.renewal:  Detail: 10.0.2.9: Fetching http://api.example.com/.well-known/acme-challenge/EXAMPLEtoken: Connection refused
+2026-09-28 03:14:05,000:INFO:certbot._internal.renewal:Attempting to renew cert (api.example.com) from /etc/letsencrypt/renewal/api.example.com.conf
+2026-09-28 03:14:09,000:WARNING:certbot._internal.auth_handler:Challenge failed for domain api.example.com
+2026-09-28 03:14:09,000:ERROR:certbot._internal.renewal:Failed to renew certificate api.example.com with error: Some challenges have failed.
+2026-09-28 03:14:09,000:ERROR:certbot._internal.renewal:  Detail: 10.0.2.9: Fetching http://api.example.com/.well-known/acme-challenge/EXAMPLEtoken: Connection refused
+2026-10-01 03:14:05,000:INFO:certbot._internal.renewal:Attempting to renew cert (api.example.com) from /etc/letsencrypt/renewal/api.example.com.conf
+2026-10-01 03:14:09,000:WARNING:certbot._internal.auth_handler:Challenge failed for domain api.example.com
+2026-10-01 03:14:09,000:ERROR:certbot._internal.renewal:Failed to renew certificate api.example.com with error: Some challenges have failed.
+2026-10-01 03:14:09,000:ERROR:certbot._internal.renewal:  Detail: 10.0.2.9: Fetching http://api.example.com/.well-known/acme-challenge/EXAMPLEtoken: Connection refused
+2026-10-04 03:14:05,000:INFO:certbot._internal.renewal:Attempting to renew cert (api.example.com) from /etc/letsencrypt/renewal/api.example.com.conf
+2026-10-04 03:14:09,000:WARNING:certbot._internal.auth_handler:Challenge failed for domain api.example.com
+2026-10-04 03:14:09,000:ERROR:certbot._internal.renewal:Failed to renew certificate api.example.com with error: Some challenges have failed.
+2026-10-04 03:14:09,000:ERROR:certbot._internal.renewal:  Detail: 10.0.2.9: Fetching http://api.example.com/.well-known/acme-challenge/EXAMPLEtoken: Connection refused

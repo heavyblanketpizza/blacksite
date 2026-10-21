@@ -1,0 +1,5 @@
+● gateway.service - API gateway
+     Loaded: loaded (/etc/systemd/system/gateway.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-09-12 03:11:40 UTC; 5 weeks 2 days ago
+   Main PID: 2114 (gateway)
+     Memory: 311.2M

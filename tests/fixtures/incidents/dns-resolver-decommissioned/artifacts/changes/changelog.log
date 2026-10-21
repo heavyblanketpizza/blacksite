@@ -1,0 +1,2 @@
+2026-10-07T13:28:40Z INFO  change #4471 applied: decommission dns01 (10.0.0.53); replacement dns03 (10.0.0.55) will be announced via DHCP tomorrow
+2026-10-07T13:28:41Z INFO  change #4471: dns01 powered off

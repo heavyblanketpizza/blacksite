@@ -1,0 +1,10 @@
+# /srv/render/docker-compose.yml
+services:
+  render-worker:
+    image: registry.example.com/render-worker:1.8.0
+    restart: always
+    mem_limit: 512m
+    environment:
+      NODE_ENV: production
+      CACHE_SIZE: "100000"   # was 20000 before 1.8.0
+      QUEUE_URL: amqp://queue.internal:5672

@@ -1,0 +1,14 @@
+[Unit]
+Description=Upload service
+After=network.target
+
+[Service]
+User=uploads
+WorkingDirectory=/srv/uploads
+ExecStart=/usr/bin/node /srv/uploads/server.js
+Restart=on-failure
+LimitNOFILE=1024
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

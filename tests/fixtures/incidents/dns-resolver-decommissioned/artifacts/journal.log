@@ -1,0 +1,7 @@
+Oct  7 06:25:11 worker03 systemd-resolved[611]: Using degraded feature set UDP instead of UDP+EDNS0 for DNS server 10.0.0.53.
+Oct  7 06:25:11 worker03 systemd-resolved[611]: Using degraded feature set UDP instead of UDP+EDNS0 for DNS server 10.0.0.54.
+Oct  7 13:30:01 worker03 systemd-resolved[611]: Switching to DNS server 10.0.0.54 for interface ens5.
+Oct  7 13:30:06 worker03 systemd-resolved[611]: Switching to DNS server 10.0.0.53 for interface ens5.
+Oct  7 13:30:11 worker03 systemd-resolved[611]: Using degraded feature set UDP instead of UDP+EDNS0 for DNS server 10.0.0.53.
+Oct  7 13:31:40 worker03 systemd-resolved[611]: Failed to send DNS request: Connection refused
+Oct  7 13:35:00 worker03 CRON[7021]: (root) CMD (test -x /usr/sbin/fstrim && /usr/sbin/fstrim -a)

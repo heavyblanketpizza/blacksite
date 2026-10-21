@@ -1,0 +1,13 @@
+$ df -h /var
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2        80G   30G   47G  38% /var
+
+$ df -i /var
+Filesystem      Inodes   IUsed  IFree IUse% Mounted on
+/dev/sda2      5242880 5242880      0  100% /var
+
+$ ls -f /var/lib/app/sessions | wc -l
+5198311
+
+$ find /var/lib/app/sessions -type f -mtime +1 | wc -l
+5174022

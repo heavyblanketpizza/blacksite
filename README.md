@@ -90,6 +90,16 @@ uv run blacksite --config demo/blacksite.toml learn approve ID...
 
 The model drafts a case record and playbook lessons from the report. Nothing reaches the agent until an admin approves it in **Learning** or with `learn approve`.
 
+## Evaluation
+
+Measure a switch before turning it on for everyone. `blacksite eval` runs the agent over labeled incidents under presets that set all three switches, scores each guide, and writes a scorecard:
+
+```bash
+uv run blacksite --config demo/blacksite.toml eval tests/fixtures/incidents --presets baseline,rag,all --report scorecard.md
+```
+
+A labeled incident carries an `expected` block in its `incident.json`: patterns the root cause must match, files the guide must cite, patterns a step must match, and commands no step may contain. The fifteen incidents in [tests/fixtures/incidents](tests/fixtures/incidents/) are labeled; copy the block to label your own. A run passes when the guide meets every label, cites only lines that exist, and runs no command the checks block. The scorecard shows, per preset, how many runs passed, what the failed ones lacked, and the median time, tool calls, and tokens. The presets are `baseline`, `rag`, `rag-inject`, `cases`, `cases-inject`, `playbook`, and `all`. `--repeat 3` shows the variance, `--out results.jsonl` keeps one line per run, and `--work DIR` keeps every run's guide and conversation.
+
 ## Use the tools from another agent
 
 The agent sees evidence only through two MCP servers, and any MCP-capable harness can run them over stdio:
@@ -133,7 +143,7 @@ Keep `var/keys/` private and backed up. It holds the key that proves the ledger 
 
 ## Data and checks
 
-- Indexing reads syslog and journalctl (including its JSON export), ISO 8601, nginx, Apache, Common Log Format, JSON lines (pino, bunyan, Docker), klog, and `dmesg -T` timestamps. A record that spans several lines, such as a stack trace, is folded into the line that started it, so patterns and the timeline count records while search still finds every line.
+- Indexing reads syslog and journalctl (including its JSON export), ISO 8601, nginx, Apache, Common Log Format, JSON lines (pino, bunyan, Docker), klog, Redis, and `dmesg -T` timestamps. A record that spans several lines, such as a stack trace, is folded into the line that started it, so patterns and the timeline count records while search still finds every line.
 - Configuration files and command output are kept verbatim: searched and read, never templated or given a severity.
 - Indexing redacts recognized secrets and flags suspicious instructions in logs.
 - Guide checks validate cited files and lines and flag risky commands. Review the guide and its warnings before acting.
