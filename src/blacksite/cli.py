@@ -402,6 +402,8 @@ def _investigate(args: argparse.Namespace, settings: Settings) -> int:
                     print(f"  ? {question}")
                 for command in request["commands"]:
                     print(f"  $ {command}")
+                for item in request["hypotheses"]:
+                    print(f"  {item['status'].replace('_', ' ')}: {item['claim']}")
                 print(f"Reply with: blacksite investigate {args.incident} --paste output.txt")
             elif kind == "done":
                 print(f"\n{dim}{event['seconds']} s, {event['requests']} model calls, {event['tool_calls']} tool "

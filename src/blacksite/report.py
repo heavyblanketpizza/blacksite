@@ -26,6 +26,7 @@ LABELS = {
         "title": "Blacksite solution", "confidence": "Confidence", "summary": "Summary", "root": "Root cause",
         "evidence": "Evidence", "steps": "Steps", "expected": "Expected", "undo": "Undo", "verify": "Verify",
         "unknowns": "Still unknown", "security": "Security notes", "checks": "Automatic checks",
+        "hypotheses": "Hypotheses", "confirmed": "confirmed", "ruled_out": "ruled out", "open": "open",
         "excerpts": "Cited log lines", "source": "Source", "generated": "Generated", "model": "Model",
         "files": "Evidence files", "note": "Written offline by a local model. Commands were checked by code for "
         "risk; read every step before running it.",
@@ -37,6 +38,7 @@ LABELS = {
         "title": "Blacksite 해결 가이드", "confidence": "신뢰도", "summary": "요약", "root": "근본 원인",
         "evidence": "증거", "steps": "단계", "expected": "예상 결과", "undo": "되돌리기", "verify": "확인",
         "unknowns": "아직 모르는 것", "security": "보안 참고", "checks": "자동 검사",
+        "hypotheses": "가설", "confirmed": "확인됨", "ruled_out": "배제됨", "open": "미확인",
         "excerpts": "인용한 로그 줄", "source": "출처", "generated": "작성 시각", "model": "모델",
         "files": "증거 파일", "note": "로컬 모델이 오프라인으로 작성했습니다. 명령의 위험도는 코드로 검사했지만, "
         "실행하기 전에 모든 단계를 읽어 보세요.",
@@ -182,8 +184,9 @@ def _html(guide: dict[str, Any], checks: list[dict[str, Any]], excerpts: list[An
         if step.get("rollback"):
             parts.append(f'<dt>{e(label["undo"])}</dt><dd>{i(step["rollback"])}</dd>')
         parts.append("</dl></div></div>")
+    hypotheses = [f"{label[item['status']]}: {item['claim']}" for item in guide.get("hypotheses", [])]
     for key, items, css in (("verify", guide["verify"], ""), ("unknowns", guide["unknowns"], ""),
-                            ("security", guide["security_notes"], " security")):
+                            ("hypotheses", hypotheses, ""), ("security", guide["security_notes"], " security")):
         if items:
             parts.append(f'<h2>{e(label[key])}</h2><div class="panel{css}"><ul>')
             parts += [f"<li>{i(item)}</li>" for item in items]

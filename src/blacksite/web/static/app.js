@@ -1274,6 +1274,9 @@ function renderGuide(event, model, index) {
   if (guide.unknowns.length) {
     sections.push(section("guide.unknowns", el("ul", { class: "plain-list" }, guide.unknowns.map((item) => el("li", {}, linkify(item))))));
   }
+  if ((guide.hypotheses || []).length) {
+    sections.push(section("guide.hypotheses", hypothesisList(guide.hypotheses)));
+  }
   if (guide.security_notes.length) {
     const security = section("guide.security", el("ul", { class: "plain-list" }, guide.security_notes.map((item) => el("li", {}, linkify(item)))));
     security.classList.add("security");
@@ -1307,6 +1310,13 @@ function saveButton() {
   return button;
 }
 
+// What the agent suspected and what the evidence made of it: confirmed, ruled out, or still open.
+function hypothesisList(items) {
+  const tone = { confirmed: "ok", ruled_out: "error", open: "warn" };
+  return el("ul", { class: "plain-list hypotheses" }, items.map((item) => el("li", {},
+    el("span", { class: `badge ${tone[item.status] || "warn"}`, text: t(`hypothesis.${item.status}`) }), " ", linkify(item.claim))));
+}
+
 function commandBlock(commands) {
   const text = commands.join("\n");
   return el("div", { class: "cmd" }, el("pre", { text }),
@@ -1323,6 +1333,7 @@ function renderQuestion(event) {
     el("div", {}, linkify(request.reason)),
     request.questions.length ? el("ul", { class: "plain-list" }, request.questions.map((q) => el("li", {}, linkify(q)))) : null,
     request.commands.length ? el("div", {}, el("div", { class: "faint small", text: t("question.run") }), commandBlock(request.commands)) : null,
+    (request.hypotheses || []).length ? hypothesisList(request.hypotheses) : null,
     event.checks.length ? el("div", { class: "check-row" },
       event.checks.map((check) => el("span", { class: `check ${check.level}`, text: checkText(check) }))) : null,
     output, el("div", {}, send));

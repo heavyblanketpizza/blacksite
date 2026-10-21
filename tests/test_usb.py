@@ -147,6 +147,7 @@ def test_report_quotes_cited_lines_and_escapes_log_text(incident_dir: Path) -> N
         files = build_solution(evidence, event, "ko", None, "test-model")
     assert set(files) == {"guide.md", "guide.html", "manifest.json"}
     page = files["guide.html"]
+    assert "배제됨: nginx itself is failing" in page
     assert "<script>" not in page and "&lt;script&gt;" in page
     assert "<code>journalctl -k</code>" in page  # inline code rendered, still escaped
     assert '<html lang="ko">' in page and "근본 원인" in page and "#1a1b26" in page  # Tokyo Night

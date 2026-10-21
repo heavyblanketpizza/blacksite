@@ -12,6 +12,7 @@ from blacksite.agent.guide import (
     Guide,
     InfoRequest,
     command_risk,
+    guide_markdown,
     parse_answer,
     review_guide,
     review_request,
@@ -57,6 +58,11 @@ Undo: redeploy 2.14.0.
 ## Still unknown
 - Which setting bounds the cache.
 
+## Hypotheses
+- confirmed: the 2.14.0 report cache grows without bound (app/app.log:3)
+- ruled out: nginx itself is failing; it only reports refused upstream connections (nginx/error.log:3-5)
+- open: whether a setting bounds the cache
+
 ## Security notes
 - nginx/access.log:61 contains a prompt-injection attempt.
 """
@@ -79,14 +85,21 @@ def test_parse_answer_reads_the_template() -> None:
     ]
     assert guide.steps[1].rollback == "redeploy 2.14.0."
     assert guide.security_notes and guide.unknowns and guide.verify
+    assert [(item.status, item.claim[:12]) for item in guide.hypotheses] == [
+        ("confirmed", "the 2.14.0 r"), ("ruled_out", "nginx itself"), ("open", "whether a se")]
+    markdown = guide_markdown(guide)
+    assert "## Hypotheses\n\n- confirmed: the 2.14.0" in markdown and "- ruled out: nginx" in markdown
 
 
 def test_parse_answer_reads_a_request_for_information() -> None:
     request = parse_answer("# Need more information\nWhich directory filled the disk?\n\n## Questions\n"
-                           "- Is /var/log separate?\n\n## Commands\n```bash\ndf -h\ndu -xh /var --max-depth=2\n```\n")
+                           "- Is /var/log separate?\n\n## Commands\n```bash\ndf -h\ndu -xh /var --max-depth=2\n```\n"
+                           "\n## Hypotheses\n- Open: /var/log holds the rotated files\n- a bare suspicion\n")
     assert isinstance(request, InfoRequest)
     assert request.commands == ["df -h", "du -xh /var --max-depth=2"]
     assert request.questions == ["Is /var/log separate?"]
+    assert [(item.status, item.claim) for item in request.hypotheses] == [
+        ("open", "/var/log holds the rotated files"), ("open", "a bare suspicion")]
 
 
 @pytest.mark.parametrize(("text", "message"), [
@@ -287,6 +300,10 @@ Expected: 서비스가 멈춤.
 
 ## 아직 모르는 것
 - 캐시 크기를 제한하는 설정 이름.
+
+## 가설
+- 확인됨: 2.14.0의 리포트 캐시가 무제한으로 커짐 (app/app.log:3)
+- 배제됨: nginx 자체의 장애 (nginx/error.log:3-5)
 """
 
 
@@ -297,13 +314,12 @@ def test_parse_answer_accepts_korean_headings_and_labels() -> None:
     assert [(s.title, s.risk) for s in guide.steps] == [("반복 종료 확인", "read-only"), ("2.13.2로 롤백", "high")]
     assert guide.steps[0].expected.startswith("재시작") and guide.steps[1].rollback == "2.14.0을 다시 배포."
     assert guide.verify and guide.unknowns == ["캐시 크기를 제한하는 설정 이름."]
+    assert [item.status for item in guide.hypotheses] == ["confirmed", "ruled_out"]
     request = parse_answer("# 추가 정보 필요\n어느 디렉터리가 찼는지 모릅니다.\n\n## 명령\n```bash\ndf -h\n```\n")
     assert isinstance(request, InfoRequest) and request.commands == ["df -h"]
 
 
 def test_korean_export_and_check_codes(evidence: Evidence) -> None:
-    from blacksite.agent.guide import guide_markdown
-
     guide = parse_answer(KOREAN_GUIDE)
     checks, fixes = review_guide(guide, evidence)
     assert not fixes
@@ -312,6 +328,7 @@ def test_korean_export_and_check_codes(evidence: Evidence) -> None:
     assert codes["steps_summary_high"] == {"readonly": 1, "changing": 1, "high": 1}
     markdown = guide_markdown(guide, checks, "ko")
     assert "**신뢰도:** 높음" in markdown and "## 근본 원인" in markdown and "(읽기 전용)" in markdown
+    assert "## 가설\n\n- 확인됨: 2.14.0의" in markdown and "- 배제됨: nginx" in markdown
 
 
 def test_korean_language_reaches_the_model(incident_dir: Path, make_settings) -> None:

@@ -37,6 +37,13 @@ class Step(BaseModel):
     rollback: str | None = Field(default=None, description="How to undo this step. Required when risk is high.")
 
 
+class Hypothesis(BaseModel):
+    """Something the agent suspected, and what the evidence made of it."""
+
+    status: Literal["confirmed", "ruled_out", "open"]
+    claim: str = Field(description="The suspicion, with the file:line that decided it where there is one.")
+
+
 class Guide(BaseModel):
     """A step-by-step guide the developer follows on the real server."""
 
@@ -50,6 +57,8 @@ class Guide(BaseModel):
     unknowns: list[str] = Field(default_factory=list, description="What the evidence cannot answer yet.")
     security_notes: list[str] = Field(default_factory=list,
                                       description="Suspicious log content (lines marked ⚠) worth reporting.")
+    hypotheses: list[Hypothesis] = Field(default_factory=list,
+                                         description="What was suspected, and what the evidence made of it.")
 
 
 class InfoRequest(BaseModel):
@@ -58,6 +67,8 @@ class InfoRequest(BaseModel):
     reason: str = Field(description="What is missing and how it would change the diagnosis.")
     questions: list[str] = Field(default_factory=list)
     commands: list[str] = Field(default_factory=list, description="Read-only commands to run and paste back.")
+    hypotheses: list[Hypothesis] = Field(default_factory=list,
+                                         description="What was suspected so far, and what the evidence made of it.")
 
 
 @dataclass(frozen=True)
@@ -302,10 +313,16 @@ Undo: <how to roll back; required when the risk is high>
 ## Still unknown
 - <what the evidence cannot answer>
 
+## Hypotheses
+- confirmed: <what you suspected, and the file:line that confirmed it>
+- ruled out: <what you suspected, and the file:line that ruled it out>
+- open: <what you could not settle>
+
 ## Security notes
 - <lines marked ⚠, if any; otherwise leave this section out>
 
-Mark each step (read-only), (low), or (high). At most 8 evidence lines and 6 steps.
+Mark each step (read-only), (low), or (high). At most 8 evidence lines and 6 steps. List every \
+hypothesis you checked, even when the cause is obvious: the reader learns what was ruled out.
 
 If one specific fact or command output would change the diagnosis, reply instead with:
 
@@ -318,7 +335,10 @@ If one specific fact or command output would change the diagnosis, reply instead
 ## Commands
 ```bash
 <read-only command for the developer to run and paste back>
-```"""
+```
+
+## Hypotheses
+- open: <what the missing information would settle>"""
 
 _FENCE_LINE = re.compile(r"^\s*(```|~~~)")
 _H1 = re.compile(r"^#\s+(.+?)\s*#*\s*$")
@@ -344,6 +364,12 @@ _EVIDENCE_ITEM = re.compile(
     r"\s*(?:[—–:\-]+\s*)?(?P<shows>.*)$"
 )
 _MORE_INFO = re.compile(r"need|more information|question|추가 정보|정보 필요|질문", re.I)
+_HYPOTHESIS = re.compile(
+    r"^(?P<status>confirmed|ruled[ -]out|rejected|open|확인됨?|배제됨?|기각|미확인|열림)"
+    r"\s*[:：\-–]\s*(?P<claim>.+)$", re.I)
+_HYPOTHESIS_STATUS = {"confirmed": "confirmed", "ruled out": "ruled_out", "ruled-out": "ruled_out",
+                      "rejected": "ruled_out", "open": "open", "확인": "confirmed", "확인됨": "confirmed",
+                      "배제": "ruled_out", "배제됨": "ruled_out", "기각": "ruled_out", "미확인": "open", "열림": "open"}
 
 
 class AnswerFormatError(ValueError):
@@ -359,7 +385,8 @@ def parse_answer(text: str) -> Guide | InfoRequest:
         reason = " ".join(line.strip() for line in preamble if line.strip())
         reason = reason or " ".join(sections.get("why", []) + sections.get("reason", [])).strip()
         return InfoRequest(reason=reason or title, questions=_bullets(sections.get("questions", [])),
-                           commands=_fenced(sections.get("commands", [])))
+                           commands=_fenced(sections.get("commands", [])),
+                           hypotheses=_hypotheses(sections.get("hypotheses", [])))
 
     confidence: Confidence = "medium"
     summary = []
@@ -391,6 +418,7 @@ def parse_answer(text: str) -> Guide | InfoRequest:
         confidence=confidence, evidence=evidence, steps=steps,
         verify=_bullets(sections.get("verify", [])), unknowns=_bullets(sections.get("still unknown", [])),
         security_notes=_bullets(sections.get("security notes", [])),
+        hypotheses=_hypotheses(sections.get("hypotheses", [])),
     )
 
 
@@ -400,6 +428,7 @@ _SECTION_NAMES = {
     "unknown": "still unknown", "open questions": "still unknown", "security notes": "security notes",
     "security": "security notes", "summary": "summary", "questions": "questions", "commands": "commands",
     "why": "why", "reason": "reason",
+    "hypotheses": "hypotheses", "hypothesis": "hypotheses", "가설": "hypotheses",
     "근본 원인": "root cause", "원인": "root cause", "증거": "evidence", "근거": "evidence", "조치 단계": "steps",
     "해결 단계": "steps", "단계": "steps", "확인": "verify", "검증": "verify", "아직 모르는 것": "still unknown",
     "미확인": "still unknown", "알 수 없는 것": "still unknown", "보안 참고": "security notes",
@@ -444,6 +473,18 @@ def _bullets(lines: list[str]) -> list[str]:
         elif line.strip() and items and line.startswith((" ", "\t")):
             items[-1] += " " + line.strip()
     return items
+
+
+def _hypotheses(lines: list[str]) -> list[Hypothesis]:
+    found = []
+    for item in _bullets(lines):
+        match = _HYPOTHESIS.match(item)
+        if match:
+            status = _HYPOTHESIS_STATUS[match["status"].lower().replace("-", " ")]
+            found.append(Hypothesis(status=status, claim=match["claim"].strip()))  # type: ignore[arg-type]
+        else:
+            found.append(Hypothesis(status="open", claim=item))
+    return found
 
 
 def _fenced(lines: list[str]) -> list[str]:
@@ -509,12 +550,14 @@ LANGUAGES = ("en", "ko")
 _EXPORT_LABELS = {
     "en": {"confidence": "Confidence", "root cause": "Root cause", "evidence": "Evidence", "steps": "Steps",
            "expected": "Expected", "rollback": "Rollback", "verify": "Verify", "unknown": "Still unknown",
-           "security": "Security notes", "checks": "Automatic checks",
+           "security": "Security notes", "checks": "Automatic checks", "hypotheses": "Hypotheses",
+           "confirmed": "confirmed", "ruled_out": "ruled out", "open": "open",
            "read-only": "read-only", "low": "low", "high": "high",
            "ok": "ok", "warn": "warning", "error": "error"},
     "ko": {"confidence": "신뢰도", "root cause": "근본 원인", "evidence": "증거", "steps": "단계",
            "expected": "예상 결과", "rollback": "되돌리기", "verify": "확인", "unknown": "아직 모르는 것",
-           "security": "보안 참고", "checks": "자동 검사",
+           "security": "보안 참고", "checks": "자동 검사", "hypotheses": "가설",
+           "confirmed": "확인됨", "ruled_out": "배제됨", "open": "미확인",
            "read-only": "읽기 전용", "low": "낮음", "high": "높음",
            "ok": "통과", "warn": "경고", "error": "오류",
            "confidence-high": "높음", "confidence-medium": "보통", "confidence-low": "낮음"},
@@ -524,9 +567,10 @@ LANGUAGE_INSTRUCTIONS = {
     "en": "",
     "ko": (
         "Write the answer in Korean (한국어): the title, summary, root cause, explanations, expected results, "
-        "undo steps, verification items, unknowns, security notes, and questions. Keep the Markdown headings, "
-        "'Confidence:', 'Expected:', 'Undo:', and the risk labels (read-only), (low), (high) exactly in English "
-        "as in the template. Keep commands, file names, file:line references, and quoted log text unchanged. "
+        "undo steps, verification items, unknowns, hypotheses, security notes, and questions. Keep the Markdown "
+        "headings, 'Confidence:', 'Expected:', 'Undo:', the risk labels (read-only), (low), (high), and the "
+        "hypothesis labels confirmed, ruled out, open exactly in English as in the template. Keep commands, file "
+        "names, file:line references, and quoted log text unchanged. "
         "Write natural Korean using only Hangul and English; never use Chinese characters or Japanese."
     ),
 }
@@ -564,6 +608,9 @@ def guide_markdown(guide: Guide, checks: Sequence[Check] = (), language: str = "
     lines += [f"## {label['verify']}", "", *[f"- [ ] {item}" for item in guide.verify], ""]
     if guide.unknowns:
         lines += [f"## {label['unknown']}", "", *[f"- {item}" for item in guide.unknowns], ""]
+    if guide.hypotheses:
+        lines += [f"## {label['hypotheses']}", "",
+                  *[f"- {label[item.status]}: {item.claim}" for item in guide.hypotheses], ""]
     if guide.security_notes:
         lines += [f"## {label['security']}", "", *[f"- {item}" for item in guide.security_notes], ""]
     if checks:

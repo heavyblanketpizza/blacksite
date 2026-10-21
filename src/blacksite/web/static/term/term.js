@@ -599,6 +599,7 @@ function renderGuide(event, fresh = false) {
       steps.length ? sec("procedure", ...steps) : null,
       (g.verify || []).length ? sec("verify", list(g.verify)) : null,
       (g.unknowns || []).length ? sec("unknowns", list(g.unknowns)) : null,
+      (g.hypotheses || []).length ? sec("hypotheses", el("ul", {}, g.hypotheses.map((h) => el("li", {}, `${h.status.replace("_", " ")}: `, ...linkRefs(h.claim))))) : null,
       (g.security_notes || []).length ? sec("security", list(g.security_notes)) : null));
   block(brief);
 }
@@ -607,6 +608,7 @@ function renderQuestion(event) {
   const r = event.request || {};
   line("q", r.reason || "the agent is asking for more output.");
   for (const q of r.questions || []) line("q", `? ${q}`);
+  for (const h of r.hypotheses || []) line("q", `${h.status.replace("_", " ")}: ${h.claim}`);
   for (const command of r.commands || []) block(el("div", { class: "sh", style: "margin-left:16ch" }, el("code", { text: command }), copyButton(command)));
   line("info", el("span", {}, "Run those on the box, then ", ref("reply", "reply"), " and paste the output (end with EOF or Ctrl-D)."));
 }
