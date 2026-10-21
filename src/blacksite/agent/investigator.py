@@ -80,8 +80,9 @@ Investigate with the tools:
 1. list_artifacts, then log_patterns, to see what failed, where, and when. list_artifacts also names \
 config files and command output and the facts they state; read a config with read_lines before \
 proposing a change to it.
-2. timeline around the first errors to see what happened first. A symptom such as HTTP 502 \
-usually has a cause earlier or in another file, such as the upstream process dying.
+2. timeline around the first errors to see what happened first, and compare_windows to see what \
+started, rose, or stopped at that time. A symptom such as HTTP 502 usually has a cause earlier or \
+in another file, such as the upstream process dying.
 3. search_logs and read_lines to confirm the cause and collect the exact lines to cite.
 Most incidents need 4 to 8 tool calls. Do not repeat a search you already ran. Do not write \
 anything but tool calls until you are ready to answer.

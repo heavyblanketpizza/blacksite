@@ -169,9 +169,37 @@ def test_configs_and_command_output_are_kept_verbatim_and_summarized(incident_di
         assert text.startswith("nginx/nginx.conf lines 1–5 of 5") and "worker_processes auto;" in text
 
 
-def test_server_exposes_exactly_five_read_only_tools(evidence: Evidence) -> None:
+def test_compare_windows_tells_what_started_and_what_stopped(evidence: Evidence) -> None:
+    outage = evidence.compare("02:14", "02:15")
+    assert outage.window == (datetime(2026, 9, 27, 2, 14), datetime(2026, 9, 27, 2, 15, 59))
+    assert outage.baseline == (datetime(2026, 9, 27, 1, 0), datetime(2026, 9, 27, 2, 14))
+    started = [change.template for change in outage.new]
+    assert any("connect() failed" in template for template in started)
+    assert any("oom-killer" in template for template in started) and not outage.stopped
+    assert all(change.baseline_count == 0 and change.window_count > 0 for change in outage.new)
+
+    quiet = evidence.compare("02:05", "02:10", baseline_since="01:52", baseline_until="02:04")
+    assert [change.template[:18] for change in quiet.stopped] == ["heap_used_mb=<NUM>"]
+    assert quiet.stopped[0].baseline_count == 25 and quiet.stopped[0].window_count == 0
+
+    repeat = evidence.compare("02:19", "02:20", baseline_since="02:14", baseline_until="02:15", level="error")
+    assert not repeat.new and not repeat.stopped
+    with pytest.raises(EvidenceError, match="until must be at or after since"):
+        evidence.compare("02:20", "02:10")
+
     server = build_evidence_server(evidence)
-    assert tool_names(server) == {"list_artifacts", "log_patterns", "search_logs", "read_lines", "timeline"}
+    _, text = call_tool(server, "compare_windows", {"since": "02:14", "until": "02:15", "level": "error"})
+    assert text.startswith("Window 2026-09-27 02:14:00 → 02:15:59 (2 min) vs 2026-09-27 01:00:00 → 02:14:00 (74 min)")
+    assert "New in the window" in text and "connect() failed" in text and "e.g. nginx/error.log:3" in text
+    _, text = call_tool(server, "compare_windows", {"since": "02:05", "until": "02:10", "baseline_since": "01:52",
+                                                    "baseline_until": "02:04"})
+    assert "Stopped (seen before" in text and "was 1.9/min, ×25 before" in text
+
+
+def test_server_exposes_exactly_six_read_only_tools(evidence: Evidence) -> None:
+    server = build_evidence_server(evidence)
+    assert tool_names(server) == {"list_artifacts", "log_patterns", "search_logs", "read_lines", "timeline",
+                                  "compare_windows"}
 
 
 def test_list_artifacts_shows_description_redactions_and_flags(evidence: Evidence) -> None:

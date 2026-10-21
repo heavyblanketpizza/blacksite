@@ -29,7 +29,7 @@ import tempfile
 import threading
 from collections.abc import Iterator
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -150,6 +150,31 @@ class Event:
     line_no: int
     text: str
     detail: str | None
+
+
+@dataclass(frozen=True)
+class Change:
+    """How often a pattern occurred in a window and in the baseline it is compared with."""
+
+    template: str
+    level: str | None
+    guessed: bool
+    files: list[str]
+    sample_file: str
+    sample_line: int
+    window_count: int
+    baseline_count: int
+    window_rate: float  # per minute
+    baseline_rate: float
+
+
+@dataclass(frozen=True)
+class Comparison:
+    window: tuple[datetime, datetime]
+    baseline: tuple[datetime, datetime] | None  # None when nothing precedes the window
+    new: list[Change]  # in the window, never in the baseline
+    rising: list[Change]  # much more frequent per minute than in the baseline
+    stopped: list[Change]  # frequent in the baseline, absent from the window
 
 
 class Evidence:
@@ -308,6 +333,63 @@ class Evidence:
         rows = self._query(f"{runs} ORDER BY first_ts, first_ord LIMIT ?", [*run_params, limit])
         events = [Event(row[0], row[1], row[2], _level(row[3]), row[4], row[5], row[6], row[7], row[8]) for row in rows]
         return events, total
+
+    def compare(self, since: str, until: str, baseline_since: str | None = None, baseline_until: str | None = None,
+                file: str | None = None, level: str | None = None, top: int = 15) -> Comparison:
+        """Patterns that are new, much more frequent, or gone in a window, against a baseline.
+
+        The baseline is the time before the window unless one is given. Rates are per
+        minute, so windows of different lengths compare.
+        """
+        first, last = self.time_range()
+        if first is None or last is None:
+            raise EvidenceError("No line has a timestamp, so there is nothing to compare")
+        try:
+            start, end = parse_time_filter(since, first, last), parse_time_filter(until, first, last, end=True)
+            base_start = parse_time_filter(baseline_since, first, last) if baseline_since else first
+            base_end = start
+            if baseline_until:
+                base_end = parse_time_filter(baseline_until, first, last, end=True) + timedelta(microseconds=1)
+        except ValueError as exc:
+            raise EvidenceError(str(exc)) from None
+        if end < start:
+            raise EvidenceError("until must be at or after since")
+        where, params = self._filters(file, level, None, None)
+        group = ("template_id, count(*) AS n, max(sev) AS sev, "
+                 "coalesce(bool_and(guessed) FILTER (WHERE sev IS NOT NULL), false) AS guessed, "
+                 "list(DISTINCT file ORDER BY file) AS files, arg_min(file, ord) AS sample_file, "
+                 "arg_min(line_no, ord) AS sample_line")
+        rows = self._query(
+            f"WITH w AS (SELECT {group} FROM lines WHERE template_id IS NOT NULL AND ts BETWEEN ? AND ? AND {where} "
+            "GROUP BY template_id), "
+            f"b AS (SELECT {group} FROM lines WHERE template_id IS NOT NULL AND ts >= ? AND ts < ? AND {where} "
+            "GROUP BY template_id) "
+            "SELECT t.template, coalesce(w.n, 0), coalesce(b.n, 0), coalesce(w.sev, b.sev), "
+            "coalesce(w.guessed, b.guessed), coalesce(w.files, b.files), coalesce(w.sample_file, b.sample_file), "
+            "coalesce(w.sample_line, b.sample_line) FROM templates t "
+            "LEFT JOIN w ON w.template_id = t.id LEFT JOIN b ON b.template_id = t.id "
+            "WHERE w.n IS NOT NULL OR b.n IS NOT NULL ORDER BY t.id",
+            [start, end, *params, base_start, base_end, *params],
+        )
+        window_minutes = max((end - start).total_seconds() / 60, 1 / 60)
+        baseline_minutes = (base_end - base_start).total_seconds() / 60
+        new, rising, stopped = [], [], []
+        for template, in_window, in_baseline, sev, guessed, files, sample_file, sample_line in rows:
+            window_rate = in_window / window_minutes
+            baseline_rate = in_baseline / baseline_minutes if baseline_minutes > 0 else 0.0
+            change = Change(template, _level(sev), guessed, list(files), sample_file, sample_line, in_window,
+                            in_baseline, window_rate, baseline_rate)
+            if in_window and not in_baseline:
+                new.append(change)
+            elif in_window >= 2 and window_rate >= 3 * baseline_rate:
+                rising.append(change)
+            elif not in_window and baseline_rate * window_minutes >= 3:
+                stopped.append(change)
+        new.sort(key=lambda change: (-change.window_count, change.template))
+        rising.sort(key=lambda change: (-change.window_rate / change.baseline_rate, change.template))
+        stopped.sort(key=lambda change: (-change.baseline_rate, change.template))
+        baseline = (base_start, base_end) if baseline_minutes > 0 else None
+        return Comparison((start, end), baseline, new[:top], rising[:top], stopped[:top])
 
     def histogram(self, level: str = "warning",
                   buckets: int = 60) -> tuple[datetime | None, int, list[tuple[int, str, int]]]:
