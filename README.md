@@ -167,7 +167,7 @@ Keep `var/keys/` private and backed up. It holds the key that proves the ledger 
 uv run ruff check && uv run mypy && uv run pytest
 ```
 
-Tests mock the model and need no GPU. CI lints, type-checks, audits the locked dependencies, and runs the tests on Linux, macOS, and Windows with Python 3.11 and 3.14.
+Tests mock the model and need no GPU. The browser tests in `tests/e2e/` run separately with `uv run pytest -m e2e` after `uv run playwright install chromium`. CI lints, type-checks, audits the locked dependencies, runs the tests on Linux, macOS, and Windows with Python 3.11 and 3.14, and drives the web app in Chromium.
 
 | Path | Contents |
 | --- | --- |

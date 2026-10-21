@@ -56,3 +56,18 @@ jobs:
         run: uv run pytest -q
       - name: Build the package
         run: uv build --wheel
+
+  e2e:
+    name: Browser
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          uv sync --locked
+          uv run playwright install --with-deps chromium
+      - name: Test in a browser
+        run: uv run pytest -q -m e2e

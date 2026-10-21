@@ -10,7 +10,7 @@ Install [uv](https://docs.astral.sh/uv/) and run `uv sync` in the checkout. That
 uv run ruff check && uv run mypy && uv run pytest
 ```
 
-CI runs the same checks on Linux, macOS, and Windows, audits the locked dependencies, and builds the wheel. A change to the agent's instructions, the answer template, or the guide checks also deserves a run of `blacksite eval` against a real local model (see the README's Evaluation section), because the unit tests cannot judge the quality of a guide.
+CI runs the same checks on Linux, macOS, and Windows, audits the locked dependencies, and builds the wheel. The browser tests in `tests/e2e/` run separately with `uv run pytest -m e2e` after `uv run playwright install chromium` (set `BLACKSITE_E2E_BROWSER` to the path of a Chromium you already have). A change to the agent's instructions, the answer template, or the guide checks also deserves a run of `blacksite eval` against a real local model (see the README's Evaluation section), because the unit tests cannot judge the quality of a guide.
 
 ## Changes
 

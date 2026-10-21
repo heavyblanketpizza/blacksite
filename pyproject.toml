@@ -34,6 +34,7 @@ dev = [
     "pytest>=8.4",
     "ruff>=0.17",
     "mypy>=2.4",
+    "playwright>=1.50",
 ]
 
 [build-system]
@@ -42,7 +43,8 @@ build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-p no:cacheprovider"
+addopts = "-p no:cacheprovider -m 'not e2e'"
+markers = ["e2e: drives the web app in a real browser; run with -m e2e"]
 
 [tool.ruff]
 line-length = 120

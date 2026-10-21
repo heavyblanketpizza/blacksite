@@ -15,7 +15,7 @@ Notable changes to Blacksite, in the format of [Keep a Changelog](https://keepac
 - Guides and questions list hypotheses as confirmed, ruled out, or open.
 - `blacksite eval` scores the agent on labeled incidents under presets that set the knowledge switches, and thirteen more sample incidents, all labeled.
 - `blacksite bundle` writes an offline install bundle: wheels, lock, example config, model files, install notes, and a checksummed manifest with a standalone `verify.py`.
-- ruff and mypy gate CI, a dependency audit runs on every push, and tagged releases are built, attested, and published by a workflow.
+- ruff and mypy gate CI, a dependency audit runs on every push, browser tests drive the web app in Chromium, and tagged releases are built, attested, and published by a workflow.
 
 ## [0.1.0] - 2026-09-28
 
