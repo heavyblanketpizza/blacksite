@@ -7,7 +7,8 @@ import json
 import os
 import shutil
 import sys
-from collections.abc import Sequence
+import time
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -217,9 +218,20 @@ def _ingest(args: argparse.Namespace, settings: Settings) -> int:
     from .evidence.server import format_artifacts
 
     with Evidence(args.incident, settings.evidence) as evidence:
-        evidence.refresh()
+        evidence.refresh(progress=_indexing_report())
         print(format_artifacts(evidence))
     return 0
+
+
+def _indexing_report() -> Callable[[int, int, int, str], None]:
+    """Reports indexing on stderr once it has taken longer than a second."""
+    started = time.monotonic()
+
+    def report(done: int, total: int, lines: int, file: str) -> None:
+        if time.monotonic() - started >= 1:
+            print(f"indexing {done}/{total} files, {lines:,} lines: {file}", file=sys.stderr)
+
+    return report
 
 
 def _serve_evidence(args: argparse.Namespace, settings: Settings) -> int:
@@ -349,6 +361,7 @@ def _investigate(args: argparse.Namespace, settings: Settings) -> int:
         (args.incident / CONVERSATION_FILE).unlink(missing_ok=True)
     pasted = args.paste.read_text(encoding="utf-8") if args.paste else ""
     investigator = Investigator(settings, args.incident, args.config, args.set)
+    investigator.evidence.refresh(progress=_indexing_report())
     dim, bold, reset = ("\033[2m", "\033[1m", "\033[0m") if _colors() else ("", "", "")
 
     async def run() -> int:

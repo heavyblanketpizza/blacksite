@@ -90,6 +90,16 @@ def sign_in(client, username: str, role: str = "member", two_step: bool | None =
     return user
 
 
+def wait_indexed(client, incident_id: str, timeout: float = 10.0) -> dict:
+    """The incident's overview once its upload has been indexed in the background."""
+    deadline = time.time() + timeout
+    while True:
+        data = client.get(f"/api/incidents/{incident_id}").json()
+        if "indexing" not in data or time.time() > deadline:
+            return data
+        time.sleep(0.05)
+
+
 def write_web_config(tmp_path: Path) -> Path:
     config = tmp_path / "blacksite.toml"
     config.write_text(

@@ -336,6 +336,10 @@ function renderCases() {
 async function openCase(id, { quiet = false } = {}) {
   closeStream();
   const data = await call(`/api/incidents/${idOf(id)}`);
+  if (data.indexing) {
+    line("sys", `${id}: indexing ${data.indexing.done}/${data.indexing.total} files · ${num(data.indexing.lines)} lines. open it again in a moment.`);
+    return;
+  }
   S.current = data;
   S.sel = Math.max(0, S.cases.findIndex((c) => c.id === id));
   history.replaceState(null, "", `#/${idOf(id)}`);
@@ -506,6 +510,9 @@ function attach(id, { resumed = false } = {}) {
 function onEvent(live, event) {
   const t = secs(event.t);
   switch (event.type) {
+    case "ingest":
+      line("sys", `indexing ${event.done}/${event.total} files · ${num(event.lines)} lines${event.file ? ` · ${event.file}` : ""}`, { t });
+      break;
     case "start":
       line("info", `model=${event.model} think=${event.thinking} rag=${event.features.rag} cases=${event.features.cases} playbook=${event.features.playbook} lang=${event.language}`, { t });
       break;

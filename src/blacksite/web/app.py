@@ -13,6 +13,7 @@ import json
 import re
 import shutil
 import sys
+import time
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field, replace
@@ -80,6 +81,10 @@ TERM_ASSETS = ("term/term.css", "term/fx.js", "term/term.js")
 SEARCH_LIMIT = 500
 
 
+class Indexing(Exception):
+    """The incident's evidence is still being indexed."""
+
+
 @dataclass
 class Run:
     """One investigation turn: its events so far, and whether it has finished."""
@@ -116,6 +121,8 @@ class DemoState:
     # The model chosen in the page ({provider, base_url, name}; empty: the config's).
     model: dict[str, str] = field(default_factory=dict)
     switching: bool = False
+    # Indexes being built, by incident: files done, files in all, lines so far, current file.
+    ingests: dict[str, dict[str, Any]] = field(default_factory=dict)
     # Which incidents each session has opened (recorded once); wrong two-step codes per session.
     opened: set[tuple[str, str]] = field(default_factory=set)
     code_failures: dict[str, int] = field(default_factory=dict)
@@ -253,6 +260,9 @@ def _endpoint(state: DemoState, handler: Any) -> Any:
             return await handler(state, request)
         except LedgerError as exc:
             return refuse(503, f"{exc}. Changes are paused until the ledger can be written.")
+        except Indexing:
+            return JSONResponse({"error": "The evidence is still being indexed; try again in a moment."},
+                                status_code=409)
         except (EvidenceError, LearningError, ConfigError, LLMError, UsbError, ModelServerError, AuthError,
                 ValueError) as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
@@ -507,7 +517,8 @@ async def _incidents(state: DemoState, request: Request) -> Response:
         source = read_source(path)
         owner = known[path.name]["owner_id"]
         items.append({"id": path.name, "title": meta.get("title") or path.name,
-                      "status": _status_of(path), "running": _running(state, path.name),
+                      "status": "indexing" if path.name in state.ingests else _status_of(path),
+                      "running": _running(state, path.name),
                       "queued": path.name in state.queue,
                       "usb": {"drive": source["drive_label"]} if source else None,
                       "mine": owner == found.user.id, "owner": names.get(owner) if owner is not None else None,
@@ -551,22 +562,55 @@ async def _create_incident(state: DemoState, request: Request) -> Response:
     if year.isdigit():
         meta["year"] = int(year)
     (target / INCIDENT_FILE).write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
-    await anyio.to_thread.run_sync(_ingest, target, state.settings())
     found = principal(request)
     state.services.access.register_incident(incident_id, found.user.id)
     files = await anyio.to_thread.run_sync(provenance.evidence_files, target)
     _record(state, request, "incident.created", incident_id, files=len(files),
             bytes=sum(item["bytes"] for item in files), sha256=[item["sha256"] for item in files])
-    return JSONResponse({"id": incident_id})
+    _index_in_background(state, target)
+    return JSONResponse({"id": incident_id, "indexing": True})
 
 
-def _ingest(path: Path, settings: Settings) -> None:
-    with Evidence(path, settings.evidence) as evidence:
-        evidence.refresh()
+def _index_in_background(state: DemoState, path: Path) -> None:
+    """Build the incident's index while the page shows how far it is."""
+    progress = state.ingests[path.name] = {"done": 0, "total": 0, "lines": 0, "file": ""}
+
+    def build() -> None:
+        with Evidence(path, state.settings().evidence) as evidence:
+            evidence.refresh(progress=lambda done, total, lines, file: progress.update(
+                done=done, total=total, lines=lines, file=file))
+
+    async def work() -> None:
+        try:
+            await anyio.to_thread.run_sync(build)
+        except Exception as exc:  # the next request on this incident reports the problem
+            print(f"blacksite: could not index {path.name}: {exc}", file=sys.stderr)
+        finally:
+            state.ingests.pop(path.name, None)
+
+    task = asyncio.create_task(work())
+    state.tasks.add(task)
+    task.add_done_callback(state.tasks.discard)
+
+
+def _ready(state: DemoState, path: Path) -> None:
+    if path.name in state.ingests:
+        raise Indexing(path.name)
 
 
 async def _incident(state: DemoState, request: Request) -> Response:
     path = state.incident_dir(request.path_params["id"])
+    found = principal(request)
+    key = (found.session.id, path.name)
+    if key not in state.opened:
+        _record(state, request, "incident.opened", path.name)
+        state.opened.add(key)
+    if (progress := state.ingests.get(path.name)) is not None:
+        meta = _read_json(path / INCIDENT_FILE)
+        return JSONResponse({"id": path.name, "title": meta.get("title") or path.name,
+                             "description": meta.get("description", ""), "indexing": progress,
+                             "running": _running(state, path.name), "queued": path.name in state.queue,
+                             "turns": _read_json(path / CONVERSATION_FILE).get("turns", [])})
     settings = state.settings()
     data = await anyio.to_thread.run_sync(_overview, path, settings)
     conversation = _read_json(path / CONVERSATION_FILE) or {"turns": []}
@@ -574,7 +618,6 @@ async def _incident(state: DemoState, request: Request) -> Response:
         for event in turn.get("events", []):
             if "checks" in event:
                 event["checks"] = [upgrade_check(check) for check in event["checks"]]
-    found = principal(request)
     services = state.services
     access = services.access
     turns = conversation.get("turns", [])
@@ -589,10 +632,6 @@ async def _incident(state: DemoState, request: Request) -> Response:
                  "owner": {"id": owner, "name": names.get(owner)} if owner is not None else None,
                  "shares": [{"id": user_id, "name": names.get(user_id)} for user_id in entry["shares"]]
                  if level == "manage" else []})
-    key = (found.session.id, path.name)
-    if key not in state.opened:
-        _record(state, request, "incident.opened", path.name)
-        state.opened.add(key)
     return JSONResponse(data)
 
 
@@ -671,6 +710,7 @@ def _overview(path: Path, settings: Settings) -> dict[str, Any]:
 
 async def _lines(state: DemoState, request: Request) -> Response:
     path = state.incident_dir(request.path_params["id"])
+    _ready(state, path)
     file = request.query_params.get("file", "")
     line = int(request.query_params.get("line", "1"))
     end = int(request.query_params.get("end", str(line)))
@@ -693,6 +733,7 @@ async def _search(state: DemoState, request: Request) -> Response:
     """Lines matching an RE2 regex (or plain text with literal=1), for the operator console's grep.
     The same search the agent's search_logs tool runs; RE2 cannot backtrack catastrophically."""
     path = state.incident_dir(request.path_params["id"])
+    _ready(state, path)
     query = request.query_params
     pattern = query.get("pattern", "")
     file, level = query.get("file") or None, query.get("level") or None
@@ -711,6 +752,7 @@ async def _search(state: DemoState, request: Request) -> Response:
 
 async def _reset(state: DemoState, request: Request) -> Response:
     path = state.incident_dir(request.path_params["id"])
+    _ready(state, path)
     if _running(state, path.name):
         raise ValueError("An investigation is running")
     for name in (CONVERSATION_FILE, "guide.md", OUTCOME_FILE):
@@ -727,6 +769,7 @@ async def _reset(state: DemoState, request: Request) -> Response:
 
 async def _start_turn(state: DemoState, request: Request) -> Response:
     path = state.incident_dir(request.path_params["id"])
+    _ready(state, path)
     if _running(state, path.name):
         return JSONResponse({"error": "An investigation is already running"}, status_code=409)
     body = await request.json()
@@ -760,7 +803,27 @@ def start_turn(state: DemoState, path: Path, message: str = "", pasted: str = ""
 
     async def work() -> None:
         events: list[dict[str, Any]] = []
+        loop = asyncio.get_running_loop()
+        begun = time.monotonic()
+        progress = {"done": 0, "total": 0, "lines": 0, "file": ""}
+
+        def indexed(done: int, total: int, lines: int, file: str) -> None:
+            progress.update(done=done, total=total, lines=lines, file=file)
+            loop.call_soon_threadsafe(run.add, {"type": "ingest", **progress, "t": round(time.monotonic() - begun, 1)})
+
+        def prepare() -> None:
+            """Build the index first, with its progress in the stream and on the incident's page."""
+            evidence = investigator.evidence
+            if evidence.is_current():
+                return
+            state.ingests[path.name] = progress
+            try:
+                evidence.refresh(progress=indexed)
+            finally:
+                state.ingests.pop(path.name, None)
+
         try:
+            await anyio.to_thread.run_sync(prepare)
             async for event in investigator.turn(message, pasted):
                 events.append(event)
                 run.add(event)
@@ -828,6 +891,7 @@ async def _usb(state: DemoState, request: Request) -> Response:
 async def _export(state: DemoState, request: Request) -> Response:
     """Save the latest guide to the incident's drive, then wipe the sandbox if configured."""
     path = state.incident_dir(request.path_params["id"])
+    _ready(state, path)
     source = read_source(path)
     if source is None:
         raise UsbError("Only incidents that came from a drive can be exported to one")
@@ -883,6 +947,7 @@ async def _export(state: DemoState, request: Request) -> Response:
 
 async def _wipe(state: DemoState, request: Request) -> Response:
     path = state.incident_dir(request.path_params["id"])
+    _ready(state, path)
     source = read_source(path)
     if source is None:
         raise UsbError("Only sandboxed drive incidents can be wiped")
@@ -986,6 +1051,7 @@ def _start_queued(state: DemoState) -> None:
 
 async def _outcome(state: DemoState, request: Request) -> Response:
     path = state.incident_dir(request.path_params["id"])
+    _ready(state, path)
     body = await request.json()
     outcome = str(body.get("outcome") or "")
     if outcome not in OUTCOMES:

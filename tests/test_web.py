@@ -7,7 +7,7 @@ import pytest
 
 from blacksite.learning.store import LearningStore
 
-from conftest import INCIDENT
+from conftest import INCIDENT, wait_indexed
 
 
 @pytest.fixture
@@ -60,9 +60,40 @@ def test_upload_creates_and_indexes_an_incident(client) -> None:
     files = [("files", ("kern.log", (INCIDENT / "artifacts" / "kern.log").read_bytes())),
              ("files", (".hidden", b"x"))]
     created = client.post("/api/incidents", data={"title": "Kernel trouble", "year": "2026"}, files=files).json()
-    overview = client.get(f"/api/incidents/{created['id']}").json()
+    assert created["indexing"] is True
+    overview = wait_indexed(client, created["id"])
     assert overview["title"] == "Kernel trouble" and [a["file"] for a in overview["artifacts"]] == ["kern.log"]
+    assert client.get("/api/incidents").json()["incidents"][0]["status"] == "new"
     assert client.post("/api/incidents", data={"title": "Empty"}).status_code == 400
+
+
+def test_evidence_requests_wait_for_indexing(client) -> None:
+    state = client.app.state.demo
+    state.ingests["nginx-502-oom"] = {"done": 1, "total": 5, "lines": 40, "file": "kern.log"}
+    try:
+        assert client.get("/api/incidents/nginx-502-oom").json()["indexing"]["total"] == 5
+        assert client.get("/api/incidents/nginx-502-oom/lines", params={"file": "kern.log"}).status_code == 409
+        assert client.post("/api/incidents/nginx-502-oom/turn", json={}).status_code == 409
+        assert client.get("/api/incidents").json()["incidents"][0]["status"] == "indexing"
+    finally:
+        del state.ingests["nginx-502-oom"]
+    assert "artifacts" in client.get("/api/incidents/nginx-502-oom").json()
+
+
+def test_a_turn_indexes_the_evidence_first_and_streams_its_progress(client, web) -> None:
+    for index in (web.incidents / "nginx-502-oom").glob("evidence.*.duckdb"):
+        index.unlink()
+    assert client.post("/api/incidents/nginx-502-oom/turn", json={}).json() == {"ok": True}
+    events = []
+    with client.stream("GET", "/api/incidents/nginx-502-oom/stream") as response:
+        for line in response.iter_lines():
+            if line.startswith("data: ") and line != "data: {}":
+                events.append(json.loads(line[6:]))
+            if line.startswith("event: end"):
+                break
+    kinds = [event["type"] for event in events]
+    assert kinds[0] == "ingest" and kinds.index("start") > 0 and "guide" in kinds
+    assert events[kinds.index("start") - 1]["done"] == 5 and "nginx-502-oom" not in client.app.state.demo.ingests
 
 
 def test_turn_streams_events_and_saves_the_guide(client) -> None:
@@ -74,7 +105,7 @@ def test_turn_streams_events_and_saves_the_guide(client) -> None:
                 events.append(json.loads(line[6:]))
             if line.startswith("event: end"):
                 break
-    kinds = [event["type"] for event in events]
+    kinds = [event["type"] for event in events if event["type"] != "ingest"]
     assert kinds[0] == "start" and "guide" in kinds and kinds[-1] == "done"
     deadline = time.time() + 5
     while client.get("/api/incidents/nginx-502-oom").json()["running"] and time.time() < deadline:

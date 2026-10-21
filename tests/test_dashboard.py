@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 
 from blacksite.learning.store import LearningStore
 
+from conftest import wait_indexed
+
 UPLOAD = [("files", ("app.log", b"2026-09-27 02:14:00 ERROR disk full\n"))]
 
 
@@ -102,6 +104,7 @@ def test_activity_after_returns_newer_items_only(web) -> None:
 def test_deleted_incident_folders_are_skipped(web) -> None:
     mina = web.client("mina")
     created = mina.post("/api/incidents", data={"title": "Gone soon"}, files=UPLOAD).json()["id"]
+    wait_indexed(mina, created)
     shutil.rmtree(web.incidents / created)
     shutil.rmtree(web.incidents / "nginx-502-oom")
     assert mina.get("/api/dashboard").status_code == 200

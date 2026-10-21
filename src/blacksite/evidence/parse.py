@@ -44,6 +44,8 @@ _CTIME = re.compile(r"[A-Z][a-z]{2} (?P<mon>[A-Z][a-z]{2}) {1,2}(?P<d>\d{1,2}) (
 _KLOG = re.compile(r"^(?P<lvl>[IWEF])(?P<m>\d{2})(?P<d>\d{2}) (?P<time>\d{2}:\d{2}:\d{2})(?:\.(?P<frac>\d{1,6}))?"
                    r"\s+\d+\s+[\w./-]+:\d+\] ")
 _KLOG_LEVELS = {"I": "info", "W": "warning", "E": "error", "F": "critical"}
+_LEADING = (_ISO, _SLASH, _CTIME, _CLF)  # tried at the start of the line first
+_ANYWHERE = (_ISO, _CLF, _CTIME, _SLASH)  # then anywhere in the first characters
 _TS_SEARCH_WINDOW = 80
 
 _LEVEL_WORD = re.compile(
@@ -118,35 +120,34 @@ class LineParser:
         return ParsedLine(ts, level, guessed, message)
 
     def _timestamp(self, text: str) -> tuple[datetime | None, str]:
-        window = text[:_TS_SEARCH_WINDOW]
         match = _SYSLOG.match(text)
         if match:
             month = _MONTHS.get(match["mon"].lower())
             if month:
                 return self._yearless(month, int(match["d"]), match["time"], match["frac"]), text[match.end():]
-        match = _ISO.search(window)
-        if match:
-            ts = _parse_iso(match)
-            return ts, _cut(text, match)
-        match = _CTIME.search(window)
-        if match:
-            month = _MONTHS.get(match["mon"].lower())
-            ts = None
-            if month:
-                ts = _safe_datetime(int(match["y"]), month, int(match["d"]), match["time"], match["frac"])
-            return ts, _cut(text, match)
-        match = _CLF.search(window)
-        if match:
-            month = _MONTHS.get(match["mon"].lower())
-            ts = _safe_datetime(int(match["y"]), month, int(match["d"]), match["time"]) if month else None
-            if ts:
-                ts = _apply_offset(ts, match["tz"])
-            return ts, _cut(text, match)
-        match = _SLASH.search(window)
-        if match:
-            ts = _safe_datetime(int(match["y"]), int(match["m"]), int(match["d"]), match["time"])
-            return ts, _cut(text, match)
-        return None, text
+        # Most formats put the time first; only when none does is the window searched.
+        at = 1 if text[:1] == "[" else 0
+        found = next((m for pattern in _LEADING if (m := pattern.match(text, at))), None)
+        if found is None:
+            window = text[:_TS_SEARCH_WINDOW]
+            found = next((m for pattern in _ANYWHERE if (m := pattern.search(window))), None)
+        if found is None:
+            return None, text
+        return self._convert(found), _cut(text, found)
+
+    def _convert(self, match: re.Match[str]) -> datetime | None:
+        pattern = match.re
+        if pattern is _ISO:
+            return _parse_iso(match)
+        if pattern is _SLASH:
+            return _safe_datetime(int(match["y"]), int(match["m"]), int(match["d"]), match["time"])
+        month = _MONTHS.get(match["mon"].lower())
+        if month is None:
+            return None
+        if pattern is _CTIME:
+            return _safe_datetime(int(match["y"]), month, int(match["d"]), match["time"], match["frac"])
+        ts = _safe_datetime(int(match["y"]), month, int(match["d"]), match["time"])
+        return _apply_offset(ts, match["tz"]) if ts else None
 
     def _yearless(self, month: int, day: int, clock: str, frac: str | None) -> datetime | None:
         """A date without a year gets the file's; later than the file itself means the year before."""

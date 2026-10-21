@@ -54,6 +54,12 @@ _INSTRUCTION_PATTERNS = re.compile(
     r")"
 )
 
+# Cheap pre-check: a line without any of these cannot match an instruction pattern above.
+_INSTRUCTION_HINT = re.compile(
+    r"(?i)ignore|disregard|forget|override|you are now|new instructions|system prompt|as an? |dear |tell |instruct|"
+    r"advise|<\||tool_call|function=|think>|curl|wget|base64"
+)
+
 _MARKUP = re.compile(r"<(/?)(tool_call|tool_response|think|function[=>]|parameter[=>]|\|im_start\||\|im_end\|)")
 
 
@@ -82,7 +88,7 @@ class Redactor:
 
 def looks_like_instructions(text: str) -> bool:
     """True when a log line reads like an attempt to instruct the model or the reader."""
-    return bool(_INSTRUCTION_PATTERNS.search(text))
+    return bool(_INSTRUCTION_HINT.search(text) and _INSTRUCTION_PATTERNS.search(text))
 
 
 def defang(text: str) -> str:

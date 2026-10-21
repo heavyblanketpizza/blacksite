@@ -27,7 +27,8 @@ import json
 import os
 import tempfile
 import threading
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -49,6 +50,11 @@ DB_PREFIX = "evidence."
 DB_SUFFIX = ".duckdb"
 _SNIFF = 65536  # bytes read first: a binary check and the sample that decides a file's kind
 MAX_OUTPUT_LINES = 5000  # of command output kept for its facts
+POOL_MIN_BYTES = 8 * 2**20  # below this, starting worker processes costs more than it saves
+REPORT_EVERY = 50_000  # lines between progress reports within one file
+
+# Called as the index is built: files done, files in all, lines so far, and the file just finished or in progress.
+Progress = Callable[[int, int, int, str], None]
 # Separates a folded record's first line from its exception line in a template.
 DETAIL_SEPARATOR = "⏎"
 
@@ -195,11 +201,11 @@ class Evidence:
         """The index currently open, if any."""
         return self._open_path
 
-    def refresh(self) -> bool:
+    def refresh(self, progress: Progress | None = None) -> bool:
         """Re-ingest if files were added or changed since the index was built.
 
         Call before answering each request so pasted command output is picked up.
-        Returns True when it re-ingested.
+        Returns True when it re-ingested; ``progress`` hears how far a build is.
         """
         with self._lock:
             target = self.root / f"{DB_PREFIX}{self._fingerprint()[:16]}{DB_SUFFIX}"
@@ -209,7 +215,7 @@ class Evidence:
             built = False
             if not target.exists():
                 self.incident = Incident.load(self.root)
-                _Ingest(self, target).run()
+                _Ingest(self, target, progress).run()
                 built = True
             try:
                 self._open(target)
@@ -217,7 +223,7 @@ class Evidence:
                 if built:
                     raise
                 remove_quietly(target)  # a damaged index from an interrupted build
-                _Ingest(self, target).run()
+                _Ingest(self, target, progress).run()
                 self._open(target)
                 built = True
             self.incident = Incident.load(self.root)
@@ -225,6 +231,10 @@ class Evidence:
                 if stale != target:
                     remove_quietly(stale)
             return built
+
+    def is_current(self) -> bool:
+        """Whether an index built from the files as they are now exists on disk."""
+        return (self.root / f"{DB_PREFIX}{self._fingerprint()[:16]}{DB_SUFFIX}").exists()
 
     def close(self) -> None:
         with self._lock:
@@ -496,114 +506,32 @@ class _Record:
             self.detail = text
 
 
-class _Ingest:
-    def __init__(self, evidence: Evidence, target: Path) -> None:
-        self.evidence = evidence
-        self.settings = evidence.settings
-        self.target = target
+@dataclass(frozen=True)
+class FileResult:
+    """What one file yielded: its artifact row, its templates by file-local id, and its row count."""
+
+    file: str
+    artifact: tuple[Any, ...]
+    clusters: list[tuple[str, str]]  # (level group, template)
+    rows: int
+
+
+class _Rows:
+    """Writes one file's rows with file-local ordinals and template ids."""
+
+    def __init__(self, writer: Any, file: str) -> None:
+        self.writer = writer
+        self.file = file
         self.miner = TemplateMiner()
         self.ord = 0
 
-    def run(self) -> None:
-        root = self.evidence.root
-        artifacts: list[tuple[Any, ...]] = []
-        tmp_db = root / f".evidence.{os.getpid()}.{threading.get_ident()}.tmp"
-        remove_quietly(tmp_db)
-        with tempfile.TemporaryDirectory(prefix="blacksite-ingest-") as scratch:
-            lines_csv = Path(scratch) / "lines.csv"
-            with lines_csv.open("w", newline="", encoding="utf-8") as stream:
-                writer = csv.writer(stream)
-                for path, relative in artifact_files(root / ARTIFACTS_DIR):
-                    artifacts.append(self._ingest_file(path, relative, writer))
-            templates_csv = Path(scratch) / "templates.csv"
-            with templates_csv.open("w", newline="", encoding="utf-8") as stream:
-                writer = csv.writer(stream)
-                for cluster_id, cluster in enumerate(self.miner.clusters):
-                    writer.writerow([cluster_id, cluster.template])
+    def plain(self, line_no: int, flagged: bool, text: str) -> None:
+        """A config or command-output line: verbatim, with no time, level, or template."""
+        self.writer.writerow([self.ord, self.file, line_no, "", "", False, "", flagged, text, self.ord, ""])
+        self.ord += 1
 
-            con = duckdb.connect(str(tmp_db))
-            try:
-                con.execute(
-                    f"CREATE TABLE lines AS SELECT * FROM read_csv(?, {_csv_options(_LINE_COLUMNS)})",
-                    [str(lines_csv)],
-                )
-                con.execute(
-                    "CREATE TABLE templates AS SELECT * FROM read_csv(?, "
-                    f"{_csv_options({'id': 'INTEGER', 'template': 'VARCHAR'})})",
-                    [str(templates_csv)],
-                )
-                con.execute(
-                    "CREATE TABLE artifacts (file VARCHAR, kind VARCHAR, compressed BOOLEAN, bytes BIGINT, "
-                    "lines BIGINT, first_ts TIMESTAMP, last_ts TIMESTAMP, errors BIGINT, redactions BIGINT, "
-                    "flagged BIGINT, tools VARCHAR, facts VARCHAR)"
-                )
-                if artifacts:
-                    con.executemany("INSERT INTO artifacts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", artifacts)
-                con.execute("CREATE TABLE meta (key VARCHAR, value VARCHAR)")
-                con.executemany(
-                    "INSERT INTO meta VALUES (?, ?)",
-                    [["index", self.target.name], ["schema", str(SCHEMA_VERSION)],
-                     ["ingested_at", datetime.now(UTC).isoformat(timespec="seconds")]],
-                )
-            finally:
-                con.close()
-        if self.target.exists():
-            remove_quietly(tmp_db)  # another process built the same index meanwhile
-        else:
-            replace(tmp_db, self.target)
-
-    def _ingest_file(self, path: Path, relative: str, writer: Any) -> tuple[Any, ...]:
-        size = path.stat().st_size
-        compressed = path.suffix == ".gz"
-        opener = gzip.open if compressed else open
-        with opener(path, "rb") as handle:
-            head = handle.read(_SNIFF)
-        if b"\0" in head:
-            return (relative, "binary", compressed, size, 0, None, None, 0, 0, 0, "", "[]")
-        mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).replace(tzinfo=None)
-        parser = LineParser(year=self.evidence.incident.year or mtime.year,
-                            latest=None if self.evidence.incident.year else mtime)
-        sample = head.decode("utf-8", errors="replace").splitlines()
-        kind = classify(relative, sample[:-1] if len(head) == _SNIFF else sample, parser)
-        redactor = Redactor()
-        folder = RecordFolder()
-        count = errors = redactions = flagged = 0
-        first = last = None
-        limit = self.settings.max_line_chars
-        record: _Record | None = None
-        kept: list[str] = []  # command output, for its facts
-        with opener(path, "rb") as handle:
-            for count, raw in enumerate(handle, 1):
-                text = raw.decode("utf-8", errors="replace").rstrip("\r\n").replace("\r", " ").replace("\0", "")
-                if len(text) > limit:
-                    text = text[:limit] + f" …[{len(text) - limit} more chars]"
-                if self.settings.redact:
-                    text, found = redactor.redact(text)
-                    redactions += found
-                suspicious = looks_like_instructions(text)
-                flagged += suspicious
-                if kind != "log":  # verbatim: no time, level, or template
-                    writer.writerow([self.ord, relative, count, "", "", False, "", suspicious, text, self.ord, ""])
-                    self.ord += 1
-                    if kind == "output" and len(kept) < MAX_OUTPUT_LINES:
-                        kept.append(text)
-                    continue
-                parsed = parser.parse(text)
-                if folder.feed(text, parsed.ts is not None) and record is not None:
-                    record.add(count, text, suspicious)
-                    continue
-                errors += self._write(writer, relative, record)
-                record = _Record(count, text, parsed.ts, parsed.level, parsed.level_guessed, parsed.message, suspicious)
-                if parsed.ts:
-                    first = parsed.ts if first is None or parsed.ts < first else first
-                    last = parsed.ts if last is None or parsed.ts > last else last
-            errors += self._write(writer, relative, record)
-        tools, facts = summarize(kept) if kind == "output" else ([], [])
-        return (relative, kind, compressed, size, count, first, last, errors, redactions, flagged, ",".join(tools),
-                json.dumps(facts))
-
-    def _write(self, writer: Any, relative: str, record: _Record | None) -> int:
-        """Write a record's rows: the first line with its template, then any continuation lines.
+    def record(self, record: _Record | None) -> int:
+        """A record's rows: the first line with its template, then any continuation lines.
 
         Returns 1 when the record is an error or worse, so files count records, not lines.
         """
@@ -615,12 +543,186 @@ class _Ingest:
         rank = SEVERITY_RANK[record.level] if record.level else None
         sev = "" if rank is None else rank
         head = self.ord
-        writer.writerow([head, relative, record.line_no, ts, sev, record.guessed, template, record.flagged,
-                         record.text, head, record.detail or ""])
+        self.writer.writerow([head, self.file, record.line_no, ts, sev, record.guessed, template, record.flagged,
+                              record.text, head, record.detail or ""])
         for offset, (line_no, text, flagged) in enumerate(record.continuations, 1):
-            writer.writerow([head + offset, relative, line_no, ts, sev, record.guessed, "", flagged, text, head, ""])
+            self.writer.writerow([head + offset, self.file, line_no, ts, sev, record.guessed, "", flagged, text, head,
+                                  ""])
         self.ord = head + len(record.continuations) + 1
         return int(rank is not None and rank >= SEVERITY_RANK["error"])
+
+
+def ingest_file(path: Path, relative: str, csv_path: Path, settings: EvidenceSettings, year: int | None,
+                report: Callable[[int], None] | None = None) -> FileResult:
+    """Parse one file into rows at ``csv_path``; may run in a worker process.
+
+    ``report`` hears the line count every REPORT_EVERY lines.
+    """
+    size = path.stat().st_size
+    compressed = path.suffix == ".gz"
+    opener = gzip.open if compressed else open
+    with opener(path, "rb") as handle:
+        head = handle.read(_SNIFF)
+    if b"\0" in head:
+        csv_path.touch()
+        return FileResult(relative, (relative, "binary", compressed, size, 0, None, None, 0, 0, 0, "", "[]"), [], 0)
+    mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).replace(tzinfo=None)
+    parser = LineParser(year=year or mtime.year, latest=None if year else mtime)
+    sample = head.decode("utf-8", errors="replace").splitlines()
+    kind = classify(relative, sample[:-1] if len(head) == _SNIFF else sample, parser)
+    redactor = Redactor()
+    folder = RecordFolder()
+    count = errors = redactions = flagged = 0
+    first = last = None
+    limit = settings.max_line_chars
+    record: _Record | None = None
+    kept: list[str] = []  # command output, for its facts
+    with csv_path.open("w", newline="", encoding="utf-8") as stream, opener(path, "rb") as handle:
+        rows = _Rows(csv.writer(stream), relative)
+        for count, raw in enumerate(handle, 1):
+            if report is not None and count % REPORT_EVERY == 0:
+                report(count)
+            text = raw.decode("utf-8", errors="replace").rstrip("\r\n").replace("\r", " ").replace("\0", "")
+            if len(text) > limit:
+                text = text[:limit] + f" …[{len(text) - limit} more chars]"
+            if settings.redact:
+                text, found = redactor.redact(text)
+                redactions += found
+            suspicious = looks_like_instructions(text)
+            flagged += suspicious
+            if kind != "log":
+                rows.plain(count, suspicious, text)
+                if kind == "output" and len(kept) < MAX_OUTPUT_LINES:
+                    kept.append(text)
+                continue
+            parsed = parser.parse(text)
+            if folder.feed(text, parsed.ts is not None) and record is not None:
+                record.add(count, text, suspicious)
+                continue
+            errors += rows.record(record)
+            record = _Record(count, text, parsed.ts, parsed.level, parsed.level_guessed, parsed.message, suspicious)
+            if parsed.ts:
+                first = parsed.ts if first is None or parsed.ts < first else first
+                last = parsed.ts if last is None or parsed.ts > last else last
+        errors += rows.record(record)
+    tools, facts = summarize(kept) if kind == "output" else ([], [])
+    artifact = (relative, kind, compressed, size, count, first, last, errors, redactions, flagged, ",".join(tools),
+                json.dumps(facts))
+    return FileResult(relative, artifact, [(cluster.group, cluster.template) for cluster in rows.miner.clusters],
+                      rows.ord)
+
+
+class _Ingest:
+    """Builds one index: every file is parsed on its own, then their rows and templates are merged."""
+
+    def __init__(self, evidence: Evidence, target: Path, progress: Progress | None = None) -> None:
+        self.evidence = evidence
+        self.settings = evidence.settings
+        self.target = target
+        self.progress = progress
+        self.miner = TemplateMiner()
+
+    def run(self) -> None:
+        root = self.evidence.root
+        tmp_db = root / f".evidence.{os.getpid()}.{threading.get_ident()}.tmp"
+        remove_quietly(tmp_db)
+        with tempfile.TemporaryDirectory(prefix="blacksite-ingest-") as scratch:
+            results = self._parse(root, Path(scratch))
+            self._load(tmp_db, Path(scratch), results)
+        if self.target.exists():
+            remove_quietly(tmp_db)  # another process built the same index meanwhile
+        else:
+            replace(tmp_db, self.target)
+
+    def _parse(self, root: Path, scratch: Path) -> list[tuple[FileResult, Path]]:
+        """Parse every file, in worker processes when the bundle is large, reporting progress."""
+        jobs = [(path, relative, scratch / f"{index}.csv")
+                for index, (path, relative) in enumerate(artifact_files(root / ARTIFACTS_DIR))]
+        year = self.evidence.incident.year
+        results: dict[str, FileResult] = {}
+        done = lines = 0
+
+        def finished(result: FileResult) -> None:
+            nonlocal done, lines
+            results[result.file] = result
+            done += 1
+            lines += result.rows
+            self._report(done, len(jobs), lines, result.file)
+
+        total = sum(path.stat().st_size for path, _, _ in jobs)
+        if self.settings.parallel and len(jobs) > 1 and total >= POOL_MIN_BYTES:
+            with ProcessPoolExecutor(max_workers=min(len(jobs), os.cpu_count() or 1)) as pool:
+                futures = [pool.submit(ingest_file, path, relative, csv_path, self.settings, year)
+                           for path, relative, csv_path in jobs]
+                for future in as_completed(futures):
+                    finished(future.result())
+        else:
+            for path, relative, csv_path in jobs:
+                def report(count: int, file: str = relative) -> None:
+                    self._report(done, len(jobs), lines + count, file)
+
+                finished(ingest_file(path, relative, csv_path, self.settings, year, report if self.progress else None))
+        return [(results[relative], csv_path) for _, relative, csv_path in jobs]
+
+    def _report(self, done: int, total: int, lines: int, file: str) -> None:
+        if self.progress is not None:
+            self.progress(done, total, lines, file)
+
+    def _load(self, tmp_db: Path, scratch: Path, results: list[tuple[FileResult, Path]]) -> None:
+        """Merge the files' templates into one set and load their rows with global ordinals and template ids."""
+        offsets: list[tuple[str, int]] = []
+        mapping: list[tuple[str, int, int]] = []
+        offset = 0
+        for result, _ in results:
+            offsets.append((result.file, offset))
+            offset += result.rows
+            for local_id, (group, template) in enumerate(result.clusters):
+                mapping.append((result.file, local_id, self.miner.merge(template, group)))
+        tables: dict[str, tuple[dict[str, str], list[tuple[Any, ...]]]] = {
+            "offsets": ({"file": "VARCHAR", "offset": "BIGINT"}, offsets),
+            "map": ({"file": "VARCHAR", "local_id": "INTEGER", "global_id": "INTEGER"}, mapping),
+            "templates": ({"id": "INTEGER", "template": "VARCHAR"},
+                          [(cluster_id, cluster.template) for cluster_id, cluster in enumerate(self.miner.clusters)]),
+        }
+        for name, (_, rows) in tables.items():
+            with (scratch / f"{name}.csv").open("w", newline="", encoding="utf-8") as stream:
+                csv.writer(stream).writerows(rows)
+        line_csvs = [str(csv_path) for result, csv_path in results if result.rows]
+        con = duckdb.connect(str(tmp_db))
+        try:
+            if line_csvs:
+                con.execute(
+                    "CREATE TABLE lines AS SELECT l.ord + o.offset AS ord, l.file, l.line_no, l.ts, l.sev, l.guessed, "
+                    "m.global_id AS template_id, l.flagged, l.text, l.rec + o.offset AS rec, l.detail "
+                    f"FROM read_csv(?, {_csv_options(_LINE_COLUMNS)}) l "
+                    f"JOIN read_csv(?, {_csv_options(tables['offsets'][0])}) o ON o.file = l.file "
+                    f"LEFT JOIN read_csv(?, {_csv_options(tables['map'][0])}) m "
+                    "ON m.file = l.file AND m.local_id = l.template_id",
+                    [line_csvs, str(scratch / "offsets.csv"), str(scratch / "map.csv")],
+                )
+            else:
+                columns = ", ".join(f"{name} {kind}" for name, kind in _LINE_COLUMNS.items())
+                con.execute(f"CREATE TABLE lines ({columns})")
+            con.execute(
+                f"CREATE TABLE templates AS SELECT * FROM read_csv(?, {_csv_options(tables['templates'][0])})",
+                [str(scratch / "templates.csv")],
+            )
+            con.execute(
+                "CREATE TABLE artifacts (file VARCHAR, kind VARCHAR, compressed BOOLEAN, bytes BIGINT, "
+                "lines BIGINT, first_ts TIMESTAMP, last_ts TIMESTAMP, errors BIGINT, redactions BIGINT, "
+                "flagged BIGINT, tools VARCHAR, facts VARCHAR)"
+            )
+            if results:
+                con.executemany("INSERT INTO artifacts VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                [result.artifact for result, _ in results])
+            con.execute("CREATE TABLE meta (key VARCHAR, value VARCHAR)")
+            con.executemany(
+                "INSERT INTO meta VALUES (?, ?)",
+                [["index", self.target.name], ["schema", str(SCHEMA_VERSION)],
+                 ["ingested_at", datetime.now(UTC).isoformat(timespec="seconds")]],
+            )
+        finally:
+            con.close()
 
 
 def artifact_files(directory: Path) -> Iterator[tuple[Path, str]]:

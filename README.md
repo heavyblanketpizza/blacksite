@@ -41,7 +41,7 @@ If the agent asks for more evidence, run the suggested command yourself and pass
 uv run blacksite --config demo/blacksite.toml investigate var/incidents/INC-1 --paste output.txt
 ```
 
-`blacksite --help` lists every command.
+`blacksite --help` lists every command. A large bundle is indexed one file per process; the web app shows the progress, and the CLI reports it once indexing takes longer than a second.
 
 ## Configuration
 

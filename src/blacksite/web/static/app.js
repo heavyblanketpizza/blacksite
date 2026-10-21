@@ -745,7 +745,7 @@ function renderIncidentList() {
       item.usb ? el("span", { class: "badge usb", title: item.usb.drive, text: t("usb.badge") }) : null,
       item.shared ? el("span", { class: "badge share", text: t("incident.sharedWithYou") }) : null,
       isAdmin() && !item.mine ? el("span", { class: "badge owner", text: item.owner || t("incident.unassigned") }) : null,
-      item.running ? el("span", { class: "spinner", "aria-hidden": "true" }) : null,
+      item.running || item.status === "indexing" ? el("span", { class: "spinner", "aria-hidden": "true" }) : null,
       t(item.running ? "incident.status.running" : item.queued ? "incident.status.queued" : `incident.status.${item.status}`)))));
 }
 
@@ -754,6 +754,7 @@ async function selectIncident(id, { keepScroll = false } = {}) {
   const scroll = $("#main").scrollTop;
   const data = await api(`/api/incidents/${encodeURIComponent(id)}`);
   S.current = data;
+  if (data.indexing) { renderIncidentList(); renderIndexing(data); return; }
   S.files = data.artifacts.map((item) => item.file);
   S.colors = Object.fromEntries(S.files.map((file, index) => [file, `var(--f${(index % 6) + 1})`]));
   history.replaceState(null, "", `#/incidents/${encodeURIComponent(id)}`);
@@ -763,6 +764,26 @@ async function selectIncident(id, { keepScroll = false } = {}) {
   renderEvidence();
   if (data.running) attachStream(id, { message: "", pasted: "", resumed: true });
   $("#main").scrollTop = keepScroll ? scroll : 0;
+}
+
+// The evidence is still being indexed: show how far it is and look again in a second.
+function renderIndexing(data) {
+  const progress = data.indexing;
+  $("#composer").hidden = true;
+  $("#evidence-body").replaceChildren();
+  $("#page").replaceChildren(
+    el("section", { class: "incident-head" }, el("h1", { text: data.title }),
+      data.description ? el("p", { text: data.description }) : null),
+    el("div", { class: "card intro" },
+      el("div", { class: "work-head" }, el("span", { class: "spinner", "aria-hidden": "true" }), el("b", { text: t("indexing.title") })),
+      el("p", { class: "muted", text: progress.total
+        ? t("indexing.progress", { done: progress.done, total: progress.total, lines: number(progress.lines) })
+        : t("indexing.starting") })));
+  setTimeout(async () => {
+    if (!S.current || S.current.id !== data.id || !S.current.indexing) return;
+    await selectIncident(data.id, { keepScroll: true });
+    if (!S.current.indexing) loadIncidents();
+  }, 1000);
 }
 
 function renderEmpty() {
@@ -950,8 +971,9 @@ function toolLabel(name, a) {
     case "list_artifacts": return [t("tool.list_artifacts")];
     case "log_patterns": return [t("tool.log_patterns"), arg("level", a.level), a.file];
     case "search_logs": return [t("tool.search_logs"), a.pattern ? `“${a.pattern}”` : a.flagged_only ? t("tool.arg.suspicious") : "", arg("in", a.file)];
-    case "read_lines": return [t("tool.read_lines"), `${a.file}:${a.start}–${a.end}`];
+    case "read_lines": return [t("tool.read_lines"), a.end ? `${a.file}:${a.start}–${a.end}` : `${a.file}:${a.start}`];
     case "timeline": return [t("tool.timeline"), arg("from", a.since), arg("to", a.until), arg("level", a.level)];
+    case "compare_windows": return [t("tool.compare_windows"), arg("from", a.since), arg("to", a.until), arg("level", a.level)];
     case "search_docs": return [t("tool.search_docs"), `“${a.query}”`];
     case "read_doc": return [t("tool.read_doc"), a.path];
     case "recall_cases": return [t("tool.recall_cases"), a.query && `“${a.query}”`];
@@ -1003,7 +1025,12 @@ class TurnView {
     this.lastEventAt = Date.now();
     if (typeof event.t === "number") this.elapsed = event.t;
     switch (event.type) {
+      case "ingest":
+        this.indexing = true;
+        this.status.textContent = t("turn.indexing", { done: event.done, total: event.total, lines: number(event.lines) });
+        break;
       case "start":
+        if (this.indexing) { this.indexing = false; this.status.textContent = t("turn.investigating"); }
         this.model = event.model;  // the model that ran this turn, whatever is selected now
         const state = (value) => (value === "off" ? t("option.off") : value);
         this.features.textContent = t("turn.features", {

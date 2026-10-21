@@ -23,6 +23,7 @@ _MASKS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"(?<![\w.<])[-+]?\d+(?:\.\d+)?(?![\d>])"), "<NUM>"),
 ]
 _VARIABLE_TOKEN = re.compile(r"\d|<(?:UUID|TS|IP|HEX|NUM)>")
+_DIGIT = re.compile(r"\d")
 # An access log's status code identifies the event; keep it out of the <NUM> mask.
 _HTTP_STATUS = re.compile(r'(HTTP/\d(?:\.\d)?") ([1-5]\d\d)(?= )')
 _KEPT = "\x00KEPT\x00"
@@ -30,6 +31,8 @@ _KEPT = "\x00KEPT\x00"
 
 def mask(message: str) -> str:
     """Replace values that vary between otherwise identical lines."""
+    if not _DIGIT.search(message):
+        return message  # every mask needs a digit
     kept: list[str] = []
 
     def keep(match: re.Match[str]) -> str:
@@ -48,6 +51,7 @@ def mask(message: str) -> str:
 class Cluster:
     tokens: list[str]
     size: int = 0
+    group: str = ""
 
     @property
     def template(self) -> str:
@@ -69,7 +73,11 @@ class TemplateMiner:
         Blacksite passes the line's severity as ``group`` so that, for example, HTTP 200
         and 502 access-log lines stay separate even though only the status differs.
         """
-        tokens = mask(message).split() or ["<EMPTY>"]
+        return self.merge(mask(message), group)
+
+    def merge(self, template: str, group: str = "") -> int:
+        """Like ``add`` for text that is already masked, such as another miner's template."""
+        tokens = template.split() or ["<EMPTY>"]
         prefix = tuple(WILDCARD if _VARIABLE_TOKEN.search(token) else token for token in tokens[: self.prefix_tokens])
         leaf = self._leaves.setdefault((group, str(len(tokens)), *prefix), [])
 
@@ -86,7 +94,7 @@ class TemplateMiner:
             cluster.size += 1
             return best_id
 
-        self.clusters.append(Cluster(tokens=list(tokens), size=1))
+        self.clusters.append(Cluster(tokens=list(tokens), size=1, group=group))
         leaf.append(len(self.clusters) - 1)
         return len(self.clusters) - 1
 

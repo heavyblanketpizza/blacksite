@@ -23,6 +23,7 @@ language = "en"            # language of guides and questions: en or ko (Korean)
 max_output_chars = 12000   # per tool result; lower it for small context windows
 max_line_chars = 2000      # longer lines are cut at ingest
 redact = true              # mask passwords, tokens, and keys before indexing
+parallel = true            # index a large bundle's files in parallel, one process per file
 
 # Retrieval over rag.docs_dir. Off until evaluation shows it helps.
 [rag]

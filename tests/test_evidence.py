@@ -1,6 +1,7 @@
 import contextlib
 import gzip
 import os
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -31,6 +32,38 @@ def test_ingest_summarizes_files_and_is_reused_until_files_change(incident_dir: 
     assert files["nginx/access.log"].flagged == 1
     with Evidence(incident_dir) as reopened:
         assert reopened.refresh() is False  # index persisted on disk
+
+
+def test_progress_is_reported_per_file(incident_dir: Path) -> None:
+    reports: list[tuple[int, int, int, str]] = []
+    with Evidence(incident_dir) as evidence:
+        assert evidence.is_current() is False
+        assert evidence.refresh(progress=lambda *args: reports.append(args)) is True
+        assert evidence.is_current() is True
+        lines = sum(item.lines for item in evidence.artifacts())
+    assert [done for done, _, _, _ in reports] == [1, 2, 3, 4, 5]
+    assert reports[-1][1:3] == (5, lines) and reports[-1][3] in {item for _, _, _, item in reports}
+
+
+def test_large_bundles_index_one_file_per_process(incident_dir: Path, tmp_path: Path, monkeypatch) -> None:
+    from blacksite.evidence import store
+
+    with Evidence(incident_dir) as sequential:
+        expected = (sequential.artifacts(), sequential.search("Killed process", literal=True)[1],
+                    sum(pattern.count for pattern in sequential.patterns(top=1000)))
+    copy = tmp_path / "parallel"
+    shutil.copytree(incident_dir, copy)
+    for stale in copy.glob("evidence.*.duckdb"):
+        stale.unlink()
+    monkeypatch.setattr(store, "POOL_MIN_BYTES", 0)
+    reports: list[tuple[int, int, int, str]] = []
+    with Evidence(copy) as parallel:
+        assert parallel.refresh(progress=lambda *args: reports.append(args)) is True
+        patterns = parallel.patterns(top=10)
+        assert (parallel.artifacts(), parallel.search("Killed process", literal=True)[1],
+                sum(pattern.count for pattern in parallel.patterns(top=1000))) == expected
+    assert "connect() failed" in patterns[0].template and patterns[0].count == 72
+    assert len(reports) == 5 and reports[-1][:2] == (5, 5)
 
 
 def test_secrets_never_reach_the_index(evidence: Evidence) -> None:

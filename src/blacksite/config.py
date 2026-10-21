@@ -63,6 +63,8 @@ class EvidenceSettings:
     max_output_chars: int = 12_000
     max_line_chars: int = 2_000
     redact: bool = True
+    # Index a large bundle's files in parallel, one process per file up to the CPU count.
+    parallel: bool = True
 
 
 @dataclass(frozen=True)
