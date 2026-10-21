@@ -128,6 +128,17 @@ The demo watches removable drives for this layout:
 
 Each incident is copied to a local sandbox and investigated. **Save to drive** writes an offline HTML guide, a Markdown guide, and a file manifest beside the evidence, then deletes the sandbox. Erasure on SSDs is best effort, so use full-disk encryption for sensitive evidence.
 
+## Offline install
+
+Build an install bundle on a connected computer like the target (same operating system, CPU, and Python minor version), carry it over, and verify it before installing:
+
+```bash
+uv run blacksite bundle var/bundle --model ~/models/Qwen3.8-27B-Q4_K_M.gguf
+python var/bundle/verify.py var/bundle
+```
+
+The bundle holds the Blacksite wheel and every locked dependency, `blacksite.example.toml`, the model files you name, install notes, and a manifest with the size and SHA-256 of every file. Its `README.txt` gives the `pip install --no-index` steps, and `blacksite bundle DIR --verify` repeats the check once Blacksite is installed.
+
 ## Access and audit
 
 The web app listens only on `127.0.0.1`, and only accounts an admin created can sign in. Run Blacksite under one OS account that alone can read `var/`, and have each person sign in from their own OS account.

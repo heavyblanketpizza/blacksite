@@ -16,6 +16,7 @@ from . import __version__
 from .audit.ledger import LedgerError
 from .audit.provenance import VerifyError
 from .auth.store import ROLES, AuthError
+from .bundle import BundleError
 from .config import ConfigError, Settings, as_dict, feature_summary, load_settings
 from .evidence.store import ARTIFACTS_DIR, INCIDENT_FILE, Evidence, EvidenceError
 from .knowledge.index import KnowledgeError
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
     from .services import Services
 
 _ERRORS = (ConfigError, EvidenceError, KnowledgeError, LearningError, LLMError, ModelServerError, AuthError,
-           LedgerError, VerifyError)
+           LedgerError, VerifyError, BundleError)
 # Sample incidents shipped with the repository, used by `blacksite demo --samples`.
 SAMPLES = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "incidents"
 
@@ -188,6 +189,13 @@ def _parser() -> argparse.ArgumentParser:
     command.set_defaults(handler=_audit_export)
     command = actions.add_parser("anchor", help="Sign the ledger head and print it, to keep a copy elsewhere")
     command.set_defaults(handler=_audit_anchor)
+
+    command = commands.add_parser("bundle", help="Write an offline install bundle: wheels, lock, models, checksums")
+    command.add_argument("directory", type=Path, help="A new or empty directory for the bundle, or one to verify")
+    command.add_argument("--model", action="append", type=Path, default=[], metavar="PATH",
+                         help="Model file or folder to include (repeatable)")
+    command.add_argument("--verify", action="store_true", help="Check an existing bundle against its manifest")
+    command.set_defaults(handler=_bundle)
 
     command = commands.add_parser("verify", help="Check a guide's signed provenance (export folder or manifest)")
     command.add_argument("path", type=Path, help="A SOLUTION-* folder, or an incident's provenance/turn-N.json")
@@ -667,6 +675,24 @@ def _audit_anchor(args: argparse.Namespace, settings: Settings) -> int:
     print(json.dumps(anchor, indent=2))
     return 0
 
+
+def _bundle(args: argparse.Namespace, settings: Settings) -> int:
+    from .bundle import NOTES, build
+    from .checksums import MANIFEST, sha256_file, verify
+
+    if args.verify:
+        problems = verify(args.directory)
+        for problem in problems:
+            print(problem)
+        print(f"{len(problems)} problem(s) in {args.directory}" if problems
+              else f"OK: every file listed in {args.directory / MANIFEST} is present and unchanged")
+        return 1 if problems else 0
+    manifest = build(args.directory, args.model)
+    total = sum(entry["bytes"] for entry in manifest["files"].values())
+    print(f"Wrote {len(manifest['files'])} files ({total / 2**20:.0f} MiB) to {args.directory}; "
+          f"{NOTES} has the install steps.\nmanifest.json sha256 {sha256_file(args.directory / MANIFEST)} "
+          "(compare it on the offline computer)")
+    return 0
 
 def _verify(args: argparse.Namespace, settings: Settings) -> int:
     from .agent.investigator import CONVERSATION_FILE
