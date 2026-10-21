@@ -7,6 +7,7 @@ import pytest
 from blacksite.knowledge.index import KnowledgeError, KnowledgeIndex, chunk_document
 from blacksite.knowledge.server import build_knowledge_server
 from blacksite.llm import Embedder, Reranker
+
 from conftest import call_tool, tool_names
 
 VOCABULARY = ["oom", "memory", "killed", "nginx", "502", "upstream", "disk", "space", "inode", "restart"]
@@ -54,7 +55,8 @@ def test_index_rebuilds_when_documents_change(make_settings) -> None:
     index = KnowledgeIndex(settings.rag)
     assert index.ensure_current() is True
     assert index.ensure_current() is False
-    (settings.rag.docs_dir / "runbooks" / "tls.md").write_text("# TLS certificate expired\nRenew with certbot.\n", encoding="utf-8")
+    (settings.rag.docs_dir / "runbooks" / "tls.md").write_text("# TLS certificate expired\nRenew with certbot.\n",
+                                                                encoding="utf-8")
     assert index.search("certificate expired certbot")[0].chunk.path == "runbooks/tls.md"
 
 

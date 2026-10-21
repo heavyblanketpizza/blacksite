@@ -28,10 +28,11 @@ import string
 import sys
 import tarfile
 import zipfile
+from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
-from typing import Any, Iterator
+from typing import Any
 
 from ._fs import replace
 from .config import UsbSettings
@@ -114,6 +115,8 @@ def _is_system_volume(path: Path) -> bool:
 def _windows_drives() -> list[Drive]:  # pragma: no cover - exercised on Windows CI
     import ctypes
 
+    if sys.platform != "win32":
+        return []
     kernel32 = ctypes.windll.kernel32
     system = os.environ.get("SYSTEMDRIVE", "C:").upper().rstrip("\\")
     mask = kernel32.GetLogicalDrives()
@@ -161,8 +164,8 @@ def find_bundles(drive: Drive, marker: str) -> list[Bundle]:
         for file, info in stats:
             digest.update(f"{file.relative_to(path).as_posix()}\0{info.st_size}\0{int(info.st_mtime)}\n".encode())
         newest = max(info.st_mtime for _, info in stats)
-        solved = any(entry.is_dir() and entry.name.upper().startswith(SOLUTION_PREFIX) and entry.stat().st_mtime >= newest
-                     for entry in path.iterdir())
+        solved = any(entry.is_dir() and entry.name.upper().startswith(SOLUTION_PREFIX)
+                     and entry.stat().st_mtime >= newest for entry in path.iterdir())
         name = path.name if path != root else drive.label
         relative = path.relative_to(drive.path).as_posix()
         bundles.append(Bundle(drive, path, name, relative, digest.hexdigest()[:16], solved))
@@ -245,19 +248,19 @@ def import_bundle(bundle: Bundle, sandbox_root: Path, settings: UsbSettings) -> 
     (target / INCIDENT_FILE).write_text(json.dumps(
         {"id": target.name, "title": title, "description": description}, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8")
-    source = {
+    record = {
         "kind": "usb",
         "drive_name": bundle.drive.name,
         "drive_label": bundle.drive.label,
         "drive_path": str(bundle.drive.path),
         "bundle": bundle.relative,
         "fingerprint": bundle.fingerprint,
-        "imported_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "imported_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "files": copied,
         "skipped": budget.skipped,
         "exported_to": None,
     }
-    write_source(target, source)
+    write_source(target, record)
     return target
 
 
@@ -339,13 +342,13 @@ def _extract(archive: Path, destination: Path, artifacts: Path, budget: _Budget,
                         continue  # links, devices, and directories are never created
                     if not budget.take(member.size, f"{label}!{member.name}"):
                         continue
-                    reader = bundle.extractfile(member)
-                    if reader is None:
+                    extracted = bundle.extractfile(member)
+                    if extracted is None:
                         continue
                     target = destination.joinpath(*parts)
-                    with reader:
+                    with extracted:
                         copied.append({"path": target.relative_to(artifacts).as_posix(),
-                                       **_write_limited(reader, target, member.size)})
+                                       **_write_limited(extracted, target, member.size)})
     except (zipfile.BadZipFile, tarfile.TarError, EOFError, OSError) as exc:
         budget.skipped.append(f"{label} (unreadable archive: {exc})")
     return copied

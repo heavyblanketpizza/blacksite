@@ -10,8 +10,9 @@ is open by accident.
 from __future__ import annotations
 
 import hmac
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Awaitable, Callable
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
 from starlette.datastructures import Headers
@@ -36,6 +37,7 @@ STAGE_PATHS = {
     "totp": frozenset({"/auth/totp/verify", "/auth/recovery"}),
 }
 LEVELS = {"view": 1, "investigate": 2, "manage": 3}
+Endpoint = Callable[[Request], Awaitable[Response]]
 CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
        "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'")
 SECURITY_HEADERS = [
@@ -117,7 +119,7 @@ def _host_ok(scope: Scope, headers: Headers) -> bool:
     return port == expected or (not port and expected in ("80", ""))
 
 
-def guarded(policy: Policy, endpoint: Callable[[Request], Awaitable[Response]]) -> Callable[[Request], Awaitable[Response]]:
+def guarded(policy: Policy, endpoint: Endpoint) -> Endpoint:
     """Wrap a route so it runs only for callers the policy allows."""
 
     async def wrapped(request: Request) -> Response:

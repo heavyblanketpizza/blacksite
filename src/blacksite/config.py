@@ -13,9 +13,10 @@ from __future__ import annotations
 import dataclasses
 import os
 import tomllib
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Literal, Mapping, get_args, get_origin, get_type_hints
+from typing import Any, Literal, get_args, get_origin, get_type_hints
 
 CONFIG_ENV = "BLACKSITE_CONFIG"
 ENV_PREFIX = "BLACKSITE__"
@@ -29,13 +30,16 @@ class ConfigError(ValueError):
     """A setting is unknown or has an invalid value."""
 
 
+# vllm (GPU servers), llamacpp (llama-server, any hardware), or ollama. All speak the
+# OpenAI-compatible API; blacksite.backends handles their differences.
+Provider = Literal["vllm", "llamacpp", "ollama"]
+
+
 @dataclass(frozen=True)
 class ModelSettings:
     """The OpenAI-compatible endpoint used by the agent and for reflection."""
 
-    # vllm (GPU servers), llamacpp (llama-server, any hardware), or ollama. All speak the
-    # OpenAI-compatible API; blacksite.backends handles their differences.
-    provider: Literal["vllm", "llamacpp", "ollama"] = "vllm"
+    provider: Provider = "vllm"
     base_url: str = "http://localhost:8000/v1"
     name: str = "blacksite"
     api_key_env: str = "VLLM_API_KEY"
@@ -259,15 +263,16 @@ def _build(cls: type, data: Mapping[str, Any], prefix: str, base_dir: Path) -> A
         kind = hints[item.name]
         if item.name in data:
             values[item.name] = _coerce(kind, data[item.name], prefix + item.name, base_dir)
-        elif dataclasses.is_dataclass(kind):
+        elif isinstance(kind, type) and dataclasses.is_dataclass(kind):
             values[item.name] = _build(kind, {}, f"{prefix}{item.name}.", base_dir)
         elif kind is Path:
+            assert isinstance(item.default, Path)
             values[item.name] = base_dir / item.default
     return cls(**values)
 
 
 def _coerce(kind: Any, value: Any, name: str, base_dir: Path) -> Any:
-    if dataclasses.is_dataclass(kind):
+    if isinstance(kind, type) and dataclasses.is_dataclass(kind):
         return _build(kind, value, name + ".", base_dir)
     if get_origin(kind) is Literal:
         choices = get_args(kind)

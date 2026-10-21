@@ -19,11 +19,12 @@ import re
 import secrets
 import sqlite3
 import time
+from collections.abc import Callable
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
@@ -147,7 +148,7 @@ def token_hash(token: str) -> str:
 
 
 def _iso(seconds: float) -> str:
-    return datetime.fromtimestamp(seconds, timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.fromtimestamp(seconds, UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 class AccessStore:
@@ -219,11 +220,10 @@ class AccessStore:
                 user_id = cursor.lastrowid
         except sqlite3.IntegrityError:
             raise AuthError(f"The username {name} is taken.") from None
+        assert user_id is not None
         return self._user_by_id(user_id), password
 
-    def _user_from(self, row: sqlite3.Row | None) -> User | None:
-        if row is None:
-            return None
+    def _user_from(self, row: sqlite3.Row) -> User:
         return User(id=row["id"], username=row["username"], display_name=row["display_name"], role=row["role"],
                     status=row["status"], must_change=bool(row["must_change"]),
                     totp_enabled=bool(row["totp_enabled"]), created_at=row["created_at"],
@@ -238,14 +238,14 @@ class AccessStore:
 
     def user(self, user_id: int) -> User | None:
         rows = self._rows("SELECT * FROM users WHERE id = ?", (user_id,))
-        return self._user_from(rows[0] if rows else None)
+        return self._user_from(rows[0]) if rows else None
 
     def find(self, username: str) -> User | None:
         name = normalize_username(username)
         if not USERNAME.match(name):
             return None
         rows = self._rows("SELECT * FROM users WHERE username = ?", (name,))
-        return self._user_from(rows[0] if rows else None)
+        return self._user_from(rows[0]) if rows else None
 
     def users(self) -> list[User]:
         return [self._user_from(row) for row in self._rows("SELECT * FROM users ORDER BY username")]
@@ -379,9 +379,7 @@ class AccessStore:
             return "totp"
         return "full"
 
-    def _session_from(self, row: sqlite3.Row | None) -> Session | None:
-        if row is None:
-            return None
+    def _session_from(self, row: sqlite3.Row) -> Session:
         return Session(id=row["id"], user_id=row["user_id"], stage=row["stage"], csrf=row["csrf"],
                        created_at=row["created_at"], last_seen_at=row["last_seen_at"], expires_at=row["expires_at"],
                        confirmed_at=row["confirmed_at"], ended_at=row["ended_at"], end_reason=row["end_reason"],
@@ -396,17 +394,23 @@ class AccessStore:
                     (session_id, token_hash(token), user.id, self._next_stage(user, None), secrets.token_urlsafe(24),
                      now, now, now + self.settings.session_hours * 3600, self.pseudonym(user_agent or ""),
                      int(self.settings.totp_enabled)))
-        return self.session(session_id), token
+        return self._session_by_id(session_id), token
 
     def session(self, session_id: str) -> Session | None:
         rows = self._rows("SELECT * FROM sessions WHERE id = ?", (session_id,))
-        return self._session_from(rows[0] if rows else None)
+        return self._session_from(rows[0]) if rows else None
+
+    def _session_by_id(self, session_id: str) -> Session:
+        session = self.session(session_id)
+        if session is None:
+            raise AuthError("Sign in again.")
+        return session
 
     def lookup(self, token: str) -> tuple[Session, User] | None:
         if not token:
             return None
         rows = self._rows("SELECT * FROM sessions WHERE token_hash = ?", (token_hash(token),))
-        session = self._session_from(rows[0] if rows else None)
+        session = self._session_from(rows[0]) if rows else None
         if session is None or session.ended_at is not None:
             return None
         if session.totp_policy != self.settings.totp_enabled:
@@ -440,7 +444,7 @@ class AccessStore:
         self._write("UPDATE sessions SET stage = ?, token_hash = ?, csrf = ?, last_seen_at = ? WHERE id = ?",
                     (self._next_stage(user, session.stage), token_hash(token), secrets.token_urlsafe(24),
                      self.clock(), session_id))
-        return self.session(session_id), token
+        return self._session_by_id(session_id), token
 
     def end_session(self, session_id: str, reason: str) -> bool:
         return self._write("UPDATE sessions SET ended_at = ?, end_reason = ? WHERE id = ? AND ended_at IS NULL",

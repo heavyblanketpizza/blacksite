@@ -17,11 +17,18 @@ from blacksite.config import UsbSettings
 from blacksite.evidence.store import Evidence
 from blacksite.report import build_solution
 from blacksite.usb import (
-    UsbError, find_bundles, import_bundle, list_drives, locate_bundle, read_source, wipe, write_solution,
+    UsbError,
+    find_bundles,
+    import_bundle,
+    list_drives,
+    locate_bundle,
+    read_source,
+    wipe,
+    write_solution,
 )
 from blacksite.web.app import _scan_drives, create_app
-from conftest import BASE_URL, sign_in
-from conftest import INCIDENT, KNOWLEDGE
+
+from conftest import BASE_URL, INCIDENT, KNOWLEDGE, sign_in
 from test_agent import GUIDE
 
 
@@ -212,7 +219,8 @@ def test_usb_flow_imports_investigates_exports_and_wipes(usb_client, mounts: Pat
     assert records[0].actor == "system:usb" and records[0].detail["files"] == 5
     assert records[-1].actor == "user:1" and records[-1].session
     assert ledger.verify().ok
-    assert {"provenance.json", "blacksite-signing-key.pub", "ledger-anchor.json"} <= {p.name for p in solution.iterdir()}
+    written = {p.name for p in solution.iterdir()}
+    assert {"provenance.json", "blacksite-signing-key.pub", "ledger-anchor.json"} <= written
 
     anyio.run(_scan_drives, app.state.demo, set())  # reinsert the drive: its bundle is now solved
     assert incident not in {item["id"] for item in client.get("/api/incidents").json()["incidents"]}

@@ -32,6 +32,8 @@ blacksite = "blacksite.cli:main"
 dev = [
     "blacksite[agent,hybrid]",
     "pytest>=8.4",
+    "ruff>=0.17",
+    "mypy>=2.4",
 ]
 
 [build-system]
@@ -41,3 +43,21 @@ build-backend = "uv_build"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-p no:cacheprovider"
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["blacksite"]
+known-local-folder = ["conftest", "test_agent"]
+
+[tool.mypy]
+files = ["src"]
+python_version = "3.11"
+strict = true
+# JSON documents and database rows are Any; annotating every return of one adds nothing.
+warn_return_any = false

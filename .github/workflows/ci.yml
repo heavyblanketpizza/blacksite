@@ -6,6 +6,37 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    name: Lint and type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # setup-uv publishes no moving major tags (v10), so pin the full release.
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.12"
+      - name: Check the lockfile
+        run: uv lock --check
+      - name: Install
+        run: uv sync --locked
+      - name: Lint
+        run: uv run ruff check
+      - name: Type check
+        run: uv run mypy
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.12"
+      - name: Audit the locked dependencies
+        run: |
+          uv export --no-emit-project --no-hashes --format requirements.txt -o requirements.txt
+          uvx pip-audit --no-deps --strict -r requirements.txt
+
   test:
     name: ${{ matrix.os }} / Python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
@@ -16,7 +47,6 @@ jobs:
         python: ["3.11", "3.14"]
     steps:
       - uses: actions/checkout@v7
-      # setup-uv publishes no moving major tags (v10), so pin the full release.
       - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: ${{ matrix.python }}

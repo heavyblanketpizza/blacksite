@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from blacksite.learning.store import LearningStore
+
 from conftest import INCIDENT
 
 
@@ -36,21 +37,23 @@ def test_incident_overview_and_lines(client) -> None:
     data = client.get("/api/incidents/nginx-502-oom").json()
     assert {item["file"] for item in data["artifacts"]} >= {"kern.log", "nginx/error.log"}
     assert data["histogram"]["rows"] and data["patterns"][0]["count"] == 72
-    lines = client.get("/api/incidents/nginx-502-oom/lines", params={"file": "kern.log", "line": 3, "context": 1}).json()
+    lines = client.get("/api/incidents/nginx-502-oom/lines",
+                       params={"file": "kern.log", "line": 3, "context": 1}).json()
     assert [line["n"] for line in lines["lines"]] == [2, 3, 4] and lines["focus"] == [3, 3]
     assert client.get("/api/incidents/../etc").status_code in (400, 404)
     assert client.get("/api/incidents/nope").status_code == 400
 
 
 def test_search_greps_the_evidence(client) -> None:
-    found = client.get("/api/incidents/nginx-502-oom/search", params={"pattern": "oom-killer", "file": "kern.log"}).json()
-    assert found["total"] >= 1 and all(line["file"] == "kern.log" and "oom-killer" in line["text"] for line in found["lines"])
-    capped = client.get("/api/incidents/nginx-502-oom/search", params={"pattern": ".", "limit": 3}).json()
+    search = "/api/incidents/nginx-502-oom/search"
+    found = client.get(search, params={"pattern": "oom-killer", "file": "kern.log"}).json()
+    assert found["total"] >= 1
+    assert all(line["file"] == "kern.log" and "oom-killer" in line["text"] for line in found["lines"])
+    capped = client.get(search, params={"pattern": ".", "limit": 3}).json()
     assert len(capped["lines"]) == 3 and capped["total"] > 3
-    plain = client.get("/api/incidents/nginx-502-oom/search", params={"pattern": "(", "literal": "1"})
-    assert plain.status_code == 200
-    assert client.get("/api/incidents/nginx-502-oom/search", params={"pattern": "("}).status_code == 400
-    assert client.get("/api/incidents/nginx-502-oom/search", params={"pattern": "x", "file": "nope.log"}).status_code == 400
+    assert client.get(search, params={"pattern": "(", "literal": "1"}).status_code == 200
+    assert client.get(search, params={"pattern": "("}).status_code == 400
+    assert client.get(search, params={"pattern": "x", "file": "nope.log"}).status_code == 400
 
 
 def test_upload_creates_and_indexes_an_incident(client) -> None:
@@ -96,7 +99,8 @@ def test_learning_review(client, tmp_path: Path) -> None:
                          source="y", approved=False)
     client.post("/api/learning", json={"ids": ["pb-0002"], "action": "reject"})
     ledger = client.app.state.demo.services.ledger
-    assert [record.action for record in ledger.records(action="learning.")] == ["learning.rejected", "learning.approved"]
+    recorded = [record.action for record in ledger.records(action="learning.")]
+    assert recorded == ["learning.rejected", "learning.approved"]
 
 
 STATIC = Path(__file__).parents[1] / "src" / "blacksite" / "web" / "static"
@@ -114,7 +118,8 @@ def test_every_ui_string_exists_in_english_and_korean() -> None:
         used |= set(re.findall(r'\bt\("([\w.\- ]+)"', script))
         # Keys passed around before t() sees them, e.g. heading("login.title"); "admin.confirmSuspend" names a group.
         literal = r'"((?:login|prov|health|account|reauth|dash|admin|user|share|nav|role|activity)\.[\w.]+)"'
-        used |= {key for key in re.findall(literal, script) if not any(other.startswith(key + ".") for other in strings["en"])}
+        used |= {key for key in re.findall(literal, script)
+                 if not any(other.startswith(key + ".") for other in strings["en"])}
     for name in ("index.html", "login.html"):
         page = (STATIC / name).read_text(encoding="utf-8")
         used |= set(re.findall(r'data-i18n(?:-placeholder|-title|-aria)?="([\w.\- ]+)"', page))
@@ -144,3 +149,24 @@ def test_page_versions_translations(client) -> None:
 def test_language_switch_reaches_the_agent_settings(client) -> None:
     assert client.post("/api/settings", json={"language": "ko"}).json()["switches"]["language"] == "ko"
     assert client.post("/api/settings", json={"language": "fr"}).status_code == 400
+
+
+def test_switches_start_as_the_config_file_and_overrides_set_them(tmp_path: Path, clock) -> None:
+    from starlette.testclient import TestClient
+
+    from blacksite.config import load_settings
+    from blacksite.services import Services
+    from blacksite.web.app import create_app
+
+    from conftest import BASE_URL, sign_in, write_web_config
+
+    config = write_web_config(tmp_path)
+    config.write_text(config.read_text(encoding="utf-8").replace("[rag]\n", '[rag]\nenabled = true\nmode = "inject"\n'),
+                      encoding="utf-8")
+    services = Services.open(load_settings(config, environ={}), clock=clock)
+    app = create_app(config, ["learning.playbook.enabled=true"], tmp_path / "incidents", services=services)
+    with TestClient(app, base_url=BASE_URL) as client:
+        sign_in(client, "admin", "admin")
+        data = client.get("/api/settings").json()
+    assert data["switches"]["rag"] == "inject" and data["switches"]["playbook"] == "on"
+    assert data["features"]["rag"] == "on (inject, bm25)"

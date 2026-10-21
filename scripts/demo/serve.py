@@ -18,21 +18,18 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from pathlib import Path
 import shutil
-import sys
 import time
+from pathlib import Path
 
 import uvicorn
-
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "src"))
 
 from blacksite.auth import totp
 from blacksite.config import load_settings
 from blacksite.services import Services
 from blacksite.web.app import create_app
 
+ROOT = Path(__file__).resolve().parents[2]
 INCIDENT_ID = "nginx-502-oom"
 DEFAULT_MODEL = "blacksite-qwen3.8:latest"
 DEFAULT_URL = "http://127.0.0.1:11434/v1"

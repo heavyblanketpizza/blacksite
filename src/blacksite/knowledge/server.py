@@ -22,7 +22,7 @@ from ..learning.store import LearningStore
 from ..llm import LLMError
 from .index import KnowledgeError, KnowledgeIndex
 
-_READ_ONLY = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
+_READ_ONLY = ToolAnnotations(read_only_hint=True, destructive_hint=False, idempotent_hint=True, open_world_hint=False)
 
 
 def build_knowledge_server(settings: Settings, evidence: Evidence | None = None,

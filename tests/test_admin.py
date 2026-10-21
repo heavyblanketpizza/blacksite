@@ -2,7 +2,6 @@ import json
 import os
 import sqlite3
 
-
 from conftest import PASSWORD
 
 
@@ -54,7 +53,8 @@ def test_member_actions(web) -> None:
     assert admin.post(f"/api/admin/users/{mina_id}", json={"action": "activate"}).json()["user"]["status"] == "active"
     reset = admin.post(f"/api/admin/users/{mina_id}", json={"action": "reset_password"}).json()
     assert len(reset["temporary_password"]) == 19 and reset["user"]["must_change"]
-    assert admin.post(f"/api/admin/users/{mina_id}", json={"action": "role", "role": "admin"}).json()["user"]["role"] == "admin"
+    promoted = admin.post(f"/api/admin/users/{mina_id}", json={"action": "role", "role": "admin"}).json()
+    assert promoted["user"]["role"] == "admin"
     assert admin.post(f"/api/admin/users/{mina_id}", json={"action": "reset_totp"}).status_code == 200
     assert admin.post(f"/api/admin/users/{mina_id}", json={"action": "explode"}).status_code == 400
     assert admin.post("/api/admin/users/999", json={"action": "suspend"}).status_code == 400

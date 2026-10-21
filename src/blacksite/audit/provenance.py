@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -34,7 +34,7 @@ _CHUNK = 1 << 20
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def file_sha256(path: Path) -> str:
@@ -153,8 +153,8 @@ def record_turn(services: Services, settings: Settings, incident_dir: Path, turn
     """Store the turn's metrics, sign a manifest if it produced a guide, and add both to the ledger."""
     incident_dir = Path(incident_dir)
     finished_at = _now()
-    done = next((event for event in reversed(events) if event.get("type") == "done"), {})
-    start = next((event for event in events if event.get("type") == "start"), {})
+    done: dict[str, Any] = next((event for event in reversed(events) if event.get("type") == "done"), {})
+    start: dict[str, Any] = next((event for event in events if event.get("type") == "start"), {})
     guide_event = _guide_event(events)
     good, total, warnings = _citations(guide_event) if guide_event else (0, 0, 0)
     model = settings.model
@@ -186,7 +186,8 @@ def record_turn(services: Services, settings: Settings, incident_dir: Path, turn
             "ledger_anchor": {"seq": seq, "hash": head},
         }, services.keys)
         write(incident_dir, manifest)
-        detail.update({"manifest": manifest_hash(manifest), "files": len(files), "evidence_root": manifest["evidence_root"]})
+        detail.update({"manifest": manifest_hash(manifest), "files": len(files),
+                       "evidence_root": manifest["evidence_root"]})
     services.ledger.append("incident.turn_finished", actor=actor, session=session, target=incident_dir.name,
                            detail=detail)
     return manifest

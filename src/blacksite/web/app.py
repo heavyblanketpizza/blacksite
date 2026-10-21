@@ -13,15 +13,17 @@ import json
 import re
 import shutil
 import sys
+from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field, replace
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any
 
 import anyio
 import httpx
 from starlette.applications import Starlette
+from starlette.datastructures import UploadFile
 from starlette.middleware import Middleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, Response, StreamingResponse
@@ -29,32 +31,40 @@ from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
 from .. import __version__, catalog
-from ..agent.guide import upgrade_check
+from ..agent.guide import LANGUAGES, upgrade_check
+from ..agent.investigator import CONVERSATION_FILE, Investigator
 from ..audit import provenance
-from ..audit.ledger import LedgerError
+from ..audit.ledger import LedgerError, Verification
 from ..auth.gate import LOOPBACK, PUBLIC, Gate, Policy, guarded, principal, refuse
 from ..auth.routes import auth_routes, versioned
 from ..auth.store import AuthError
-from ..agent.investigator import CONVERSATION_FILE, Investigator
 from ..backends import DEFAULT_URLS, DISPLAY, PROVIDERS, server_root, serving
 from ..backends import status as backend_status
-from ..config import ConfigError, ModelSettings, Settings, feature_summary, load_settings
+from ..config import ConfigError, ModelSettings, Provider, Settings, feature_summary, load_settings
 from ..context import open_store
 from ..evidence.server import format_artifacts
 from ..evidence.store import ARTIFACTS_DIR, INCIDENT_FILE, Evidence, EvidenceError
-from ..learning.reflect import OUTCOME_FILE, reflect, record_outcome
+from ..keys import private_dir
+from ..learning.reflect import OUTCOME_FILE, record_outcome, reflect
 from ..learning.store import OUTCOMES, LearningError
 from ..llm import ChatClient, LLMError
 from ..modelserver import ModelServerError, Supervisor, find_llama_server, find_vllm, plan
-from ..keys import private_dir
 from ..report import build_solution
 from ..services import Services
+from ..usb import (
+    Bundle,
+    UsbError,
+    find_bundles,
+    import_bundle,
+    list_drives,
+    locate_bundle,
+    read_source,
+    wipe,
+    write_solution,
+    write_source,
+)
 from .admin import admin_routes
 from .dashboard import dashboard_routes
-from ..usb import (
-    Bundle, UsbError, find_bundles, import_bundle, list_drives, locate_bundle, read_source, wipe, write_source,
-    write_solution,
-)
 
 STATIC = Path(__file__).parent / "static"
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
@@ -88,27 +98,27 @@ class DemoState:
     config_path: Path | None
     base_overrides: list[str]
     incidents: Path
+    # Accounts and the audit ledger, the USB sandbox, the model server this page may start,
+    # and the model the config file names.
+    services: Services
+    sandbox: Path
+    server: Supervisor
+    base_model: ModelSettings
+    host: str = "127.0.0.1"
     switches: dict[str, str] = field(default_factory=lambda: {
         "rag": "off", "cases": "off", "playbook": "off", "thinking": "", "language": ""})
     runs: dict[str, Run] = field(default_factory=dict)
     tasks: set[asyncio.Task[Any]] = field(default_factory=set)
-    sandbox: Path | None = None
     # USB mode: drives seen with a marker folder, events for the page, and queued incidents.
     drives: list[dict[str, Any]] = field(default_factory=list)
     usb_events: list[dict[str, Any]] = field(default_factory=list)
     queue: list[str] = field(default_factory=list)
-    # The model chosen in the page ({provider, base_url, name}; empty: the config's) and the
-    # model server the page started, if any.
+    # The model chosen in the page ({provider, base_url, name}; empty: the config's).
     model: dict[str, str] = field(default_factory=dict)
-    base_model: ModelSettings | None = None
-    server: Supervisor | None = None
     switching: bool = False
-    # Accounts and the audit ledger; which incidents each session has opened (recorded once);
-    # wrong two-step codes per session.
-    services: Services | None = None
+    # Which incidents each session has opened (recorded once); wrong two-step codes per session.
     opened: set[tuple[str, str]] = field(default_factory=set)
     code_failures: dict[str, int] = field(default_factory=dict)
-    host: str = "127.0.0.1"
 
     def usb_event(self, kind: str, **data: Any) -> None:
         event_id = self.usb_events[-1]["id"] + 1 if self.usb_events else 1
@@ -117,7 +127,7 @@ class DemoState:
         del self.usb_events[:-200]
 
     def roots(self) -> list[Path]:
-        return [root for root in (self.incidents, self.sandbox) if root is not None]
+        return [self.incidents, self.sandbox]
 
     def incident_paths(self) -> list[Path]:
         """Incident folders that exist now; ones deleted outside the app simply drop out."""
@@ -142,9 +152,9 @@ class DemoState:
     def settings(self) -> Settings:
         return load_settings(self.config_path, self.overrides())
 
-    def model_settings(self, provider: str, name: str = "") -> ModelSettings:
+    def model_settings(self, provider: Provider, name: str = "") -> ModelSettings:
         """Settings for talking to ``provider``: the config's URL for its own provider, else the default port."""
-        base = self.base_model or self.settings().model
+        base = self.base_model
         current = self.settings().model
         url = base.base_url if base.provider == provider else DEFAULT_URLS[provider]
         if not name:
@@ -163,18 +173,16 @@ class DemoState:
 
 def create_app(config_path: Path | None, overrides: list[str], incidents: Path,
                services: Services | None = None, host: str = "127.0.0.1") -> Starlette:
-    state = DemoState(config_path, list(overrides), incidents.resolve(), host=host)
-    base = state.settings()
-    state.services = services or Services.open(base)
-    state.switches["thinking"] = base.agent.thinking
-    state.switches["language"] = base.agent.language
-    state.switches["rag"] = base.rag.mode if base.rag.enabled else "off"
-    state.switches["cases"] = base.learning.cases.mode if base.learning.cases.enabled else "off"
-    state.switches["playbook"] = "on" if base.learning.playbook.enabled else "off"
+    base = load_settings(config_path, overrides)  # the switches start as the config file sets them
+    incidents = incidents.resolve()
+    state = DemoState(config_path, list(overrides), incidents, services or Services.open(base),
+                      base.usb.sandbox_dir.resolve(), Supervisor(incidents.parent / "model-server.log"), base.model,
+                      host=host)
+    state.switches.update(thinking=base.agent.thinking, language=base.agent.language,
+                          rag=base.rag.mode if base.rag.enabled else "off",
+                          cases=base.learning.cases.mode if base.learning.cases.enabled else "off",
+                          playbook="on" if base.learning.playbook.enabled else "off")
     state.incidents.mkdir(parents=True, exist_ok=True)
-    state.sandbox = base.usb.sandbox_dir.resolve()
-    state.base_model = base.model
-    state.server = Supervisor(state.incidents.parent / "model-server.log")
     _register_folders(state)
 
     @asynccontextmanager
@@ -259,7 +267,7 @@ def _record(state: DemoState, request: Request, action: str, target: str = "", *
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _register_folders(state: DemoState) -> None:
@@ -272,7 +280,7 @@ def _register_folders(state: DemoState) -> None:
     recorded = {(run["incident_id"], run["turn"]) for run in access.runs(limit=100_000)}
     for path in state.incident_paths():
         if path.name not in known:
-            stamp = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+            stamp = datetime.fromtimestamp(path.stat().st_mtime, UTC)
             access.register_incident(path.name, None, stamp.isoformat(timespec="seconds").replace("+00:00", "Z"))
         turns = _read_json(path / CONVERSATION_FILE).get("turns", [])
         for number, turn in enumerate(turns, 1):
@@ -282,8 +290,8 @@ def _register_folders(state: DemoState) -> None:
 
 def _past_run(incident: str, number: int, turn: dict[str, Any]) -> dict[str, Any]:
     events = turn.get("events", [])
-    done = next((event for event in events if event.get("type") == "done"), {})
-    start = next((event for event in events if event.get("type") == "start"), {})
+    done: dict[str, Any] = next((event for event in events if event.get("type") == "done"), {})
+    start: dict[str, Any] = next((event for event in events if event.get("type") == "start"), {})
     guide = next((event for event in events if event.get("type") == "guide"), None)
     good, total, _ = provenance._citations(guide) if guide else (0, 0, 0)
     return {"incident_id": incident, "turn": number, "actor": "unknown", "session": None,
@@ -297,7 +305,7 @@ def _past_run(incident: str, number: int, turn: dict[str, Any]) -> dict[str, Any
 async def _verify_ledger(state: DemoState) -> None:
     """Check the whole ledger at startup, then new records every few minutes."""
     ledger = state.services.ledger
-    check = ledger.verify
+    check: Callable[[], Verification] = ledger.verify
     while True:
         try:
             await anyio.to_thread.run_sync(check)
@@ -347,7 +355,7 @@ async def _models(state: DemoState, request: Request) -> Response:
         "context": current.context, "backends": [entry for entry, _ in backends]})
 
 
-async def _backend(state: DemoState, provider: str) -> tuple[dict[str, Any], list[catalog.LocalModel]]:
+async def _backend(state: DemoState, provider: Provider) -> tuple[dict[str, Any], list[catalog.LocalModel]]:
     """One server kind: whether it is installed and running, what it serves, and the models on disk."""
     model = state.model_settings(provider)
     entry: dict[str, Any] = {"id": provider, "name": DISPLAY[provider], "base_url": model.base_url,
@@ -375,7 +383,8 @@ async def _backend(state: DemoState, provider: str) -> tuple[dict[str, Any], lis
             return item.id == current.name
         if server.running and server.provider == provider:
             return server.model == item.label
-        return any(served["name"] == current.name and _same_model(served["source"], item) for served in entry["serving"])
+        return any(served["name"] == current.name and _same_model(served["source"], item)
+                   for served in entry["serving"])
 
     entry["models"] = [{**item.to_json(), "in_use": in_use(item)} for item in models]
     return entry, models
@@ -392,14 +401,15 @@ def _same_model(source: str, model: catalog.LocalModel) -> bool:
         return False
 
 
-async def _switch_model(state: DemoState, provider: str, model_id: str) -> None:
+async def _switch_model(state: DemoState, provider_name: str, model_id: str) -> None:
     """Use a model already on this computer, starting or stopping model servers as needed.
 
     Only models found on disk can be chosen, so the page can never make the demo launch an
     arbitrary path. A server this page did not start is used as it is or left alone.
     """
-    if provider not in PROVIDERS:
-        raise ValueError(f"Unknown model server {provider!r}")
+    provider = next((item for item in PROVIDERS if item == provider_name), None)
+    if provider is None:
+        raise ValueError(f"Unknown model server {provider_name!r}")
     if any(not run.done for run in state.runs.values()):
         raise ValueError("Wait for the running investigation to finish before switching models.")
     if state.switching:
@@ -524,7 +534,7 @@ async def _create_incident(state: DemoState, request: Request) -> Response:
     artifacts.mkdir(parents=True)
     count = 0
     for upload in form.getlist("files"):
-        if not hasattr(upload, "filename") or not upload.filename:
+        if not isinstance(upload, UploadFile) or not upload.filename:
             continue
         name = _safe_filename(upload.filename)
         if not name:
@@ -787,7 +797,7 @@ async def _stream(state: DemoState, request: Request) -> Response:
             run.changed.clear()
             try:
                 await asyncio.wait_for(run.changed.wait(), timeout=15)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 yield ": keep-alive\n\n"
 
     return StreamingResponse(events(), media_type="text/event-stream",
@@ -823,7 +833,9 @@ async def _export(state: DemoState, request: Request) -> Response:
         return JSONResponse({"error": "An investigation is running; export when it finishes"}, status_code=409)
     body = await request.json() if await request.body() else {}
     settings = state.settings()
-    language = body.get("language") if body.get("language") in ("en", "ko") else settings.agent.language
+    language = str(body.get("language") or "")
+    if language not in LANGUAGES:
+        language = settings.agent.language
     conversation = _read_json(path / CONVERSATION_FILE)
     turns = list(enumerate(conversation.get("turns", []), 1))
     found = next(((number, turn, event) for number, turn in reversed(turns)
@@ -850,8 +862,8 @@ async def _export(state: DemoState, request: Request) -> Response:
         source["exported_to"] = str(target)
         write_source(path, source)
         services.ledger.append("incident.exported", actor=who.actor, session=who.session.id, target=path.name,
-                               detail={"drive": source.get("drive_label"), "turn": number, "signed": manifest is not None,
-                                       "files": sorted(files)})
+                               detail={"drive": source.get("drive_label"), "turn": number,
+                                       "signed": manifest is not None, "files": sorted(files)})
         wiped = False
         if settings.usb.wipe_after_export:
             wipe(path)
@@ -947,7 +959,7 @@ async def _scan_drives(state: DemoState, previous: set[str]) -> None:
 def _known_bundles(state: DemoState) -> dict[tuple[str, str], str]:
     """Drive bundles already in the sandbox, so reinserting a drive does not import twice."""
     known: dict[tuple[str, str], str] = {}
-    if state.sandbox and state.sandbox.is_dir():
+    if state.sandbox.is_dir():
         for path in state.sandbox.iterdir():
             source = read_source(path) if path.is_dir() else None
             if source:

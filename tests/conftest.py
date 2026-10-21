@@ -107,6 +107,7 @@ def scripted_agent(monkeypatch) -> None:
     from pydantic_ai.models.function import FunctionModel
 
     from blacksite.agent import investigator as investigator_module
+
     from test_agent import GUIDE
 
     async def stream(messages, info):

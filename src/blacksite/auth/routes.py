@@ -4,22 +4,26 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import anyio
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.routing import Route
 
+from ..audit.ledger import LedgerError
 from . import totp
 from .gate import PUBLIC, Policy, Principal, clear_cookie, guarded, principal, refuse, services_of, set_cookie
-from ..audit.ledger import LedgerError
 from .passwords import PasswordPolicyError
 from .store import AuthError, LoginFailed
+
+if TYPE_CHECKING:
+    from ..services import Services
 
 STATIC = Path(__file__).resolve().parents[1] / "web" / "static"
 SESSION = Policy("session")
 MAX_CODE_FAILURES = 5
+WRONG_CODE = "That code did not match. Check that your phone's clock is right, then try the next code."
 
 
 def versioned(page: str, assets: tuple[str, ...]) -> HTMLResponse:
@@ -31,6 +35,14 @@ def versioned(page: str, assets: tuple[str, ...]) -> HTMLResponse:
         version = int((STATIC / name).stat().st_mtime)
         html = html.replace(f"/static/{name}\"", f"/static/{name}?v={version}\"")
     return HTMLResponse(html)
+
+
+def _refreshed(services: Services, found: Principal) -> Principal:
+    """The principal read again after a change to its account or session."""
+    user, session = services.access.user(found.user.id), services.access.session(found.session.id)
+    if user is None or session is None:
+        raise AuthError("Sign in again.")
+    return Principal(user, session)
 
 
 async def _body(request: Request) -> dict[str, Any]:
@@ -115,8 +127,7 @@ def auth_routes(state: Any) -> list[Route]:
         set_cookie(response, token)
         return response
 
-    def wrong_code(request: Request, found: Principal, action: str,
-                   message: str = "That code did not match. Check that your phone's clock is right, then try the next code.") -> Response:
+    def wrong_code(request: Request, found: Principal, action: str, message: str = WRONG_CODE) -> Response:
         services = services_of(request)
         count = failures.get(found.session.id, 0) + 1
         failures[found.session.id] = count
@@ -147,7 +158,7 @@ def auth_routes(state: Any) -> list[Route]:
             return refuse(400, str(exc))
         services.ledger.append("auth.password_changed", actor=found.actor, session=found.session.id,
                                detail={"sessions_ended": len(ended)})
-        refreshed = Principal(services.access.user(found.user.id), services.access.session(found.session.id))
+        refreshed = _refreshed(services, found)
         return advanced(request, refreshed)
 
     async def totp_setup(request: Request) -> Response:
@@ -173,7 +184,7 @@ def auth_routes(state: Any) -> list[Route]:
             return wrong_code(request, found, "auth.totp_failed")
         failures.pop(found.session.id, None)
         services.ledger.append("auth.totp_enrolled", actor=found.actor, session=found.session.id)
-        refreshed = Principal(services.access.user(found.user.id), services.access.session(found.session.id))
+        refreshed = _refreshed(services, found)
         return advanced(request, refreshed, {"recovery_codes": codes})
 
     async def totp_verify(request: Request) -> Response:
@@ -230,8 +241,8 @@ def auth_routes(state: Any) -> list[Route]:
         endpoint.__name__ = handler.__name__
         return endpoint
 
-    login, logout, password, totp_setup, totp_enroll, totp_verify, recovery, confirm = (
-        recorded(handler) for handler in (login, logout, password, totp_setup, totp_enroll, totp_verify, recovery, confirm))
+    handlers = (login, logout, password, totp_setup, totp_enroll, totp_verify, recovery, confirm)
+    login, logout, password, totp_setup, totp_enroll, totp_verify, recovery, confirm = map(recorded, handlers)
 
     return [
         Route("/login", guarded(PUBLIC, login_page)),

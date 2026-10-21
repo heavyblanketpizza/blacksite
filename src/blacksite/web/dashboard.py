@@ -7,7 +7,7 @@ about those incidents or about themselves; admins may look at everything.
 from __future__ import annotations
 
 import statistics
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -41,7 +41,7 @@ def parse_time(text: Any) -> datetime | None:
         value = datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError:
         return None
-    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    return value if value.tzinfo else value.replace(tzinfo=UTC)
 
 
 def _median(values: list[float]) -> float | None:
@@ -71,7 +71,7 @@ def compute(state: DemoState, user: User, scope: str, days: int) -> dict[str, An
 
     access = state.services.access
     entries = access.incidents()
-    now = datetime.fromtimestamp(access.clock(), timezone.utc)
+    now = datetime.fromtimestamp(access.clock(), UTC)
     start, previous_start = now - timedelta(days=days), now - timedelta(days=2 * days)
     buckets = min(days, MAX_BUCKETS)
     size = timedelta(days=days) / buckets
@@ -81,13 +81,13 @@ def compute(state: DemoState, user: User, scope: str, days: int) -> dict[str, An
             return None
         return min(int((moment - start) / size), buckets - 1)
 
-    incidents = []
+    incidents: list[dict[str, Any]] = []
     for path in state.incident_paths():
         entry = entries.get(path.name, {"owner_id": None, "shares": [], "created_at": None})
         if not in_scope(entry, user, scope):
             continue
         outcome = _read_json(path / OUTCOME_FILE)
-        created = parse_time(entry.get("created_at")) or datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+        created = parse_time(entry.get("created_at")) or datetime.fromtimestamp(path.stat().st_mtime, UTC)
         incidents.append({"id": path.name, "status": _status_of(path), "created": created,
                           "outcome": outcome.get("outcome"), "reported": parse_time(outcome.get("reported_at"))})
     ids = {item["id"] for item in incidents}
@@ -110,7 +110,8 @@ def compute(state: DemoState, user: User, scope: str, days: int) -> dict[str, An
         if run["guide"] and (index := bucket(run["at"])) is not None:
             guide_spark[index] += 1
             guide_seconds[index].append(run["seconds"])
-    current_outcomes = [item["outcome"] for item in incidents if item["outcome"] and within(item["reported"], start, now)]
+    current_outcomes = [item["outcome"] for item in incidents
+                        if item["outcome"] and within(item["reported"], start, now)]
     previous_outcomes = [item["outcome"] for item in incidents
                          if item["outcome"] and within(item["reported"], previous_start, start)]
     current_guides = [run["seconds"] for run in runs if run["guide"] and within(run["at"], start, now)]
@@ -218,16 +219,19 @@ def dashboard_routes(state: DemoState, api: Any) -> list[Route]:
             if record.target and not record.target.startswith("user:"):
                 if record.target not in titles:
                     path = paths.get(record.target)
-                    titles[record.target] = (_read_json(path / INCIDENT_FILE).get("title") or record.target) if path else None
+                    titles[record.target] = None
+                    if path:
+                        titles[record.target] = _read_json(path / INCIDENT_FILE).get("title") or record.target
                 incident = {"id": record.target, "title": titles[record.target]}
-            kind = "user" if record.actor.startswith("user:") else "cli" if record.actor.startswith("cli:") else "system"
+            kind = next((name for name in ("user", "cli") if record.actor.startswith(f"{name}:")), "system")
             detail = dict(record.detail)
             if isinstance(detail.get("user"), str):
                 detail["user_name"] = actor_name(detail["user"], people)
             items.append({"seq": record.seq, "at": record.at, "action": record.action, "incident": incident,
                           "actor": {"kind": kind, "id": int(record.actor[5:]) if kind == "user" and
                                     record.actor[5:].isdigit() else None, "name": actor_name(record.actor, people)},
-                          "target_name": actor_name(record.target, people) if record.target.startswith("user:") else None,
+                          "target_name": (actor_name(record.target, people) if record.target.startswith("user:")
+                                          else None),
                           "detail": detail})
         last = services.ledger.last_verification()
         verification = {key: last.get(key) for key in ("ok", "records", "at", "reason", "first_bad")} if last else None

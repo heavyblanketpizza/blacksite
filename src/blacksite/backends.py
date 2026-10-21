@@ -14,13 +14,16 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from .config import ModelSettings, Settings
+from .config import ModelSettings, Provider, Settings
 
-PROVIDERS = ("ollama", "llamacpp", "vllm")
+if TYPE_CHECKING:
+    from pydantic_ai.models.openai import OpenAIChatModelSettings
+
+PROVIDERS: tuple[Provider, ...] = ("ollama", "llamacpp", "vllm")
 DISPLAY = {"ollama": "Ollama", "llamacpp": "llama.cpp", "vllm": "vLLM"}
 DEFAULT_URLS = {"ollama": "http://127.0.0.1:11434/v1", "llamacpp": "http://127.0.0.1:8080/v1",
                 "vllm": "http://127.0.0.1:8000/v1"}
@@ -65,7 +68,7 @@ def agent_model(settings: Settings, http_client: httpx.AsyncClient | None = None
     return OpenAIChatModel(model.name, provider=provider)
 
 
-def agent_settings(settings: Settings) -> dict[str, Any]:
+def agent_settings(settings: Settings) -> OpenAIChatModelSettings:
     """Per-request model settings for the agent."""
     thinking = settings.agent.thinking
     if settings.model.provider == "ollama":
@@ -133,7 +136,8 @@ async def status(model: ModelSettings, transport: httpx.AsyncBaseTransport | Non
                 return Status(True, False, f"health check returned HTTP {health.status_code}")
             if model.provider == "llamacpp":
                 return Status(True, True)  # llama-server serves one model under any requested name
-            served = [item.get("id") for item in (await client.get(f"{model.base_url.rstrip('/')}/models")).json().get("data", [])]
+            listed = (await client.get(f"{model.base_url.rstrip('/')}/models")).json().get("data", [])
+            served = [item.get("id") for item in listed]
             if model.name not in served:
                 return Status(True, False, f"serving {', '.join(map(str, served)) or 'nothing'}, not {model.name}")
             return Status(True, True)

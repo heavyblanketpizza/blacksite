@@ -9,6 +9,7 @@ from mcp.client.stdio import StdioServerParameters
 
 from blacksite.cli import main
 from blacksite.learning.store import LearningStore
+
 from conftest import INCIDENT, KNOWLEDGE
 
 

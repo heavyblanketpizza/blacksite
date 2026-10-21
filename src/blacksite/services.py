@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import getpass
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from .audit.ledger import Ledger
 from .auth.store import AccessStore

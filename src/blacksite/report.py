@@ -10,7 +10,7 @@ from __future__ import annotations
 import html
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from . import __version__
@@ -42,7 +42,8 @@ LABELS = {
         "실행하기 전에 모든 단계를 읽어 보세요.",
         "read-only": "읽기 전용", "low": "낮음", "high": "높음",
         "conf-high": "높음", "conf-medium": "보통", "conf-low": "낮음",
-        "signed": "Blacksite 키 {fingerprint}로 서명했습니다. 이 폴더는 다음 명령으로 확인하세요: blacksite verify <폴더>",
+        "signed": "Blacksite 키 {fingerprint}로 서명했습니다. 이 폴더는 다음 명령으로 확인하세요: "
+                  "blacksite verify <폴더>",
     },
 }
 
@@ -93,7 +94,7 @@ def build_solution(evidence: Evidence, guide_event: dict[str, Any], language: st
     guide = guide_event["guide"]
     checks = guide_event.get("checks", [])
     excerpts = _excerpts(evidence, [item["ref"] for item in guide["evidence"]])
-    generated = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    generated = datetime.now(UTC).isoformat(timespec="seconds")
 
     markdown = guide_event.get("markdown", "").rstrip() + "\n"
     if excerpts:
@@ -108,7 +109,8 @@ def build_solution(evidence: Evidence, guide_event: dict[str, Any], language: st
         "model": model,
         "language": language,
         "incident": {"title": evidence.incident.title, "description": evidence.incident.description},
-        "source": {key: source[key] for key in ("drive_label", "bundle", "imported_at") if key in source} if source else None,
+        "source": ({key: source[key] for key in ("drive_label", "bundle", "imported_at") if key in source}
+                   if source else None),
         "evidence_files": (source or {}).get("files", []),
         "checks": checks,
         "guide": guide,
@@ -121,7 +123,7 @@ def build_solution(evidence: Evidence, guide_event: dict[str, Any], language: st
         "guide.html": _html(guide, checks, excerpts, label, language, generated, model, source, signed),
         "manifest.json": json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
     }
-    if signed is not None:
+    if provenance is not None and public_pem is not None:
         files["provenance.json"] = json.dumps(provenance, ensure_ascii=False, indent=2) + "\n"
         files["blacksite-signing-key.pub"] = public_pem.decode("ascii")
         if anchor is not None:

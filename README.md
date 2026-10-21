@@ -139,10 +139,10 @@ Keep `var/keys/` private and backed up. It holds the key that proves the ledger 
 ## Development
 
 ```bash
-uv run pytest
+uv run ruff check && uv run mypy && uv run pytest
 ```
 
-Tests mock the model and need no GPU. CI runs them on Linux, macOS, and Windows with Python 3.11 and 3.14.
+Tests mock the model and need no GPU. CI lints, type-checks, audits the locked dependencies, and runs the tests on Linux, macOS, and Windows with Python 3.11 and 3.14.
 
 | Path | Contents |
 | --- | --- |

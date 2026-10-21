@@ -6,7 +6,7 @@ import os
 import stat
 import tempfile
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -27,7 +27,7 @@ SENSITIVE = Policy("admin", confirm=True)
 
 
 def _iso(seconds: float) -> str:
-    return datetime.fromtimestamp(seconds, timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.fromtimestamp(seconds, UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _names(state: DemoState) -> dict[int, User]:
@@ -106,7 +106,7 @@ def admin_routes(state: DemoState, api: Any) -> list[Route]:
             _record(request, "admin.role_changed", target.actor(), role=role)
         else:
             raise AuthError("Unknown action.")
-        return JSONResponse({"user": access.user(user_id).to_json(), **result})
+        return JSONResponse({"user": (access.user(user_id) or target).to_json(), **result})
 
     async def sessions(state: DemoState, request: Request) -> Response:
         me = principal(request)
@@ -165,7 +165,7 @@ def admin_routes(state: DemoState, api: Any) -> list[Route]:
             count = await anyio.to_thread.run_sync(services.ledger.export, path)
             content = path.read_bytes()
         _record(request, "audit.exported", records=count)
-        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
         return Response(content, media_type="application/x-ndjson",
                         headers={"Content-Disposition": f'attachment; filename="blacksite-audit-{stamp}.jsonl"'})
 
@@ -181,13 +181,13 @@ def admin_routes(state: DemoState, api: Any) -> list[Route]:
 
         people = _names(state)
         entries = services.access.incidents()
-        items = []
+        items: list[dict[str, Any]] = []
         for path in state.incident_paths():
             entry = entries.get(path.name, {"owner_id": None, "shares": [], "created_at": None})
             owner = entry["owner_id"]
             items.append({"id": path.name, "title": _read_json(path / INCIDENT_FILE).get("title") or path.name,
                           "status": _status_of(path), "created_at": entry.get("created_at"),
-                          "sandbox": state.sandbox is not None and path.parent == state.sandbox,
+                          "sandbox": path.parent == state.sandbox,
                           "owner": {"id": owner, "name": people[owner].display_name}
                           if owner is not None and owner in people else None,
                           "shares": [{"id": uid, "name": people[uid].display_name}
@@ -218,7 +218,7 @@ def admin_routes(state: DemoState, api: Any) -> list[Route]:
         access, ledger, settings = services.access, services.ledger, services.settings
         people = access.users()
         now = time.time()
-        since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat(timespec="seconds").replace("+00:00", "Z")
+        since = (datetime.now(UTC) - timedelta(hours=24)).isoformat(timespec="seconds").replace("+00:00", "Z")
         failed = ledger.records(action="auth.login_failed", since=since, limit=10_000)
         paths = list(dict.fromkeys([settings.auth.store_path.parent, settings.audit.store_path.parent,
                                     settings.auth.keys_dir]))
@@ -228,7 +228,7 @@ def admin_routes(state: DemoState, api: Any) -> list[Route]:
         return JSONResponse({
             "private": private, "private_paths": [str(path) for path in paths],
             "loopback": True, "host": state.host,
-            "keys": (settings.auth.keys_dir / "master.key").is_file() and (settings.auth.keys_dir / "signing.key").is_file(),
+            "keys": all((settings.auth.keys_dir / name).is_file() for name in ("master.key", "signing.key")),
             "admins_without_totp": sum(1 for user in people if user.admin and user.status == "active"
                                        and not user.totp_enabled),
             "admins": sum(1 for user in people if user.admin and user.status == "active"),

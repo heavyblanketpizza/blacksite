@@ -10,8 +10,9 @@ from __future__ import annotations
 import json
 import secrets
 import time
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-from typing import Any, Callable, Iterator
+from typing import Any
 
 import anyio
 import httpx
@@ -115,8 +116,8 @@ def run_checks(settings: Settings, transport: httpx.BaseTransport | None = None,
         message = body["choices"][0]["message"]
         calls = message.get("tool_calls") or []
         if len(calls) != 1 or calls[0]["function"]["name"] != "search_logs":
-            raise CheckFailed(f"expected one search_logs call, got {calls or repr((message.get('content') or '')[:120])}",
-                              hints["tools"])
+            got = calls or repr((message.get("content") or "")[:120])
+            raise CheckFailed(f"expected one search_logs call, got {got}", hints["tools"])
         arguments = json.loads(calls[0]["function"]["arguments"])
         if not isinstance(arguments.get("pattern"), str):
             raise CheckFailed(f"tool arguments are not usable: {arguments}", hints["tools"])
@@ -176,8 +177,8 @@ def run_checks(settings: Settings, transport: httpx.BaseTransport | None = None,
 
     def structured() -> str:
         body = chat({"messages": [{"role": "user", "content": "Give a title and at most 3 steps to free a full disk."}],
-                     "response_format": {"type": "json_schema", "json_schema": {"name": "plan", "schema": JSON_SCHEMA}}},
-                    "json")
+                     "response_format": {"type": "json_schema",
+                                         "json_schema": {"name": "plan", "schema": JSON_SCHEMA}}}, "json")
         content = body["choices"][0]["message"].get("content") or ""
         try:
             data = json.loads(content)

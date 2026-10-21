@@ -7,8 +7,9 @@ import json
 import os
 import shutil
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
+from typing import TYPE_CHECKING
 
 from . import __version__
 from .audit.ledger import LedgerError
@@ -19,11 +20,13 @@ from .evidence.store import ARTIFACTS_DIR, INCIDENT_FILE, Evidence, EvidenceErro
 from .knowledge.index import KnowledgeError
 from .learning.store import OUTCOMES, LearningError
 from .llm import LLMError
+from .modelserver import ModelServerError
 
-from .modelserver import ModelServerError  # noqa: E402  (after the imports it depends on)
+if TYPE_CHECKING:
+    from .services import Services
 
-_ERRORS = (ConfigError, EvidenceError, KnowledgeError, LearningError, LLMError, ModelServerError, AuthError, LedgerError,
-           VerifyError)
+_ERRORS = (ConfigError, EvidenceError, KnowledgeError, LearningError, LLMError, ModelServerError, AuthError,
+           LedgerError, VerifyError)
 # Sample incidents shipped with the repository, used by `blacksite demo --samples`.
 SAMPLES = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "incidents"
 
@@ -362,19 +365,20 @@ def _investigate(args: argparse.Namespace, settings: Settings) -> int:
             if thinking:
                 print(reset)
                 thinking = False
+            at = f"{dim}[{event['t']:>5}s]{reset}"
             if kind == "start":
                 print(f"{bold}{event['model']}{reset} ({_features(settings)}; thinking {event['thinking']})")
             elif kind == "text":
                 print(event["delta"], end="", flush=True)
             elif kind == "tool_call":
-                print(f"\n{dim}[{event['t']:>5}s]{reset} {bold}\u2192 {event['name']}{reset} {json.dumps(event['args'])}")
+                print(f"\n{at} {bold}\u2192 {event['name']}{reset} {json.dumps(event['args'])}")
             elif kind == "tool_result":
                 lines = event["content"].splitlines()
                 shown = "\n".join(f"  {line[:160]}" for line in lines[:8])
                 more = f"\n  \u2026 {len(lines) - 8} more lines" if len(lines) > 8 else ""
                 print(f"{dim}{shown}{more}{reset} ({event['ms']} ms)")
             elif kind == "retry":
-                print(f"\n{dim}[{event['t']:>5}s]{reset} {bold}checks sent the answer back:{reset} {event['reason'][:400]}")
+                print(f"\n{at} {bold}checks sent the answer back:{reset} {event['reason'][:400]}")
             elif kind == "guide":
                 print(f"\n{dim}[{event['t']:>5}s] guide ready{reset}\n" + event["markdown"])
             elif kind == "question":
@@ -386,8 +390,8 @@ def _investigate(args: argparse.Namespace, settings: Settings) -> int:
                     print(f"  $ {command}")
                 print(f"Reply with: blacksite investigate {args.incident} --paste output.txt")
             elif kind == "done":
-                print(f"\n{dim}{event['seconds']} s, {event['requests']} model calls, {event['tool_calls']} tool calls, "
-                      f"{event['input_tokens']} in / {event['output_tokens']} out tokens{reset}")
+                print(f"\n{dim}{event['seconds']} s, {event['requests']} model calls, {event['tool_calls']} tool "
+                      f"calls, {event['input_tokens']} in / {event['output_tokens']} out tokens{reset}")
             elif kind == "error":
                 print(f"\nblacksite: {event['message']}", file=sys.stderr)
                 status = 1
@@ -493,7 +497,7 @@ def _list(args: argparse.Namespace, settings: Settings) -> int:
     return 0
 
 
-def _services(settings: Settings):
+def _services(settings: Settings) -> Services:
     from .services import Services
 
     return Services.open(settings)
@@ -537,7 +541,8 @@ def _users_change(args: argparse.Namespace, settings: Settings) -> int:
     actor = cli_actor()
     if args.change == "reset-password":
         temporary, ended = access.reset_password(user.id)
-        services.ledger.append("admin.password_reset", actor=actor, target=user.actor(), detail={"sessions": len(ended)})
+        services.ledger.append("admin.password_reset", actor=actor, target=user.actor(),
+                               detail={"sessions": len(ended)})
         print(f"Reset the password for {user.username} and signed them out.")
         print(f"Temporary password (shown once): {temporary}")
         return 0
@@ -596,14 +601,16 @@ def _audit_export(args: argparse.Namespace, settings: Settings) -> int:
 def _audit_anchor(args: argparse.Namespace, settings: Settings) -> int:
     ledger = _services(settings).ledger
     anchor = ledger.checkpoint() or ledger.anchor()
+    if anchor is None:
+        raise LedgerError("The ledger is empty; there is nothing to anchor.")
     print(f"Anchor: record {anchor['seq']}, fingerprint {anchor['fingerprint']}")
     print(json.dumps(anchor, indent=2))
     return 0
 
 
 def _verify(args: argparse.Namespace, settings: Settings) -> int:
-    from .audit import provenance
     from .agent.investigator import CONVERSATION_FILE
+    from .audit import provenance
 
     path = args.path
     guide = None

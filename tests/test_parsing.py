@@ -103,7 +103,8 @@ def test_defang_neutralizes_tool_call_markup_only() -> None:
 
 
 def test_masks_keep_http_status_and_hide_values() -> None:
-    assert mask('10.0.3.7 - - "GET /api/orders/42 HTTP/1.1" 502 157') == '<IP> - - "GET /api/orders/<NUM> HTTP/<NUM>" 502 <NUM>'
+    masked = mask('10.0.3.7 - - "GET /api/orders/42 HTTP/1.1" 502 157')
+    assert masked == '<IP> - - "GET /api/orders/<NUM> HTTP/<NUM>" 502 <NUM>'
     assert mask("pid 4242 took 12ms on sda1 id 123e4567-e89b-12d3-a456-426614174000") == \
         "pid <NUM> took <NUM>ms on sda1 id <UUID>"
 

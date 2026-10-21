@@ -12,11 +12,11 @@ from __future__ import annotations
 
 import hashlib
 import os
-from contextlib import closing
 import re
 import sqlite3
 import struct
 import threading
+from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol

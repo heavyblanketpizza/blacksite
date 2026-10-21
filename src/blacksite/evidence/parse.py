@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 SEVERITIES = ("debug", "info", "warning", "error", "critical")
 SEVERITY_RANK = {name: rank for rank, name in enumerate(SEVERITIES)}
@@ -243,7 +243,7 @@ def _json_time(value: object) -> datetime | None:
     if isinstance(value, (int, float)):
         seconds = value / 1000 if value > 1e11 else value
         try:
-            return datetime.fromtimestamp(seconds, tz=timezone.utc).replace(tzinfo=None)
+            return datetime.fromtimestamp(seconds, tz=UTC).replace(tzinfo=None)
         except (OverflowError, OSError, ValueError):
             return None
     if isinstance(value, str):

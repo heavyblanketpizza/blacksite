@@ -11,6 +11,7 @@ from blacksite.auth.gate import COOKIE
 from blacksite.config import load_settings
 from blacksite.services import Services
 from blacksite.web.app import serve
+
 from conftest import PASSWORD, add_account
 
 UPLOAD = [("files", ("app.log", b"2026-09-27 02:14:00 ERROR boom\n"))]
@@ -64,7 +65,8 @@ def test_cross_site_changes_are_refused(web) -> None:
         assert response.status_code == 403 and response.json()["csrf"] is True
     finally:
         admin.headers["X-CSRF-Token"] = token
-    ok = admin.post("/api/settings", json={}, headers={"Origin": "http://127.0.0.1:8765", "Sec-Fetch-Site": "same-origin"})
+    ok = admin.post("/api/settings", json={},
+                    headers={"Origin": "http://127.0.0.1:8765", "Sec-Fetch-Site": "same-origin"})
     assert ok.status_code == 200
 
 
@@ -104,7 +106,8 @@ def test_incidents_are_visible_to_owner_shares_and_admins(web) -> None:
     assert data["access"] == "investigate" and data["owner"]["name"] == "Mina"
     assert joon.post(f"/api/incidents/{created}/reset").status_code == 403  # shared: no start over
     assert mina.post(f"/api/incidents/{created}/reset").status_code == 200
-    assert mina.post(f"/api/incidents/{created}/share", json={"user_id": joon_id, "action": "unshare"}).status_code == 200
+    unshared = mina.post(f"/api/incidents/{created}/share", json={"user_id": joon_id, "action": "unshare"})
+    assert unshared.status_code == 200
     assert joon.get(f"/api/incidents/{created}").status_code == 404
 
 

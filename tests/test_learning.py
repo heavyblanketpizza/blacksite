@@ -7,9 +7,16 @@ from blacksite.context import build_context
 from blacksite.evidence.store import Evidence
 from blacksite.knowledge.server import build_knowledge_server
 from blacksite.learning.reflect import (
-    Outcome, Reflection, build_messages, load_outcome, record_outcome, reflect, response_schema,
+    Outcome,
+    Reflection,
+    build_messages,
+    load_outcome,
+    record_outcome,
+    reflect,
+    response_schema,
 )
 from blacksite.learning.store import LearningError, LearningStore
+
 from conftest import call_tool
 
 OOM_SIGNATURE = [

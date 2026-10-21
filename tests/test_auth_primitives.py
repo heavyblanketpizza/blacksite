@@ -63,7 +63,8 @@ def test_verify_allows_one_step_of_drift_and_refuses_replay() -> None:
     assert totp.verify(secret, totp.code_at(secret, step + 1), now, None) == step + 1
     assert totp.verify(secret, totp.code_at(secret, step - 2), now, None) is None
     assert totp.verify(secret, totp.code_at(secret, step), now, last_step=step) is None
-    assert totp.verify(secret, " " + totp.code_at(secret, step)[:3] + " " + totp.code_at(secret, step)[3:], now, None) == step
+    spaced = " " + totp.code_at(secret, step)[:3] + " " + totp.code_at(secret, step)[3:]
+    assert totp.verify(secret, spaced, now, None) == step
     assert totp.verify(secret, "abcdef", now, None) is None and totp.verify(secret, "", now, None) is None
 
 

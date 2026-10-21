@@ -1,6 +1,6 @@
 import os
-import stat
 import sqlite3
+import stat
 from dataclasses import replace
 from pathlib import Path
 

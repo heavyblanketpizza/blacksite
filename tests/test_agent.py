@@ -7,7 +7,13 @@ from pydantic_ai.messages import ModelMessage, ModelRequest, RetryPromptPart
 from pydantic_ai.models.function import AgentInfo, DeltaThinkingPart, DeltaToolCall, FunctionModel
 
 from blacksite.agent.guide import (
-    AnswerFormatError, Guide, InfoRequest, command_risk, parse_answer, review_guide, review_request,
+    AnswerFormatError,
+    Guide,
+    InfoRequest,
+    command_risk,
+    parse_answer,
+    review_guide,
+    review_request,
 )
 from blacksite.agent.investigator import CONVERSATION_FILE, Investigator
 from blacksite.evidence.store import Evidence
@@ -74,8 +80,8 @@ def test_parse_answer_reads_the_template() -> None:
 
 
 def test_parse_answer_reads_a_request_for_information() -> None:
-    request = parse_answer("# Need more information\nWhich directory filled the disk?\n\n## Questions\n- Is /var/log separate?\n"
-                           "\n## Commands\n```bash\ndf -h\ndu -xh /var --max-depth=2\n```\n")
+    request = parse_answer("# Need more information\nWhich directory filled the disk?\n\n## Questions\n"
+                           "- Is /var/log separate?\n\n## Commands\n```bash\ndf -h\ndu -xh /var --max-depth=2\n```\n")
     assert isinstance(request, InfoRequest)
     assert request.commands == ["df -h", "du -xh /var --max-depth=2"]
     assert request.questions == ["Is /var/log separate?"]

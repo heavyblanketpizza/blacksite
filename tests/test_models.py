@@ -18,8 +18,8 @@ from blacksite.config import load_settings
 from blacksite.modelserver import Launch, Supervisor
 from blacksite.web import app as app_module
 from blacksite.web.app import Run, create_app
-from conftest import BASE_URL, sign_in
-from conftest import INCIDENT
+
+from conftest import BASE_URL, INCIDENT, sign_in
 
 TOOL_TEMPLATE = "{% if tools %}<tools>{{ tools }}</tools>{% endif %}{% if enable_thinking %}<think>{% endif %}"
 
@@ -63,8 +63,8 @@ def ollama_store(root: Path, names: list[str], blob: Path, family: str = "qwen35
         model, _, tag = name.partition(":")
         manifest = root / "manifests" / "registry.ollama.ai" / "library" / model / (tag or "latest")
         manifest.parent.mkdir(parents=True, exist_ok=True)
-        manifest.write_text(json.dumps({"config": {"digest": "sha256:config"}, "layers": [
-            {"mediaType": "application/vnd.ollama.image.model", "digest": digest.replace("-", ":", 1)}]}), encoding="utf-8")
+        layer = {"mediaType": "application/vnd.ollama.image.model", "digest": digest.replace("-", ":", 1)}
+        manifest.write_text(json.dumps({"config": {"digest": "sha256:config"}, "layers": [layer]}), encoding="utf-8")
 
 
 def test_gguf_header_gives_template_and_context(tmp_path: Path) -> None:
@@ -119,15 +119,16 @@ def test_hf_models_lists_chat_models_with_weights(home: Path) -> None:
 
 def test_ollama_models_read_capabilities_and_context() -> None:
     shows = {
-        "blacksite-qwen3.8": {"capabilities": ["completion", "tools", "thinking"], "parameters": "num_ctx                        65536"},
+        "blacksite-qwen3.8": {"capabilities": ["completion", "tools", "thinking"],
+                              "parameters": "num_ctx                        65536"},
         "gemma3:27b": {"capabilities": ["completion", "vision"]},
         "nomic-embed-text": {"capabilities": ["embedding"]},
     }
 
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/api/tags":
-            return httpx.Response(200, json={"models": [{"name": "blacksite-qwen3.8:latest", "size": 17}, {"name": "gemma3:27b"},
-                                                        {"name": "nomic-embed-text:latest"}]})
+            return httpx.Response(200, json={"models": [{"name": "blacksite-qwen3.8:latest", "size": 17},
+                                                        {"name": "gemma3:27b"}, {"name": "nomic-embed-text:latest"}]})
         return httpx.Response(200, json=shows[json.loads(request.content)["model"]])
 
     models = anyio.run(catalog.ollama_models, "http://ollama", httpx.MockTransport(handler))
@@ -144,7 +145,8 @@ def test_ollama_status_reports_a_context_too_small_for_the_agent(make_settings) 
         return httpx.Response(200, json={"models": [{"name": "qwen:latest", "context_length": 4096}]})
 
     result = anyio.run(status, model, httpx.MockTransport(handler))
-    assert not result.loaded and not result.loading and "4096-token context" in result.detail and "llama.cpp" in result.detail
+    assert not result.loaded and not result.loading
+    assert "4096-token context" in result.detail and "llama.cpp" in result.detail
 
 
 def test_serving_names_what_each_server_runs(make_settings) -> None:
@@ -176,7 +178,8 @@ def test_supervisor_explains_a_server_that_exits(tmp_path: Path) -> None:
 
 GGUF = catalog.LocalModel(id="/models/qwen.gguf", label="qwen3.8:27b", size=10, source="Ollama")
 BARE = catalog.LocalModel(id="/models/gemma4.gguf", label="gemma4", source="Ollama", usable=False, note="no-template")
-OLLAMA = [catalog.LocalModel(id="blacksite-qwen3.8", label="blacksite-qwen3.8", source="Ollama", thinking=True, context=65536),
+OLLAMA = [catalog.LocalModel(id="blacksite-qwen3.8", label="blacksite-qwen3.8", source="Ollama", thinking=True,
+                             context=65536),
           catalog.LocalModel(id="plain:7b", label="plain:7b", source="Ollama", thinking=False)]
 
 
@@ -213,7 +216,8 @@ def demo(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(catalog, "gguf_models", lambda: [GGUF, BARE])
     monkeypatch.setattr(catalog, "hf_models", lambda: [])
     monkeypatch.setattr(app_module, "find_llama_server", lambda: "llama-server")
-    monkeypatch.setattr(app_module, "find_vllm", lambda: (_ for _ in ()).throw(app_module.ModelServerError("vllm is not installed")))
+    monkeypatch.setattr(app_module, "find_vllm",
+                        lambda: (_ for _ in ()).throw(app_module.ModelServerError("vllm is not installed")))
     monkeypatch.setattr(app_module, "backend_status", fake_status)
     monkeypatch.setattr(app_module, "serving", fake_serving)
     monkeypatch.setattr(app_module, "plan", fake_plan)
@@ -231,7 +235,8 @@ def test_picker_lists_each_server_and_its_models(demo) -> None:
     assert data["current"]["provider"] == "ollama" and data["context"] == 65536
     assert [model["in_use"] for model in backends["ollama"]["models"]] == [True, False]
     assert backends["llamacpp"]["base_url"] == "http://127.0.0.1:8080/v1" and not backends["llamacpp"]["running"]
-    assert [(model["label"], model["usable"]) for model in backends["llamacpp"]["models"]] == [("qwen3.8:27b", True), ("gemma4", False)]
+    gguf_models = [(model["label"], model["usable"]) for model in backends["llamacpp"]["models"]]
+    assert gguf_models == [("qwen3.8:27b", True), ("gemma4", False)]
     assert not backends["vllm"]["installed"] and "not installed" in backends["vllm"]["detail"]
 
 

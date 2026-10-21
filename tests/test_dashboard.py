@@ -1,6 +1,6 @@
 import json
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from blacksite.learning.store import LearningStore
 
@@ -8,7 +8,7 @@ UPLOAD = [("files", ("app.log", b"2026-09-27 02:14:00 ERROR disk full\n"))]
 
 
 def iso(seconds: float) -> str:
-    return datetime.fromtimestamp(seconds, timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.fromtimestamp(seconds, UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def run(incident: str, turn: int, at: str, seconds: float, guide: bool, **extra) -> dict:
@@ -60,7 +60,8 @@ def test_members_see_their_own_scope(web) -> None:
     assert set(data["learning"]) == {"lessons", "cases"}
     joon = web.client("joon")
     assert joon.get("/api/dashboard", params={"scope": "shared"}).json()["kpis"]["open"]["value"] == 0
-    mina.post(f"/api/incidents/{created}/share", json={"user_id": web.services.access.find("joon").id, "action": "share"})
+    joon_id = web.services.access.find("joon").id
+    mina.post(f"/api/incidents/{created}/share", json={"user_id": joon_id, "action": "share"})
     assert joon.get("/api/dashboard", params={"scope": "shared"}).json()["kpis"]["open"]["value"] == 1
     assert web.admin.get("/api/dashboard", params={"scope": "range"}).status_code == 400
 
@@ -81,7 +82,8 @@ def test_activity_shows_members_only_what_they_may_see(web) -> None:
     assert ("incident.created", "Mina") in seen and ("auth.login", "Mina") in seen
     assert ("auth.login", "Joon") not in seen and all(action != "settings.changed" for action, _ in seen)
     assert all(action != "incident.created" for action, _ in actions(joon))
-    mina.post(f"/api/incidents/{created}/share", json={"user_id": web.services.access.find("joon").id, "action": "share"})
+    joon_id = web.services.access.find("joon").id
+    mina.post(f"/api/incidents/{created}/share", json={"user_id": joon_id, "action": "share"})
     shared = joon.get("/api/activity").json()["items"]
     assert any(item["action"] == "incident.created" and item["incident"] == {"id": created, "title": "Mine"}
                for item in shared)

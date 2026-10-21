@@ -23,10 +23,11 @@ import json
 import os
 import tempfile
 import threading
+from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import duckdb
 
@@ -237,7 +238,8 @@ class Evidence:
             raise EvidenceError("pattern is empty")
         where, params = self._filters(file, level, since, until)
         if literal:
-            match = "contains(lower(coalesce(text, '')), lower(?))" if ignore_case else "contains(coalesce(text, ''), ?)"
+            match = ("contains(lower(coalesce(text, '')), lower(?))" if ignore_case
+                     else "contains(coalesce(text, ''), ?)")
         else:
             match = "regexp_matches(coalesce(text, ''), ?)"
             pattern = f"(?i){pattern}" if ignore_case else pattern
@@ -292,7 +294,8 @@ class Evidence:
         events = [Event(row[0], row[1], row[2], _level(row[3]), row[4], row[5], row[6], row[7]) for row in rows]
         return events, total
 
-    def histogram(self, level: str = "warning", buckets: int = 60) -> tuple[datetime | None, int, list[tuple[int, str, int]]]:
+    def histogram(self, level: str = "warning",
+                  buckets: int = 60) -> tuple[datetime | None, int, list[tuple[int, str, int]]]:
         """Counts of dated lines at ``level`` or worse per time bucket and file.
 
         Returns (start, bucket_seconds, [(bucket_index, file, count)]).
@@ -329,7 +332,8 @@ class Evidence:
 
     def _filters(self, file: str | None, level: str | None, since: str | None, until: str | None,
                  alias: str = "") -> tuple[str, list[Any]]:
-        clauses, params = ["true"], []
+        clauses: list[str] = ["true"]
+        params: list[Any] = []
         if file:
             self._require_file(file)
             clauses.append(f"{alias}file = ?")
@@ -420,7 +424,7 @@ class _Ingest:
                 con.executemany(
                     "INSERT INTO meta VALUES (?, ?)",
                     [["index", self.target.name], ["schema", str(SCHEMA_VERSION)],
-                     ["ingested_at", datetime.now(timezone.utc).isoformat(timespec="seconds")]],
+                     ["ingested_at", datetime.now(UTC).isoformat(timespec="seconds")]],
                 )
             finally:
                 con.close()
@@ -436,7 +440,7 @@ class _Ingest:
         with opener(path, "rb") as handle:
             if b"\0" in handle.read(_BINARY_SNIFF):
                 return (relative, "binary", size, 0, None, None, 0, 0, 0)
-        mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).replace(tzinfo=None)
+        mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).replace(tzinfo=None)
         parser = LineParser(year=self.evidence.incident.year or mtime.year,
                             latest=None if self.evidence.incident.year else mtime)
         redactor = Redactor()
@@ -461,8 +465,8 @@ class _Ingest:
                     last = parsed.ts if last is None or parsed.ts > last else last
                 writer.writerow([
                     self.ord, relative, count, parsed.ts.isoformat(sep=" ") if parsed.ts else "",
-                    "" if sev is None else sev, parsed.level_guessed, self.miner.add(parsed.message, parsed.level or ""),
-                    suspicious, text,
+                    "" if sev is None else sev, parsed.level_guessed,
+                    self.miner.add(parsed.message, parsed.level or ""), suspicious, text,
                 ])
                 self.ord += 1
         return (relative, "gzip" if compressed else "text", size, count, first, last, errors, redactions, flagged)

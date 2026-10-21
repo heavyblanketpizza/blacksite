@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal, Protocol
 
@@ -121,7 +121,7 @@ def record_outcome(incident_dir: Path, outcome: str, notes: str = "", root_cause
         "outcome": outcome,
         "notes": notes,
         "root_cause": root_cause,
-        "reported_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "reported_at": datetime.now(UTC).isoformat(timespec="seconds"),
     }, indent=2) + "\n", encoding="utf-8")
     return path
 

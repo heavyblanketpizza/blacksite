@@ -78,9 +78,12 @@ def ollama_blobs() -> dict[str, tuple[Path, str]]:
             name = f"{'' if namespace == 'library' else namespace + '/'}{model}:{tag}".removesuffix(":latest")
             try:
                 data = json.loads(manifest.read_text(encoding="utf-8"))
-                digest = next(layer["digest"] for layer in data.get("layers", []) if layer.get("mediaType") == MODEL_LAYER)
+                layers = data.get("layers", [])
+                digest = next(layer["digest"] for layer in layers if layer.get("mediaType") == MODEL_LAYER)
                 config = root / "blobs" / str(data.get("config", {}).get("digest", "")).replace(":", "-")
-                family = json.loads(config.read_text(encoding="utf-8")).get("model_family", "") if config.is_file() else ""
+                family = ""
+                if config.is_file():
+                    family = json.loads(config.read_text(encoding="utf-8")).get("model_family", "")
             except (OSError, ValueError, KeyError, StopIteration):
                 continue
             blob = root / "blobs" / digest.replace(":", "-")
@@ -159,14 +162,16 @@ def gguf_dirs() -> list[tuple[Path, str]]:
         else Path(os.environ.get("LOCALAPPDATA", Path.home())) / "llama.cpp" if os.name == "nt"
         else Path.home() / ".cache" / "llama.cpp")
     return [(hub_cache(), "Hugging Face cache"), (Path(cache), "llama.cpp cache"),
-            (Path.home() / ".lmstudio" / "models", "LM Studio"), (Path.home() / ".cache" / "lm-studio" / "models", "LM Studio")]
+            (Path.home() / ".lmstudio" / "models", "LM Studio"),
+            (Path.home() / ".cache" / "lm-studio" / "models", "LM Studio")]
 
 
 def gguf_models() -> list[LocalModel]:
     """GGUF files llama.cpp can load, one entry per file, reusing Ollama's downloads when present."""
     models: dict[Path, LocalModel] = {}
     # Several Ollama names can share one blob (an alias with a larger context, for example).
-    for name, (blob, family) in sorted(ollama_blobs().items(), key=lambda item: (item[0].startswith("blacksite-"), item[0])):
+    blobs = sorted(ollama_blobs().items(), key=lambda item: (item[0].startswith("blacksite-"), item[0]))
+    for name, (blob, family) in blobs:
         if blob in models or NOT_CHAT.search(name) or NOT_CHAT.search(family):
             continue
         models[blob] = gguf_model(blob, name, "Ollama")
@@ -195,7 +200,8 @@ def snapshot(repo: Path) -> Path | None:
         folder = repo / "snapshots" / ref.read_text(encoding="utf-8").strip()
         if folder.is_dir():
             return folder
-    folders = sorted((repo / "snapshots").glob("*"), key=lambda path: path.stat().st_mtime) if (repo / "snapshots").is_dir() else []
+    snapshots = repo / "snapshots"
+    folders = sorted(snapshots.glob("*"), key=lambda path: path.stat().st_mtime) if snapshots.is_dir() else []
     return folders[-1] if folders else None
 
 

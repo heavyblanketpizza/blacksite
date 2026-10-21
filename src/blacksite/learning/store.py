@@ -15,11 +15,12 @@ import json
 import re
 import sqlite3
 import threading
+from collections.abc import Iterable
 from contextlib import closing
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 SECTIONS = ("diagnosis", "remediation", "safety", "guide-writing")
 OUTCOMES = ("resolved", "partial", "not_resolved")
@@ -220,12 +221,11 @@ class LearningStore:
                     _event(con, "bullet-added", _bullet_id(cursor.lastrowid), f"{status}; from {source}")
                 elif op in ("helpful", "harmful"):
                     num = _parse_id(str(update.get("id", "")), "pb")
-                    changed = num is not None and con.execute(
+                    if num is not None and con.execute(
                         f"UPDATE bullets SET {op} = {op} + 1, updated = ? "
                         "WHERE num = ? AND status IN ('active', 'pending')",
                         (_now(), num),
-                    ).rowcount
-                    if changed:
+                    ).rowcount:
                         report.tagged.append(f"{_bullet_id(num)} {op}")
                         _event(con, f"bullet-{op}", _bullet_id(num), f"from {source}")
                     else:
@@ -348,4 +348,4 @@ def _rrf(rankings: list[list[int]]) -> list[tuple[int, float]]:
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")

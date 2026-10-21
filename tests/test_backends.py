@@ -28,7 +28,8 @@ def backend(make_settings, provider: str, *overrides: str):
 
 @pytest.mark.parametrize("provider", ["llamacpp", "vllm"])
 def test_template_servers_get_thinking_through_chat_template_kwargs(provider) -> None:
-    assert thinking_fields(provider, "low") == {"chat_template_kwargs": {"enable_thinking": True, "reasoning_effort": "low"}}
+    assert thinking_fields(provider, "low") == {
+        "chat_template_kwargs": {"enable_thinking": True, "reasoning_effort": "low"}}
     assert thinking_fields(provider, "none") == {"chat_template_kwargs": {"enable_thinking": False}}
     assert thinking_fields("ollama", "medium") == {"reasoning_effort": "medium"}
 
@@ -88,23 +89,26 @@ def test_status_reads_each_servers_health_endpoints(make_settings) -> None:
     vllm = backend(make_settings, "vllm").model
     ollama = backend(make_settings, "ollama").model
     models = httpx.Response(200, json={"data": [{"id": "blacksite-qwen3.8"}]})
+    other = httpx.Response(200, json={"data": [{"id": "other"}]})
+    nothing_loaded = httpx.Response(200, json={"models": []})
     cases = [
         (llamacpp, {"GET /health": httpx.Response(200)}, (True, True)),
         (llamacpp, {"GET /health": httpx.Response(503)}, (True, False, "loading the model", True)),
         (vllm, {"GET /health": httpx.Response(200), "GET /v1/models": models}, (True, True)),
-        (vllm, {"GET /health": httpx.Response(200), "GET /v1/models": httpx.Response(200, json={"data": [{"id": "other"}]})},
+        (vllm, {"GET /health": httpx.Response(200), "GET /v1/models": other},
          (True, False, "serving other, not blacksite-qwen3.8", False)),
         (ollama, {"GET /api/ps": httpx.Response(200, json={"models": [{"name": "qwen3.8:27b-q4_K_M"}]}),
                   "POST /api/show": httpx.Response(200, json={"details": {"parent_model": "qwen3.8:27b-q4_K_M"}})},
          (True, True)),
-        (ollama, {"GET /api/ps": httpx.Response(200, json={"models": []}), "POST /api/show": httpx.Response(200, json={})},
+        (ollama, {"GET /api/ps": nothing_loaded, "POST /api/show": httpx.Response(200, json={})},
          (True, False, "Ollama loads the model on the first request", True)),
-        (ollama, {"GET /api/ps": httpx.Response(200, json={"models": []}), "POST /api/show": httpx.Response(404)},
+        (ollama, {"GET /api/ps": nothing_loaded, "POST /api/show": httpx.Response(404)},
          (True, False, "model blacksite-qwen3.8 is not installed in Ollama", False)),
     ]
     for model, routes, expected in cases:
         result = anyio.run(status, model, serve(routes))
-        assert (result.reachable, result.loaded, result.detail, result.loading)[:len(expected)] == expected, model.provider
+        seen = (result.reachable, result.loaded, result.detail, result.loading)
+        assert seen[:len(expected)] == expected, model.provider
 
     def refuse(request: httpx.Request) -> httpx.Response:
         raise httpx.ConnectError("refused")
@@ -124,9 +128,11 @@ def fake_server(tool_call: bool = True, runaway: bool = False):
         bodies.append(body)
         call = {"id": "c1", "type": "function", "function": {"name": "search_logs", "arguments": '{"pattern": "OOM"}'}}
         if body.get("stream"):
+            opened = {"index": 0, **call, "function": {"name": "search_logs", "arguments": ""}}
+            argued = {"index": 0, "function": {"arguments": '{"pattern": "OOM"}'}}
             chunks = [{"choices": [{"delta": {"reasoning_content": "Look for OOM."}}]},
-                      {"choices": [{"delta": {"tool_calls": [{"index": 0, **call, "function": {"name": "search_logs", "arguments": ""}}]}}]},
-                      {"choices": [{"delta": {"tool_calls": [{"index": 0, "function": {"arguments": '{"pattern": "OOM"}'}}]}}]}]
+                      {"choices": [{"delta": {"tool_calls": [opened]}}]},
+                      {"choices": [{"delta": {"tool_calls": [argued]}}]}]
             text = "".join(f"data: {json.dumps(chunk)}\n\n" for chunk in chunks) + "data: [DONE]\n\n"
             return httpx.Response(200, text=text, headers={"content-type": "text/event-stream"})
         if "response_format" in body:

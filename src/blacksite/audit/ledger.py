@@ -19,15 +19,17 @@ import hmac
 import json
 import sqlite3
 import time
+from collections.abc import Callable, Iterable
 from contextlib import closing
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any
 
 from ..keys import Keys, canonical, group, load_public_key, private_file, sha256_hex, verify_signature
 
 GENESIS = sha256_hex(b"blacksite-ledger-v1")
+_CHECKPOINT_COLUMNS = ("seq", "at", "hash", "key_id", "signature")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS ledger (
@@ -91,7 +93,7 @@ class Verification:
 
 
 def _utc(seconds: float) -> str:
-    return datetime.fromtimestamp(seconds, timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    return datetime.fromtimestamp(seconds, UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def record_hash(fields: dict[str, Any]) -> str:
@@ -262,7 +264,8 @@ class Ledger:
                 since: str | None = None, until: str | None = None,
                 where: Callable[[Record], bool] | None = None) -> list[Record]:
         """Newest first. ``action`` matches a prefix ("auth." finds every sign-in event)."""
-        clauses, params = ["seq > ?"], [after]
+        clauses: list[str] = ["seq > ?"]
+        params: list[Any] = [after]
         for column, value in (("actor", actor), ("target", target), ("session", session)):
             if value:
                 clauses.append(f"{column} = ?")
@@ -305,7 +308,7 @@ class Ledger:
             else:
                 row = con.execute("SELECT hash FROM ledger WHERE seq = ?", (since - 1,)).fetchone()
                 if row is None:
-                    return self._finish(since - 1, since, since - 1, "Record {} is missing.".format(since - 1))
+                    return self._finish(since - 1, since, since - 1, f"Record {since - 1} is missing.")
                 prev = row[0]
             checker = _Checker(prev, since, self._mac_key)
             for row in con.execute("SELECT * FROM ledger WHERE seq >= ? ORDER BY seq", (since,)):
@@ -313,7 +316,7 @@ class Ledger:
                 if problem:
                     return self._finish(checker.expected - 1, since, *problem)
             total = checker.expected - 1
-            checkpoints = [dict(zip(("seq", "at", "hash", "key_id", "signature"), row)) for row in
+            checkpoints = [dict(zip(_CHECKPOINT_COLUMNS, row, strict=True)) for row in
                            con.execute("SELECT seq, at, hash, key_id, signature FROM checkpoints ORDER BY seq")]
 
             def hashes(seq: int) -> str | None:
@@ -374,8 +377,8 @@ class Ledger:
                 stream.write(json.dumps({"type": "record", **item}, ensure_ascii=False) + "\n")
                 count += 1
             for row in con.execute("SELECT seq, at, hash, key_id, signature FROM checkpoints ORDER BY seq"):
-                stream.write(json.dumps({"type": "checkpoint",
-                                         **dict(zip(("seq", "at", "hash", "key_id", "signature"), row))}) + "\n")
+                checkpoint = dict(zip(_CHECKPOINT_COLUMNS, row, strict=True))
+                stream.write(json.dumps({"type": "checkpoint", **checkpoint}) + "\n")
         return count
 
 

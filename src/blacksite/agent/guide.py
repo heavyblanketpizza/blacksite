@@ -9,6 +9,8 @@ over is shown to the developer as a warning.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping, Sequence
+from collections.abc import Set as AbstractSet
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -18,6 +20,7 @@ from ..evidence.safety import looks_like_instructions
 from ..evidence.store import Evidence, EvidenceError
 
 Risk = Literal["read-only", "low", "high"]
+Confidence = Literal["high", "medium", "low"]
 
 
 class Citation(BaseModel):
@@ -40,12 +43,13 @@ class Guide(BaseModel):
     title: str = Field(description="The problem in a few words.")
     summary: str = Field(description="Two or three sentences: what happened and what to do.")
     root_cause: str = Field(description="The underlying cause, not just the symptom.")
-    confidence: Literal["high", "medium", "low"]
+    confidence: Confidence
     evidence: list[Citation] = Field(min_length=1, description="The lines that support the root cause.")
     steps: list[Step] = Field(min_length=1, description="Confirm first with read-only steps, then fix, then verify.")
     verify: list[str] = Field(description="How to confirm the incident is over.")
     unknowns: list[str] = Field(default_factory=list, description="What the evidence cannot answer yet.")
-    security_notes: list[str] = Field(default_factory=list, description="Suspicious log content (lines marked ⚠) worth reporting.")
+    security_notes: list[str] = Field(default_factory=list,
+                                      description="Suspicious log content (lines marked ⚠) worth reporting.")
 
 
 class InfoRequest(BaseModel):
@@ -63,7 +67,7 @@ class Check:
     level: Literal["ok", "warn", "error"]
     text: str
     code: str = ""
-    params: dict[str, object] = field(default_factory=dict)
+    params: Mapping[str, object] = field(default_factory=dict)
 
 
 # file:line, file:first-last, or several of them: kern.log:5-6,8,11-12
@@ -72,29 +76,29 @@ _SPAN = re.compile(r"(\d+)(?:\s*[-–]\s*(\d+))?")
 _CASE_REF = re.compile(r"^case-\d{4,}$")
 
 # Commands that change state: (pattern, minimum risk, reason key). See REASONS for labels.
-_STATE_CHANGING: list[tuple[re.Pattern[str], Risk, str]] = [
-    (re.compile(p), risk, label) for p, risk, label in [
-        (r"\brm\s+(-\w*[rf]\w*\s+)", "high", "recursive_delete"),
-        (r"\brm\s", "high", "delete"),
-        (r"\b(dd|mkfs(\.\w+)?|fdisk|parted|wipefs|shred)\b", "high", "disk_write"),
-        (r"\btruncate\s+(-s|--size)\b|^\s*:?\s*>\s*/\S+", "high", "file_truncation"),
-        (r"(?i)\b(drop|truncate)\s+(table|database|schema)\b|\bdelete\s+from\b", "high", "data_deletion"),
-        (r"\biptables\s+-(F|X|D)\b|\bufw\s+(disable|reset)\b", "high", "firewall_change"),
-        (r"\bchmod\s+-R\b|\bchown\s+-R\b|\bchmod\s+777\b", "high", "recursive_permissions"),
-        (r"\b(reboot|shutdown|halt|poweroff)\b", "high", "host_restart"),
-        (r"\bkill(all)?\s+-9\b|\bpkill\b|\bkillall\b", "high", "process_kill"),
-        (r"\bsystemctl\s+(stop|disable|mask|kill)\b", "high", "service_stop"),
-        (r"\b(docker|podman)\s+(rm|rmi|system\s+prune|volume\s+rm)\b|\bkubectl\s+delete\b", "high", "container_deletion"),
-        (r"\bgit\s+(reset\s+--hard|clean\s+-\w*f)", "high", "discard_changes"),
-        (r"\b(apt(-get)?|yum|dnf)\s+(remove|purge|autoremove)\b", "high", "package_removal"),
-        (r"\bcrontab\s+-r\b|\buserdel\b", "high", "account_deletion"),
-        (r"\bsystemctl\s+(restart|reload|start|edit|daemon-reload|enable|revert)\b|\bservice\s+\S+\s+(restart|reload|start)\b",
-         "low", "service_change"),
-        (r"\bsed\s+-i\b|\btee\b(?!\s+-a\s+/dev/null)|(?<![<>&\d])>\s*/(etc|var|opt|usr)/", "low", "file_edit"),
-        (r"\b(apt(-get)?|yum|dnf|pip)\s+install\b|\bsysctl\s+-w\b|\bulimit\s", "low", "system_change"),
-        (r"\blogrotate\s+-f\b|\bjournalctl\s+--vacuum", "low", "log_cleanup"),
-    ]
+_RISK_RULES: list[tuple[str, Risk, str]] = [
+    (r"\brm\s+(-\w*[rf]\w*\s+)", "high", "recursive_delete"),
+    (r"\brm\s", "high", "delete"),
+    (r"\b(dd|mkfs(\.\w+)?|fdisk|parted|wipefs|shred)\b", "high", "disk_write"),
+    (r"\btruncate\s+(-s|--size)\b|^\s*:?\s*>\s*/\S+", "high", "file_truncation"),
+    (r"(?i)\b(drop|truncate)\s+(table|database|schema)\b|\bdelete\s+from\b", "high", "data_deletion"),
+    (r"\biptables\s+-(F|X|D)\b|\bufw\s+(disable|reset)\b", "high", "firewall_change"),
+    (r"\bchmod\s+-R\b|\bchown\s+-R\b|\bchmod\s+777\b", "high", "recursive_permissions"),
+    (r"\b(reboot|shutdown|halt|poweroff)\b", "high", "host_restart"),
+    (r"\bkill(all)?\s+-9\b|\bpkill\b|\bkillall\b", "high", "process_kill"),
+    (r"\bsystemctl\s+(stop|disable|mask|kill)\b", "high", "service_stop"),
+    (r"\b(docker|podman)\s+(rm|rmi|system\s+prune|volume\s+rm)\b|\bkubectl\s+delete\b", "high",
+     "container_deletion"),
+    (r"\bgit\s+(reset\s+--hard|clean\s+-\w*f)", "high", "discard_changes"),
+    (r"\b(apt(-get)?|yum|dnf)\s+(remove|purge|autoremove)\b", "high", "package_removal"),
+    (r"\bcrontab\s+-r\b|\buserdel\b", "high", "account_deletion"),
+    (r"\bsystemctl\s+(restart|reload|start|edit|daemon-reload|enable|revert)\b|\bservice\s+\S+\s+(restart|reload|start)\b",
+     "low", "service_change"),
+    (r"\bsed\s+-i\b|\btee\b(?!\s+-a\s+/dev/null)|(?<![<>&\d])>\s*/(etc|var|opt|usr)/", "low", "file_edit"),
+    (r"\b(apt(-get)?|yum|dnf|pip)\s+install\b|\bsysctl\s+-w\b|\bulimit\s", "low", "system_change"),
+    (r"\blogrotate\s+-f\b|\bjournalctl\s+--vacuum", "low", "log_cleanup"),
 ]
+_STATE_CHANGING = [(re.compile(pattern), risk, label) for pattern, risk, label in _RISK_RULES]
 _RANK = {"read-only": 0, "low": 1, "high": 2}
 REASONS = {
     "recursive_delete": "recursive or forced delete", "delete": "delete", "disk_write": "disk write",
@@ -116,8 +120,8 @@ def command_risk(command: str) -> tuple[Risk, str | None]:
     return worst
 
 
-def review_guide(guide: Guide, evidence: Evidence, known_docs: set[str] = frozenset(),
-                 known_cases: set[str] = frozenset()) -> tuple[list[Check], list[str]]:
+def review_guide(guide: Guide, evidence: Evidence, known_docs: AbstractSet[str] = frozenset(),
+                 known_cases: AbstractSet[str] = frozenset()) -> tuple[list[Check], list[str]]:
     """Check a guide. Returns (checks for the developer, problems the model must fix)."""
     checks: list[Check] = []
     fixes: list[str] = []
@@ -125,16 +129,17 @@ def review_guide(guide: Guide, evidence: Evidence, known_docs: set[str] = frozen
     bad_refs = [ref for ref in _all_refs(guide) if not _ref_exists(ref, evidence, known_docs, known_cases)]
     good = len(guide.evidence) - sum(1 for citation in guide.evidence if citation.ref in bad_refs)
     if bad_refs:
+        missing = ", ".join(bad_refs)
         fixes.append(
-            "These citations do not match any file and line in the evidence: "
-            + ", ".join(bad_refs)
-            + ". Cite only file:line references printed by the tools. Files: "
+            f"These citations do not match any file and line in the evidence: {missing}. "
+            "Cite only file:line references printed by the tools. Files: "
             + ", ".join(f"{item.file} ({item.lines} lines)" for item in evidence.artifacts())
         )
-        checks.append(Check("error", f"{count(len(bad_refs), 'citation')} not found in the evidence: {', '.join(bad_refs)}",
-                            "citations_bad", {"count": len(bad_refs), "refs": ", ".join(bad_refs)}))
+        checks.append(Check("error", f"{count(len(bad_refs), 'citation')} not found in the evidence: {missing}",
+                            "citations_bad", {"count": len(bad_refs), "refs": missing}))
     if good:
-        checks.append(Check("ok", f"{count(good, 'citation')} verified against the evidence", "citations_ok", {"count": good}))
+        checks.append(Check("ok", f"{count(good, 'citation')} verified against the evidence", "citations_ok",
+                            {"count": good}))
 
     for number, step in enumerate(guide.steps, 1):
         for command in step.commands:
@@ -144,14 +149,15 @@ def review_guide(guide: Guide, evidence: Evidence, known_docs: set[str] = frozen
                 checks.append(Check("error", f"Step {number}: blocked an unsafe command", "unsafe_command",
                                     {"step": number}))
             implied, reason = command_risk(command)
-            if _RANK[implied] > _RANK[step.risk]:
-                checks.append(Check(
-                    "warn", f"Step {number}: raised risk from {step.risk} to {implied} ({REASONS[reason]}: `{command}`)",
-                    "risk_raised", {"step": number, "from": step.risk, "to": implied, "reason": reason, "command": command}))
+            if reason is not None and _RANK[implied] > _RANK[step.risk]:
+                text = f"Step {number}: raised risk from {step.risk} to {implied} ({REASONS[reason]}: `{command}`)"
+                checks.append(Check("warn", text, "risk_raised", {"step": number, "from": step.risk, "to": implied,
+                                                                  "reason": reason, "command": command}))
                 step.risk = implied
         if step.risk == "high" and not (step.rollback or "").strip():
             fixes.append(f"Step {number} ({step.title}) is high risk but has no rollback. Add one.")
-            checks.append(Check("warn", f"Step {number} is high risk with no rollback", "no_rollback", {"step": number}))
+            checks.append(Check("warn", f"Step {number} is high risk with no rollback", "no_rollback",
+                                {"step": number}))
 
     high = sum(step.risk == "high" for step in guide.steps)
     changing = sum(step.risk != "read-only" for step in guide.steps)
@@ -264,13 +270,14 @@ _H2 = re.compile(r"^##\s+(.+?)\s*#*\s*$")
 _H3 = re.compile(r"^###\s+(?:step\s+|단계\s*)?(?:\d+\s*(?:단계)?\s*[.):-]?\s*)?(.+?)\s*#*\s*$", re.I)
 _RISK_WORDS = {"read-only": "read-only", "read only": "read-only", "읽기 전용": "read-only", "읽기전용": "read-only",
                "low": "low", "낮음": "low", "보통": "low", "중간": "low", "high": "high", "높음": "high"}
-_RISK_TAIL = re.compile(r"\s*[(\[]\s*(read[- ]only|low|high|읽기\s?전용|낮음|보통|중간|높음)(?:\s+risk|\s*위험)?\s*[)\]]\s*$",
-                        re.I)
+_RISK_TAIL = re.compile(
+    r"\s*[(\[]\s*(read[- ]only|low|high|읽기\s?전용|낮음|보통|중간|높음)(?:\s+risk|\s*위험)?\s*[)\]]\s*$", re.I)
 _CONFIDENCE = re.compile(r"^\W*(?:confidence|신뢰도)\W*\s*[:\-]?\s*\W*(high|medium|low|높음|보통|중간|낮음)", re.I)
-_CONFIDENCE_WORDS = {"높음": "high", "보통": "medium", "중간": "medium", "낮음": "low"}
+_CONFIDENCE_WORDS: dict[str, Confidence] = {"high": "high", "medium": "medium", "low": "low",
+                                            "높음": "high", "보통": "medium", "중간": "medium", "낮음": "low"}
 _FIELD = re.compile(
-    r"^\W{0,3}(why|expected|expect|undo|rollback|risk|이유|예상 결과|예상|기대 결과|되돌리기|롤백|위험도|위험)\W{0,3}\s*[:\-]\s*(.*)$",
-    re.I)
+    r"^\W{0,3}(why|expected|expect|undo|rollback|risk|이유|예상 결과|예상|기대 결과|되돌리기|롤백|위험도|위험)"
+    r"\W{0,3}\s*[:\-]\s*(.*)$", re.I)
 _FIELD_NAMES = {"expect": "expected", "undo": "rollback", "이유": "why", "예상 결과": "expected", "예상": "expected",
                 "기대 결과": "expected", "되돌리기": "rollback", "롤백": "rollback", "위험도": "risk", "위험": "risk"}
 _BULLET = re.compile(r"^\s*(?:[-*+•]|\d+[.)])\s+(?:\[[ xX]\]\s+)?(.*\S)\s*$")
@@ -288,10 +295,7 @@ class AnswerFormatError(ValueError):
 def parse_answer(text: str) -> Guide | InfoRequest:
     """Turn the model's Markdown answer into a Guide or InfoRequest."""
     lines = text.strip().splitlines()
-    start = next((i for i, line in enumerate(lines) if _H1.match(line)), None)
-    if start is None:
-        raise AnswerFormatError("Reply with the guide template, starting with a '# ' title line.")
-    title = _H1.match(lines[start]).group(1).strip()
+    start, title = _title(lines)
     preamble, sections = _sections(lines[start + 1:])
     if "questions" in sections or "commands" in sections or ("steps" not in sections and _MORE_INFO.search(title)):
         reason = " ".join(line.strip() for line in preamble if line.strip())
@@ -299,13 +303,12 @@ def parse_answer(text: str) -> Guide | InfoRequest:
         return InfoRequest(reason=reason or title, questions=_bullets(sections.get("questions", [])),
                            commands=_fenced(sections.get("commands", [])))
 
-    confidence = "medium"
+    confidence: Confidence = "medium"
     summary = []
     for line in preamble:
         match = _CONFIDENCE.match(line.strip())
         if match:
-            value = match.group(1).lower()
-            confidence = _CONFIDENCE_WORDS.get(value, value)
+            confidence = _CONFIDENCE_WORDS.get(match.group(1).lower(), "medium")
         elif line.strip():
             summary.append(line.strip())
     summary = summary or [line.strip() for line in sections.get("summary", []) if line.strip()]
@@ -341,9 +344,19 @@ _SECTION_NAMES = {
     "why": "why", "reason": "reason",
     "근본 원인": "root cause", "원인": "root cause", "증거": "evidence", "근거": "evidence", "조치 단계": "steps",
     "해결 단계": "steps", "단계": "steps", "확인": "verify", "검증": "verify", "아직 모르는 것": "still unknown",
-    "미확인": "still unknown", "알 수 없는 것": "still unknown", "보안 참고": "security notes", "보안": "security notes",
+    "미확인": "still unknown", "알 수 없는 것": "still unknown", "보안 참고": "security notes",
+    "보안": "security notes",
     "요약": "summary", "질문": "questions", "명령어": "commands", "명령": "commands", "이유": "why",
 }
+
+
+def _title(lines: list[str]) -> tuple[int, str]:
+    """The index and text of the first '# ' heading."""
+    for index, line in enumerate(lines):
+        match = _H1.match(line)
+        if match:
+            return index, match.group(1).strip()
+    raise AnswerFormatError("Reply with the guide template, starting with a '# ' title line.")
 
 
 def _sections(lines: list[str]) -> tuple[list[str], dict[str, list[str]]]:
@@ -387,7 +400,7 @@ def _fenced(lines: list[str]) -> list[str]:
 
 
 def _steps(lines: list[str]) -> list[Step]:
-    steps: list[dict[str, object]] = []
+    steps: list[dict[str, Any]] = []
     in_fence = False
     field = "why"
     for line in lines:
@@ -396,7 +409,7 @@ def _steps(lines: list[str]) -> list[Step]:
             continue
         if in_fence:
             if steps and line.strip():
-                steps[-1]["commands"].append(line.strip().removeprefix("$ "))  # type: ignore[union-attr]
+                steps[-1]["commands"].append(line.strip().removeprefix("$ "))
             continue
         heading = _H3.match(line)
         if heading:
@@ -423,12 +436,12 @@ def _steps(lines: list[str]) -> list[Step]:
                 continue
             steps[-1][field] = f"{steps[-1][field]} {match.group(2).strip()}".strip()
             continue
-        text = _BULLET.match(line).group(1) if _BULLET.match(line) else line.strip()
+        bullet = _BULLET.match(line)
+        text = bullet.group(1) if bullet else line.strip()
         steps[-1][field] = f"{steps[-1][field]} {text}".strip()
     return [
         Step(title=str(step["title"]), why=str(step["why"]) or str(step["title"]), commands=list(step["commands"]),
-             expected=str(step["expected"]) or "No errors.", risk=step["risk"],  # type: ignore[arg-type]
-             rollback=str(step["rollback"]) or None)
+             expected=str(step["expected"]) or "No errors.", risk=step["risk"], rollback=str(step["rollback"]) or None)
         for step in steps
     ]
 
@@ -475,7 +488,7 @@ def language_checks(guide: Guide | InfoRequest, language: str) -> list[Check]:
     return [Check("warn", f"Contains Chinese or Japanese text: {sample}", "mixed_script", {"sample": sample})]
 
 
-def guide_markdown(guide: Guide, checks: list[Check] = (), language: str = "en") -> str:
+def guide_markdown(guide: Guide, checks: Sequence[Check] = (), language: str = "en") -> str:
     """The guide as a Markdown document for export, with headings in ``language``."""
     label = _EXPORT_LABELS.get(language, _EXPORT_LABELS["en"])
     confidence = label.get(f"confidence-{guide.confidence}", guide.confidence)
@@ -512,7 +525,7 @@ def parse_reference(ref: str) -> tuple[str, list[tuple[int, int]]] | None:
     return match["file"].strip(), [(int(start), int(end or start)) for start, end in _SPAN.findall(match["spans"])]
 
 
-def _ref_exists(ref: str, evidence: Evidence, known_docs: set[str], known_cases: set[str]) -> bool:
+def _ref_exists(ref: str, evidence: Evidence, known_docs: AbstractSet[str], known_cases: AbstractSet[str]) -> bool:
     if _CASE_REF.match(ref):
         return ref in known_cases
     parsed = parse_reference(ref)

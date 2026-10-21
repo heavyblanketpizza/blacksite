@@ -13,22 +13,36 @@ import os
 import re
 import sys
 import time
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any
 
+import pydantic_ai
 from fastmcp.client.transports import StdioTransport
 from pydantic_ai import (
-    Agent, AgentRunResultEvent, FunctionToolCallEvent, FunctionToolResultEvent, ModelMessagesTypeAdapter,
-    ModelRetry, PartDeltaEvent, PartStartEvent, RetryPromptPart, RunContext, TextOutput,
-    TextPart, TextPartDelta, ThinkingPart, ThinkingPartDelta, UsageLimits,
+    Agent,
+    AgentRunResult,
+    AgentRunResultEvent,
+    FunctionToolCallEvent,
+    FunctionToolResultEvent,
+    ModelMessagesTypeAdapter,
+    ModelRetry,
+    PartDeltaEvent,
+    PartStartEvent,
+    RetryPromptPart,
+    RunContext,
+    TextOutput,
+    TextPart,
+    TextPartDelta,
+    ThinkingPart,
+    ThinkingPartDelta,
+    UsageLimits,
 )
 from pydantic_ai.mcp import MCPToolset
 from pydantic_ai.models import Model
 from pydantic_ai.toolsets import WrapperToolset
-
-import pydantic_ai
 
 from .._fs import replace
 from ..backends import agent_model, agent_settings
@@ -37,7 +51,16 @@ from ..context import build_context, open_store
 from ..evidence.store import ARTIFACTS_DIR, Evidence
 from ..knowledge.index import document_paths
 from .guide import (
-    ANSWER_TEMPLATE, LANGUAGE_INSTRUCTIONS, AnswerFormatError, language_checks, Check, Guide, InfoRequest, guide_markdown, parse_answer, review_guide,
+    ANSWER_TEMPLATE,
+    LANGUAGE_INSTRUCTIONS,
+    AnswerFormatError,
+    Check,
+    Guide,
+    InfoRequest,
+    guide_markdown,
+    language_checks,
+    parse_answer,
+    review_guide,
     review_request,
 )
 
@@ -156,7 +179,7 @@ class Investigator:
                     "language": self.settings.agent.language})
         tool_names: dict[str, str] = {}
         tool_started: dict[str, float] = {}
-        result = None
+        result: AgentRunResult[Guide | InfoRequest] | None = None
         try:
             async with agent.run_stream_events(
                 prompt, message_history=history, deps=state,
@@ -184,8 +207,8 @@ class Investigator:
                         elapsed = time.monotonic() - tool_started.get(event.tool_call_id, time.monotonic())
                         yield emit({"type": "tool_result", "id": event.tool_call_id,
                                     "name": tool_names.get(event.tool_call_id, event.part.tool_name),
-                                    "content": _text(event.part.content), "error": isinstance(event.part, RetryPromptPart),
-                                    "ms": round(elapsed * 1000)})
+                                    "content": _text(event.part.content),
+                                    "error": isinstance(event.part, RetryPromptPart), "ms": round(elapsed * 1000)})
                     elif isinstance(event, AgentRunResultEvent):
                         result = event.result
         except Exception as exc:  # the model server, a tool, or a limit failed; report it to the UI
@@ -193,6 +216,7 @@ class Investigator:
             self._save(saved, history, message, pasted, events)
             return
 
+        assert result is not None
         output = result.output
         if isinstance(output, Guide):
             markdown = guide_markdown(output, state.checks, self.settings.agent.language)
@@ -217,12 +241,13 @@ class Investigator:
             toolsets.append(BudgetToolset(self._mcp("knowledge", "--incident", str(self.root))))
         context = build_context(settings, self.evidence)
         language = LANGUAGE_INSTRUCTIONS[settings.agent.language]
+        # The answer is Markdown streamed as text, so the page can show the guide as it is
+        # written; parse_answer turns it back into a checked structure.
+        output: TextOutput[Guide | InfoRequest] = TextOutput(_parse_or_retry)
         agent: Agent[TurnState, Guide | InfoRequest] = Agent(
             self.model or agent_model(settings),
             deps_type=TurnState,
-            # The answer is Markdown streamed as text, so the page can show the guide as it is
-            # written; parse_answer turns it back into a checked structure.
-            output_type=TextOutput(_parse_or_retry),
+            output_type=output,
             instructions=INSTRUCTIONS + (f"\n\n{language}" if language else "") + (f"\n\n{context}" if context else ""),
             toolsets=toolsets,
             model_settings=agent_settings(settings),
@@ -287,7 +312,7 @@ class Investigator:
     def _save(self, saved: dict[str, Any], messages: Any, message: str, pasted: str,
               events: list[dict[str, Any]]) -> None:
         turns = saved.get("turns", [])
-        turns.append({"at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "message": message,
+        turns.append({"at": datetime.now(UTC).isoformat(timespec="seconds"), "message": message,
                       "pasted": pasted, "events": _merge_deltas(events)})
         data = {"messages": json.loads(ModelMessagesTypeAdapter.dump_json(list(messages))), "turns": turns}
         path = self.root / CONVERSATION_FILE
